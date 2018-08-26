@@ -25,6 +25,7 @@ export const getVectorSum = (v: number[]): number => {
   }
   return s
 }
+
 export const getFlushSuit7 = (v: number[]): number => {
   let t: number = v[0]
   let c: number = 0
@@ -58,7 +59,7 @@ export const checkStraight5on7 = (arr: number[]): boolean => {
   return c >= 4
 }
 
-const singlePairsList = (startSet: number[]): number[][] => {
+export const singlePairsList = (startSet: number[]): number[][] => {
   let toAdd = kombinatoricsJs.multiCombinations(startSet, 3, 0)
   let singlePairs = []
   for (let i = 0; i < startSet.length; ++i) {
@@ -71,7 +72,7 @@ const singlePairsList = (startSet: number[]): number[][] => {
   return singlePairs
 }
 
-const sortedPairsToAdd = (startSet: number[]): number[][] => {
+export const sortedPairsToAdd = (startSet: number[]): number[][] => {
   let _toAdd = kombinatoricsJs.multiCombinations(startSet, 2, 0)
 
   _toAdd.forEach((pair, idx) => {
@@ -92,7 +93,7 @@ const sortedPairsToAdd = (startSet: number[]): number[][] => {
   return _toAdd
 }
 
-const doublePairsList = (startSet: number[]): number[][] => {
+export const doublePairsList = (startSet: number[]): number[][] => {
   let toAdd = sortedPairsToAdd(startSet)
   let doublePairs = []
 

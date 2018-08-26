@@ -2,7 +2,7 @@
   "name": "gamblingjs",
   "version": "0.0.1",
   "description": "",
-  "keywords": [],
+  "keywords": ["poker", "evaluator", "eval", "casino", "gambling", "gaming"],
   "main": "dist/gamblingjs.umd.js",
   "module": "dist/gamblingjs.es5.js",
   "typings": "dist/types/gamblingjs.d.ts",
