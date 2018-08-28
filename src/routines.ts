@@ -1,4 +1,6 @@
 import * as kombinatoricsJs from 'kombinatoricsjs'
+import { hashRanking, NumberMap } from './interfaces'
+import * as CONSTANTS from './constants'
 
 export const atLeast5Eq = (list: (number | string)[][]): (number | string)[][] => {
   return list.filter(v => {
@@ -157,4 +159,30 @@ export const removeStraights = (list: number[][]): number[][] => {
   return list.filter((hand, idx) => {
     return !checkStraight(hand)
   })
+}
+
+export const _rankOfHand = (hand: number[], rankHash: NumberMap) => {
+  return rankHash[getVectorSum(hand)]
+}
+export const _rankOf5onX = (hand: number[], rankHash: NumberMap) => {
+  return Math.max(...kombinatoricsJs.combinations(hand, 5).map(h => rankHash[getVectorSum(h)]))
+}
+
+export const fillRank5 = (h: number[], idx: number, rankingObject: hashRanking): hashRanking => {
+  let hash = getVectorSum(h.map(card => rankingObject.baseRankValues[card]))
+  rankingObject.HASHES[hash] = idx
+  rankingObject.rankingInfos.push(idx)
+  return rankingObject
+}
+
+export const fillRank5PlusFlushes = (
+  h: number[],
+  idx: number,
+  rankingObject: hashRanking,
+  offset: number = CONSTANTS.FLUSHES_BASE_START + CONSTANTS.HIGH_CARDS_5_AMOUNT
+): hashRanking => {
+  let hash = getVectorSum(h.map(card => rankingObject.baseRankValues[card]))
+  rankingObject.HASHES[hash] = idx + offset
+  rankingObject.rankingInfos.push(idx + offset)
+  return rankingObject
 }

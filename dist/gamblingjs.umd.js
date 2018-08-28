@@ -83,6 +83,13 @@
 
     var flushHash = [1, 2, 4, 8, 16, 32, 64, 128, 255, 508, 1012, 2016, 4016]; // 13 one for each rank
     var suitsHash = [0, 57, 1, 8]; // 4 one for each suit
+    /**check for !==undefined */
+    var flush5hHashCheck = {
+        '0': 0,
+        '5': 1,
+        '40': 8,
+        '285': 57
+    };
     var ranksHashOn7 = []; // 13 one for each rank
     ranksHashOn7[0] = 0;
     ranksHashOn7[1] = 1;
@@ -114,13 +121,19 @@
     /*
     arrays initialization
     */
-    var deckOfRanks = new Array(52);
+    var deckOfRanks_5 = new Array(52);
+    var deckOfRanks_7 = new Array(52);
     var deckOfFlushes = new Array(52);
     var deckOfSuits = new Array(52);
+    var fullCardsDeckHash_5 = new Array(52);
+    var fullCardsDeckHash_7 = new Array(52);
     for (var i = 0; i < 52; i++) {
-        deckOfRanks[i] = ranksHashOn5[i % 13];
+        deckOfRanks_5[i] = ranksHashOn5[i % 13];
+        deckOfRanks_7[i] = ranksHashOn5[i % 13];
         deckOfFlushes[i] = flushHash[i % 13];
         deckOfSuits[i] = suitsHash[~~(i / 13)];
+        var card5 = fullCardsDeckHash_5[i] = (deckOfRanks_5[i] << 9) + deckOfSuits[i];
+        var card7 = fullCardsDeckHash_7[i] = (deckOfRanks_7[i] << 9) + deckOfSuits[i];
     }
     var STRAIGHTS = [
         [12, 0, 1, 2, 3],
@@ -256,6 +269,7 @@
     var createRankOfFiveHashes = function () {
         var hashRankingOfFive = {
             HASHES: {},
+            FLUSH_CHECK_KEYS: flush5hHashCheck,
             baseRankValues: ranksHashOn5,
             baseSuitValues: suitsHash,
             rankingInfos: []
@@ -271,23 +285,25 @@
         var TRIPLES = trisList(rankCards$$1);
         var FULLHOUSES = fullHouseList(rankCards$$1);
         var QUADS = quadsList(rankCards$$1);
-        console.log(HIGH_CARDS, FULLHOUSES, QUADS);
         var inc = 0;
-        console.log("high cards", inc += HIGH_CARDS.length);
-        console.log("single pairs", inc += SINGLE_PAIRS.length);
-        console.log("double pairs", inc += DOUBLE_PAIRS.length);
-        console.log("triples", inc += TRIPLES.length);
-        console.log("straights", inc += STRAIGHTS$$1.length);
+        console.log('high cards', (inc += HIGH_CARDS.length));
+        console.log('single pairs', (inc += SINGLE_PAIRS.length));
+        console.log('double pairs', (inc += DOUBLE_PAIRS.length));
+        console.log('triples', (inc += TRIPLES.length));
+        console.log('straights', (inc += STRAIGHTS$$1.length));
         //flushes as many as highcards
-        console.log("flushes", inc += HIGH_CARDS_5_AMOUNT$$1);
-        console.log("full houses", inc += FULLHOUSES.length);
-        console.log("quads", inc += QUADS.length);
-        HIGH_CARDS.concat(SINGLE_PAIRS, DOUBLE_PAIRS, TRIPLES, STRAIGHTS$$1).forEach(function (h, idx) {
+        console.log('flushes', (inc += HIGH_CARDS_5_AMOUNT$$1));
+        console.log('full houses', (inc += FULLHOUSES.length));
+        console.log('quads', (inc += QUADS.length));
+        var upToStraights = HIGH_CARDS.concat(SINGLE_PAIRS, DOUBLE_PAIRS, TRIPLES, STRAIGHTS$$1);
+        upToStraights.forEach(function (h, idx) {
             return fillRank5(h, idx, hashRankingOfFive);
         });
-        FULLHOUSES.concat(QUADS).forEach(function (h, idx) {
+        var aboveStraights = HIGH_CARDS.concat(FULLHOUSES, QUADS, STRAIGHTS$$1);
+        aboveStraights.forEach(function (h, idx) {
             return fillRank5PlusFlushes(h, idx, hashRankingOfFive);
         });
+        //console.log(upToStraights, aboveStraights);
         /**
          * @TODO
          * add strightflushes
@@ -303,7 +319,8 @@
     var createRankOf5On7Hashes = function (hashRankOfFive) {
         var hashRankingOfFiveOnSeven = {
             HASHES: {},
-            FLUSH_HASHES: {},
+            FLUSH_CHECK_KEYS: {},
+            FLUSH_RANK_HASHES: {},
             baseRankValues: ranksHashOn7,
             baseSuitValues: suitsHash,
             rankingInfos: []
@@ -311,30 +328,67 @@
         var counter = 0;
         var rankCards$$1 = rankCards;
         var ranksHashOn7$$1 = hashRankingOfFiveOnSeven.baseRankValues;
-        multiCombinations(rankCards$$1, 7, 3).map(function (hand) { return hand.map(function (card) { return ranksHashOn7$$1[card]; }); }).forEach(function (h, i) {
-            var hash = getVectorSum(h);
-            hashRankingOfFiveOnSeven.HASHES[hash] = _rankOf5onX(h, hashRankOfFive.HASHES);
+        multiCombinations(rankCards$$1, 7, 3)
+            .forEach(function (hand, i) {
+            var h7 = hand.map(function (card) { return ranksHashOn7$$1[card]; });
+            var h5 = hand.map(function (card) { return hashRankOfFive.baseRankValues[card]; });
+            var hash7 = getVectorSum(h7);
+            hashRankingOfFiveOnSeven.HASHES[hash7] = _rankOf5onX(h5, hashRankOfFive.HASHES);
             counter++;
         });
+        console.log("7rankhands:", counter);
         /**
-      * 5 same suits
-      * 6 same suits
-      * 7 same suits
-      * the use best5On6 best5On7
-      */
-        var fiveFlushes = combinations(rankCards$$1, 5).map(function (hand) { return hand.map(function (card) { return ranksHashOn7$$1[card]; }); });
-        var sixFlushes = combinations(rankCards$$1, 6).map(function (hand) { return hand.map(function (card) { return ranksHashOn7$$1[card]; }); });
-        var sevenFlushes = combinations(rankCards$$1, 7).map(function (hand) { return hand.map(function (card) { return ranksHashOn7$$1[card]; }); });
-        console.log(counter, hashRankingOfFiveOnSeven, sixFlushes, sevenFlushes, fiveFlushes);
+         * 5 same suits
+         * 6 same suits
+         * 7 same suits
+         * the use best5On6 best5On7
+         */
+        var FLUSH_RANK_HASHES = hashRankingOfFiveOnSeven.FLUSH_RANK_HASHES || {};
+        var fiveFlushes = combinations(rankCards$$1, 5);
+        var sixFlushes = combinations(rankCards$$1, 6);
+        var sevenFlushes = combinations(rankCards$$1, 7);
+        fiveFlushes.concat(sixFlushes, sevenFlushes).forEach(function (h) {
+            var h5 = h.map(function (c) { return hashRankOfFive.baseRankValues[c]; });
+            var h7 = h.map(function (c) { return hashRankingOfFiveOnSeven.baseRankValues[c]; });
+            var hash7 = getVectorSum(h7);
+            FLUSH_RANK_HASHES[hash7] = _rankOf5onX(h5, hashRankOfFive.HASHES) + FLUSHES_BASE_START;
+        });
+        var fiveFlushHashes = [[0, 0, 0, 0, 0], [1, 1, 1, 1, 1], [8, 8, 8, 8, 8], [57, 57, 57, 57, 57]];
+        var sixFlushHashes = [];
+        fiveFlushHashes.forEach(function (v, i) {
+            sixFlushHashes.push(v.concat([0]), v.concat([1]), v.concat([8]), v.concat([57]));
+        });
+        var sevenFlushHashes = [];
+        sixFlushHashes.forEach(function (v) {
+            sevenFlushHashes.push(v.concat([0]), v.concat([1]), v.concat([8]), v.concat([57]));
+        });
+        var FLUSH_CHECK_KEYS = hashRankingOfFiveOnSeven.FLUSH_CHECK_KEYS;
+        /**for testing count all to be 84 and equally distributed */
+        fiveFlushHashes.concat(sixFlushHashes, sevenFlushHashes).forEach(function (h) {
+            FLUSH_CHECK_KEYS[getVectorSum(h)] = h[0];
+        });
+        /*console.log(counter, sixFlushes, sevenFlushes, fiveFlushes);
+        console.log(cc, fiveFlushHashes, sixFlushHashes, sevenFlushHashes, hashRankingOfFiveOnSeven.FLUSH_CHECK_KEYS);
+        console.log("--------", hashRankingOfFiveOnSeven);*/
         return hashRankingOfFiveOnSeven;
     };
 
     var HASHES_OF_FIVE = createRankOfFiveHashes();
     var HASHES_OF_FIVE_ON_SEVEN = createRankOf5On7Hashes(HASHES_OF_FIVE);
-    console.log(HASHES_OF_FIVE, HASHES_OF_FIVE_ON_SEVEN);
+    //console.log("MAIN:", HASHES_OF_FIVE, HASHES_OF_FIVE_ON_SEVEN);
+    /*
+    let count = 0;
+    for (let h in HASHES_OF_FIVE_ON_SEVEN.HASHES) {
+      count++;
+      if (isNaN(HASHES_OF_FIVE_ON_SEVEN.HASHES[h])) {
+        console.log(h, count);
+      }
+    }
+    */
     var fac = function (n) {
         return factorial(n);
     };
+    /**@TODO yahtzee ,poker dice,yacht,generala ,cheerio*/
 
     exports.fac = fac;
 

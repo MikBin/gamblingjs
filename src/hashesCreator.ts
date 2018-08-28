@@ -1,32 +1,13 @@
 import * as CONSTANTS from './constants'
-import { getVectorSum } from './routines'
+import { getVectorSum, _rankOf5onX, fillRank5, fillRank5PlusFlushes } from './routines'
 import * as ROUTINES from './routines'
 import * as kombinatoricsJs from 'kombinatoricsjs'
-import { hashRanking } from './interfaces'
-import { NumberMap } from './interfaces'
-
-const fillRank5 = (h: number[], idx: number, rankingObject: hashRanking): hashRanking => {
-  let hash = getVectorSum(h.map(card => rankingObject.baseRankValues[card]))
-  rankingObject.HASHES[hash] = idx
-  rankingObject.rankingInfos.push(idx)
-  return rankingObject
-}
-
-const fillRank5PlusFlushes = (
-  h: number[],
-  idx: number,
-  rankingObject: hashRanking,
-  offset: number = CONSTANTS.FLUSHES_BASE_START + CONSTANTS.HIGH_CARDS_5_AMOUNT
-): hashRanking => {
-  let hash = getVectorSum(h.map(card => rankingObject.baseRankValues[card]))
-  rankingObject.HASHES[hash] = idx + offset
-  rankingObject.rankingInfos.push(idx + offset)
-  return rankingObject
-}
+import { hashRanking, NumberMap } from './interfaces'
 
 export const createRankOfFiveHashes = (): Readonly<hashRanking> => {
   const hashRankingOfFive: hashRanking = {
     HASHES: {},
+    FLUSH_CHECK_KEYS: CONSTANTS.flush5hHashCheck,
     baseRankValues: CONSTANTS.ranksHashOn5,
     baseSuitValues: CONSTANTS.suitsHash,
     rankingInfos: []
@@ -44,7 +25,7 @@ export const createRankOfFiveHashes = (): Readonly<hashRanking> => {
   const TRIPLES = ROUTINES.trisList(rankCards)
   const FULLHOUSES = ROUTINES.fullHouseList(rankCards)
   const QUADS = ROUTINES.quadsList(rankCards)
-  console.log(HIGH_CARDS, FULLHOUSES, QUADS)
+
   let inc = 0
   console.log('high cards', (inc += HIGH_CARDS.length))
   console.log('single pairs', (inc += SINGLE_PAIRS.length))
@@ -56,12 +37,16 @@ export const createRankOfFiveHashes = (): Readonly<hashRanking> => {
   console.log('full houses', (inc += FULLHOUSES.length))
   console.log('quads', (inc += QUADS.length))
 
-  HIGH_CARDS.concat(SINGLE_PAIRS, DOUBLE_PAIRS, TRIPLES, STRAIGHTS).forEach((h, idx) => {
+  let upToStraights = HIGH_CARDS.concat(SINGLE_PAIRS, DOUBLE_PAIRS, TRIPLES, STRAIGHTS)
+  upToStraights.forEach((h, idx) => {
     return fillRank5(h, idx, hashRankingOfFive)
   })
-  FULLHOUSES.concat(QUADS).forEach((h, idx) => {
+  let aboveStraights = HIGH_CARDS.concat(FULLHOUSES, QUADS, STRAIGHTS)
+  aboveStraights.forEach((h, idx) => {
     return fillRank5PlusFlushes(h, idx, hashRankingOfFive)
   })
+
+  //console.log(upToStraights, aboveStraights);
   /**
    * @TODO
    * add strightflushes
@@ -72,53 +57,74 @@ export const createRankOfFiveHashes = (): Readonly<hashRanking> => {
   return hashRankingOfFive
 }
 
-const _rankOfFive = (hand: number[], rankHash: NumberMap) => {
-  return rankHash[getVectorSum(hand)]
-}
-const _rankOf5onX = (hand: number[], rankHash: NumberMap) => {
-  return Math.max(...kombinatoricsJs.combinations(hand, 5).map(h => rankHash[getVectorSum(h)]))
-}
-
-export const createRankOf5On6Hashes = () => {}
+//export const createRankOf5On6Hashes = () => { };
 
 export const createRankOf5On7Hashes = (hashRankOfFive: hashRanking) => {
   const hashRankingOfFiveOnSeven: hashRanking = {
     HASHES: {},
-    FLUSH_HASHES: {},
+    FLUSH_CHECK_KEYS: {},
+    FLUSH_RANK_HASHES: {},
     baseRankValues: CONSTANTS.ranksHashOn7,
     baseSuitValues: CONSTANTS.suitsHash,
-    rankingInfos: []
+    rankingInfos: hashRankOfFive.rankingInfos
   }
   let counter: number = 0
   const rankCards = CONSTANTS.rankCards
   const ranksHashOn7 = hashRankingOfFiveOnSeven.baseRankValues
+  const suit7Hash = hashRankingOfFiveOnSeven.baseSuitValues
 
-  kombinatoricsJs
-    .multiCombinations(rankCards, 7, 3)
-    .map(hand => hand.map(card => ranksHashOn7[card]))
-    .forEach((h: number[], i: number) => {
-      let hash: number = getVectorSum(h)
-      hashRankingOfFiveOnSeven.HASHES[hash] = _rankOf5onX(h, hashRankOfFive.HASHES)
-      counter++
-    })
+  kombinatoricsJs.multiCombinations(rankCards, 7, 3).forEach((hand: number[], i: number) => {
+    let h7 = hand.map(card => ranksHashOn7[card])
+    let h5 = hand.map(card => hashRankOfFive.baseRankValues[card])
+    let hash7: number = getVectorSum(h7)
+    hashRankingOfFiveOnSeven.HASHES[hash7] = _rankOf5onX(h5, hashRankOfFive.HASHES)
 
+    counter++
+  })
+  console.log('7rankhands:', counter)
   /**
    * 5 same suits
    * 6 same suits
    * 7 same suits
    * the use best5On6 best5On7
    */
-  let fiveFlushes = kombinatoricsJs
-    .combinations(rankCards, 5)
-    .map(hand => hand.map(card => ranksHashOn7[card]))
-  let sixFlushes = kombinatoricsJs
-    .combinations(rankCards, 6)
-    .map(hand => hand.map(card => ranksHashOn7[card]))
-  let sevenFlushes = kombinatoricsJs
-    .combinations(rankCards, 7)
-    .map(hand => hand.map(card => ranksHashOn7[card]))
 
-  console.log(counter, hashRankingOfFiveOnSeven, sixFlushes, sevenFlushes, fiveFlushes)
+  const FLUSH_RANK_HASHES = hashRankingOfFiveOnSeven.FLUSH_RANK_HASHES || {}
+
+  let fiveFlushes = kombinatoricsJs.combinations(rankCards, 5)
+  let sixFlushes = kombinatoricsJs.combinations(rankCards, 6)
+  let sevenFlushes = kombinatoricsJs.combinations(rankCards, 7)
+
+  fiveFlushes.concat(sixFlushes, sevenFlushes).forEach(h => {
+    let h5: number[] = h.map(c => hashRankOfFive.baseRankValues[c])
+    let h7: number[] = h.map(c => hashRankingOfFiveOnSeven.baseRankValues[c])
+    let hash7 = getVectorSum(h7)
+
+    FLUSH_RANK_HASHES[hash7] = _rankOf5onX(h5, hashRankOfFive.HASHES) + CONSTANTS.FLUSHES_BASE_START
+  })
+
+  let fiveFlushHashes = [[0, 0, 0, 0, 0], [1, 1, 1, 1, 1], [8, 8, 8, 8, 8], [57, 57, 57, 57, 57]]
+  let sixFlushHashes: number[][] = []
+  fiveFlushHashes.forEach((v, i) => {
+    sixFlushHashes.push(v.concat([0]), v.concat([1]), v.concat([8]), v.concat([57]))
+  })
+  let sevenFlushHashes: number[][] = []
+
+  sixFlushHashes.forEach(v => {
+    sevenFlushHashes.push(v.concat([0]), v.concat([1]), v.concat([8]), v.concat([57]))
+  })
+
+  let cc = 0
+  const FLUSH_CHECK_KEYS = hashRankingOfFiveOnSeven.FLUSH_CHECK_KEYS
+  /**for testing count all to be 84 and equally distributed */
+  fiveFlushHashes.concat(sixFlushHashes, sevenFlushHashes).forEach(h => {
+    FLUSH_CHECK_KEYS[getVectorSum(h)] = h[0]
+    cc++
+  })
+
+  /*console.log(counter, sixFlushes, sevenFlushes, fiveFlushes);
+    console.log(cc, fiveFlushHashes, sixFlushHashes, sevenFlushHashes, hashRankingOfFiveOnSeven.FLUSH_CHECK_KEYS);
+    console.log("--------", hashRankingOfFiveOnSeven);*/
 
   return hashRankingOfFiveOnSeven
 }

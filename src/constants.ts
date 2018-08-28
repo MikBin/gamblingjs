@@ -3,6 +3,7 @@
  * 8bit or 16bits arrays can be used
  */
 import { NumberMap } from './interfaces'
+import { NumberToStringMap } from './interfaces'
 
 export const flushHash: number[] = [1, 2, 4, 8, 16, 32, 64, 128, 255, 508, 1012, 2016, 4016] // 13 one for each rank
 
@@ -94,14 +95,29 @@ ranksHashOn5[12] = 79415 // A
 /* 
 arrays initialization
 */
-export const deckOfRanks: number[] = new Array(52)
+export const deckOfRanks_5: number[] = new Array(52)
+export const deckOfRanks_7: number[] = new Array(52)
 export const deckOfFlushes: number[] = new Array(52)
 export const deckOfSuits: number[] = new Array(52)
 
+export const fullCardsDeckHash_5: number[] = new Array(52)
+export const fullCardsDeckHash_7: number[] = new Array(52)
+
+export const cardHashToDescription_5: NumberToStringMap = {}
+export const cardHashToDescription_7: NumberToStringMap = {}
+
 for (let i: number = 0; i < 52; i++) {
-  deckOfRanks[i] = ranksHashOn5[i % 13]
+  deckOfRanks_5[i] = ranksHashOn5[i % 13]
+  deckOfRanks_7[i] = ranksHashOn5[i % 13]
   deckOfFlushes[i] = flushHash[i % 13]
   deckOfSuits[i] = suitsHash[~~(i / 13)]
+
+  let card5 = (fullCardsDeckHash_5[i] = (deckOfRanks_5[i] << 9) + deckOfSuits[i])
+  let card7 = (fullCardsDeckHash_7[i] = (deckOfRanks_7[i] << 9) + deckOfSuits[i])
+  cardHashToDescription_5[
+    card5
+  ] = i /**any value used to display the card to the user---make it configurable!!!!! */
+  cardHashToDescription_7[card7] = i
 }
 
 export const STRAIGHTS: number[][] = [
@@ -121,7 +137,17 @@ export const rankCards: number[] = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12]
 export const HIGH_CARDS_5_AMOUNT = 1277
 export const FLUSHES_BASE_START = 5863
 
-export const handsRankingDelimiter_5cards = [1277, 4137, 4995, 5853, 5863, 7140, 7296, 7452, 7462]
+export const handsRankingDelimiter_5cards: number[] = [
+  1277,
+  4137,
+  4995,
+  5853,
+  5863,
+  7140,
+  7296,
+  7452,
+  7462
+]
 /**
  * fill with these:
  * https://en.wikipedia.org/wiki/Poker_probability
