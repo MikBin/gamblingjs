@@ -126,8 +126,8 @@ for (var i = 0; i < 52; i++) {
     deckOfRanks_7[i] = ranksHashOn5[i % 13];
     deckOfFlushes[i] = flushHash[i % 13];
     deckOfSuits[i] = suitsHash[~~(i / 13)];
-    var card5 = fullCardsDeckHash_5[i] = (deckOfRanks_5[i] << 9) + deckOfSuits[i];
-    var card7 = fullCardsDeckHash_7[i] = (deckOfRanks_7[i] << 9) + deckOfSuits[i];
+    var card5 = (fullCardsDeckHash_5[i] = (deckOfRanks_5[i] << 9) + deckOfSuits[i]);
+    var card7 = (fullCardsDeckHash_7[i] = (deckOfRanks_7[i] << 9) + deckOfSuits[i]);
 }
 var STRAIGHTS = [
     [12, 0, 1, 2, 3],
@@ -173,26 +173,27 @@ var singlePairsList = function (startSet) {
     }
     return singlePairs;
 };
+var internalDoublePairsSort = function (a, b) {
+    if (a[0] < b[0])
+        return -1;
+    if (a[0] > b[0])
+        return 1;
+    if (a[1] < b[1])
+        return -1;
+    if (a[1] > b[1])
+        return 1;
+    return 0;
+};
 var sortedPairsToAdd = function (startSet) {
     var _toAdd = multiCombinations(startSet, 2, 0);
-    _toAdd.forEach(function (pair, idx) {
+    _toAdd.forEach(function (pair) {
+        var _a;
+        /* istanbul ignore if  */
         if (pair[0] < pair[1]) {
-            var tmp = pair[0];
-            pair[0] = pair[1];
-            pair[1] = tmp;
+            _a = [pair[1], pair[0]], pair[0] = _a[0], pair[1] = _a[1];
         }
     });
-    _toAdd.sort(function (a, b) {
-        if (a[0] < b[0])
-            return -1;
-        if (a[0] > b[0])
-            return 1;
-        if (a[1] < b[1])
-            return -1;
-        if (a[1] > b[1])
-            return 1;
-        return 0;
-    });
+    _toAdd.sort(internalDoublePairsSort);
     return _toAdd;
 };
 var doublePairsList = function (startSet) {
@@ -227,7 +228,7 @@ var fullHouseList = function (startSet) {
 };
 var quadsList = function (startSet) {
     var quads = crossProduct(startSet, 2).filter(function (p) { return p[0] !== p[1]; });
-    return quads.map(function (hand, idx) {
+    return quads.map(function (hand) {
         return [hand[0], hand[0], hand[0], hand[0], hand[1]];
     });
 };
@@ -246,7 +247,9 @@ var removeStraights = function (list) {
         return !checkStraight(hand);
     });
 };
-
+var _rankOf5onX = function (hand, rankHash) {
+    return Math.max.apply(Math, combinations(hand, 5).map(function (h) { return rankHash[getVectorSum(h)]; }));
+};
 var fillRank5 = function (h, idx, rankingObject) {
     var hash = getVectorSum(h.map(function (card) { return rankingObject.baseRankValues[card]; }));
     rankingObject.HASHES[hash] = idx;
@@ -260,10 +263,13 @@ var fillRank5PlusFlushes = function (h, idx, rankingObject, offset) {
     rankingObject.rankingInfos.push(idx + offset);
     return rankingObject;
 };
+
 var createRankOfFiveHashes = function () {
     var hashRankingOfFive = {
         HASHES: {},
         FLUSH_CHECK_KEYS: flush5hHashCheck,
+        FLUSH_RANK_HASHES: {},
+        FLUSH_HASHES: {},
         baseRankValues: ranksHashOn5,
         baseSuitValues: suitsHash,
         rankingInfos: []
@@ -307,37 +313,28 @@ var createRankOfFiveHashes = function () {
      */
     return hashRankingOfFive;
 };
-var _rankOf5onX = function (hand, rankHash) {
-    return Math.max.apply(Math, combinations(hand, 5).map(function (h) { return rankHash[getVectorSum(h)]; }));
-};
+//export const createRankOf5On6Hashes = () => { };
+/**@TODO add hand code to rankingInfo : [12,0,1,2,3,10,11] this is straight A2345KQ
+ * or just retrieve category from rankValue the fine hightest card or components by statical exaustive hand analisys
+*/
 var createRankOf5On7Hashes = function (hashRankOfFive) {
     var hashRankingOfFiveOnSeven = {
         HASHES: {},
         FLUSH_CHECK_KEYS: {},
         FLUSH_RANK_HASHES: {},
+        FLUSH_HASHES: {},
         baseRankValues: ranksHashOn7,
         baseSuitValues: suitsHash,
-        rankingInfos: []
+        rankingInfos: hashRankOfFive.rankingInfos
     };
-    var counter = 0;
     var rankCards$$1 = rankCards;
     var ranksHashOn7$$1 = hashRankingOfFiveOnSeven.baseRankValues;
-    multiCombinations(rankCards$$1, 7, 3)
-        .forEach(function (hand, i) {
+    multiCombinations(rankCards$$1, 7, 3).forEach(function (hand, i) {
         var h7 = hand.map(function (card) { return ranksHashOn7$$1[card]; });
         var h5 = hand.map(function (card) { return hashRankOfFive.baseRankValues[card]; });
         var hash7 = getVectorSum(h7);
         hashRankingOfFiveOnSeven.HASHES[hash7] = _rankOf5onX(h5, hashRankOfFive.HASHES);
-        counter++;
     });
-    console.log("7rankhands:", counter);
-    /**
-     * 5 same suits
-     * 6 same suits
-     * 7 same suits
-     * the use best5On6 best5On7
-     */
-    var FLUSH_RANK_HASHES = hashRankingOfFiveOnSeven.FLUSH_RANK_HASHES || {};
     var fiveFlushes = combinations(rankCards$$1, 5);
     var sixFlushes = combinations(rankCards$$1, 6);
     var sevenFlushes = combinations(rankCards$$1, 7);
@@ -345,7 +342,7 @@ var createRankOf5On7Hashes = function (hashRankOfFive) {
         var h5 = h.map(function (c) { return hashRankOfFive.baseRankValues[c]; });
         var h7 = h.map(function (c) { return hashRankingOfFiveOnSeven.baseRankValues[c]; });
         var hash7 = getVectorSum(h7);
-        FLUSH_RANK_HASHES[hash7] = _rankOf5onX(h5, hashRankOfFive.HASHES) + FLUSHES_BASE_START;
+        hashRankingOfFiveOnSeven.FLUSH_RANK_HASHES[hash7] = _rankOf5onX(h5, hashRankOfFive.HASHES) + FLUSHES_BASE_START;
     });
     var fiveFlushHashes = [[0, 0, 0, 0, 0], [1, 1, 1, 1, 1], [8, 8, 8, 8, 8], [57, 57, 57, 57, 57]];
     var sixFlushHashes = [];
@@ -362,8 +359,8 @@ var createRankOf5On7Hashes = function (hashRankOfFive) {
         FLUSH_CHECK_KEYS[getVectorSum(h)] = h[0];
     });
     /*console.log(counter, sixFlushes, sevenFlushes, fiveFlushes);
-    console.log(cc, fiveFlushHashes, sixFlushHashes, sevenFlushHashes, hashRankingOfFiveOnSeven.FLUSH_CHECK_KEYS);
-    console.log("--------", hashRankingOfFiveOnSeven);*/
+      console.log(cc, fiveFlushHashes, sixFlushHashes, sevenFlushHashes, hashRankingOfFiveOnSeven.FLUSH_CHECK_KEYS);
+      console.log("--------", hashRankingOfFiveOnSeven);*/
     return hashRankingOfFiveOnSeven;
 };
 

@@ -9,9 +9,9 @@ export interface NumberToStringMap {
 }
 export interface hashRanking {
     HASHES: NumberMap;
-    FLUSH_HASHES?: NumberMap;
+    FLUSH_HASHES: NumberMap;
     FLUSH_CHECK_KEYS: NumberMap;
-    FLUSH_RANK_HASHES?: NumberMap;
+    FLUSH_RANK_HASHES: NumberMap;
     baseRankValues: number[];
     baseSuitValues: number[];
     rankingInfos: (string | number)[];

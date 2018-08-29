@@ -95,8 +95,8 @@ for (var i = 0; i < 52; i++) {
     exports.deckOfRanks_7[i] = exports.ranksHashOn5[i % 13];
     exports.deckOfFlushes[i] = exports.flushHash[i % 13];
     exports.deckOfSuits[i] = exports.suitsHash[~~(i / 13)];
-    var card5 = exports.fullCardsDeckHash_5[i] = (exports.deckOfRanks_5[i] << 9) + exports.deckOfSuits[i];
-    var card7 = exports.fullCardsDeckHash_7[i] = (exports.deckOfRanks_7[i] << 9) + exports.deckOfSuits[i];
+    var card5 = (exports.fullCardsDeckHash_5[i] = (exports.deckOfRanks_5[i] << 9) + exports.deckOfSuits[i]);
+    var card7 = (exports.fullCardsDeckHash_7[i] = (exports.deckOfRanks_7[i] << 9) + exports.deckOfSuits[i]);
     exports.cardHashToDescription_5[card5] = i; /**any value used to display the card to the user---make it configurable!!!!! */
     exports.cardHashToDescription_7[card7] = i;
 }
@@ -115,7 +115,17 @@ exports.STRAIGHTS = [
 exports.rankCards = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12];
 exports.HIGH_CARDS_5_AMOUNT = 1277;
 exports.FLUSHES_BASE_START = 5863;
-exports.handsRankingDelimiter_5cards = [1277, 4137, 4995, 5853, 5863, 7140, 7296, 7452, 7462];
+exports.handsRankingDelimiter_5cards = [
+    1277,
+    4137,
+    4995,
+    5853,
+    5863,
+    7140,
+    7296,
+    7452,
+    7462
+];
 /**
  * fill with these:
  * https://en.wikipedia.org/wiki/Poker_probability

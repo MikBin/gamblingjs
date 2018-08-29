@@ -18,5 +18,5 @@ for (let h in HASHES_OF_FIVE_ON_SEVEN.HASHES) {
 exports.fac = function (n) {
     return kombinatoricsJs.factorial(n);
 };
-/**@TODO yahtzee ,poker dice,yacht,generala ,cheerio*/ 
+/**@TODO yahtzee ,poker dice,yacht,generala ,cheerio*/
 //# sourceMappingURL=gamblingjs.js.map

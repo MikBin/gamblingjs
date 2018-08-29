@@ -1,6 +1,7 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 var kombinatoricsJs = require("kombinatoricsjs");
+var CONSTANTS = require("./constants");
 exports.atLeast5Eq = function (list) {
     return list.filter(function (v) {
         var l = v.length;
@@ -40,6 +41,7 @@ exports.getFlushSuit7 = function (v) {
             c++;
         }
         i++;
+        /* istanbul ignore if  */
         if (c === 4)
             break;
     }
@@ -57,6 +59,7 @@ exports.checkStraight5on7 = function (arr) {
         else {
             c = 0;
         }
+        /* istanbul ignore if  */
         if (c === 4)
             break;
     }
@@ -74,26 +77,27 @@ exports.singlePairsList = function (startSet) {
     }
     return singlePairs;
 };
+exports.internalDoublePairsSort = function (a, b) {
+    if (a[0] < b[0])
+        return -1;
+    if (a[0] > b[0])
+        return 1;
+    if (a[1] < b[1])
+        return -1;
+    if (a[1] > b[1])
+        return 1;
+    return 0;
+};
 exports.sortedPairsToAdd = function (startSet) {
     var _toAdd = kombinatoricsJs.multiCombinations(startSet, 2, 0);
-    _toAdd.forEach(function (pair, idx) {
+    _toAdd.forEach(function (pair) {
+        var _a;
+        /* istanbul ignore if  */
         if (pair[0] < pair[1]) {
-            var tmp = pair[0];
-            pair[0] = pair[1];
-            pair[1] = tmp;
+            _a = [pair[1], pair[0]], pair[0] = _a[0], pair[1] = _a[1];
         }
     });
-    _toAdd.sort(function (a, b) {
-        if (a[0] < b[0])
-            return -1;
-        if (a[0] > b[0])
-            return 1;
-        if (a[1] < b[1])
-            return -1;
-        if (a[1] > b[1])
-            return 1;
-        return 0;
-    });
+    _toAdd.sort(exports.internalDoublePairsSort);
     return _toAdd;
 };
 exports.doublePairsList = function (startSet) {
@@ -128,7 +132,7 @@ exports.fullHouseList = function (startSet) {
 };
 exports.quadsList = function (startSet) {
     var quads = kombinatoricsJs.crossProduct(startSet, 2).filter(function (p) { return p[0] !== p[1]; });
-    return quads.map(function (hand, idx) {
+    return quads.map(function (hand) {
         return [hand[0], hand[0], hand[0], hand[0], hand[1]];
     });
 };
@@ -143,13 +147,32 @@ exports.checkStraight = function (arr) {
     return cond;
 };
 exports.checkDoublePair = function (hand) {
-    return ((hand[0] === hand[1] && hand[2] === hand[3]) ||
-        (hand[0] === hand[1] && hand[3] === hand[4]) ||
-        (hand[1] === hand[2] && hand[3] === hand[4]));
+    return ((hand[0] === hand[1] && hand[2] === hand[3] && hand[3] !== hand[4] && hand[1] !== hand[4]) ||
+        (hand[0] === hand[1] && hand[3] === hand[4] && hand[3] !== hand[2] && hand[1] !== hand[2]) ||
+        (hand[1] === hand[2] && hand[3] === hand[4] && hand[3] !== hand[0] && hand[2] !== hand[0]));
 };
 exports.removeStraights = function (list) {
     return list.filter(function (hand, idx) {
         return !exports.checkStraight(hand);
     });
+};
+exports._rankOfHand = function (hand, rankHash) {
+    return rankHash[exports.getVectorSum(hand)];
+};
+exports._rankOf5onX = function (hand, rankHash) {
+    return Math.max.apply(Math, kombinatoricsJs.combinations(hand, 5).map(function (h) { return rankHash[exports.getVectorSum(h)]; }));
+};
+exports.fillRank5 = function (h, idx, rankingObject) {
+    var hash = exports.getVectorSum(h.map(function (card) { return rankingObject.baseRankValues[card]; }));
+    rankingObject.HASHES[hash] = idx;
+    rankingObject.rankingInfos.push(idx);
+    return rankingObject;
+};
+exports.fillRank5PlusFlushes = function (h, idx, rankingObject, offset) {
+    if (offset === void 0) { offset = CONSTANTS.FLUSHES_BASE_START + CONSTANTS.HIGH_CARDS_5_AMOUNT; }
+    var hash = exports.getVectorSum(h.map(function (card) { return rankingObject.baseRankValues[card]; }));
+    rankingObject.HASHES[hash] = idx + offset;
+    rankingObject.rankingInfos.push(idx + offset);
+    return rankingObject;
 };
 //# sourceMappingURL=routines.js.map
