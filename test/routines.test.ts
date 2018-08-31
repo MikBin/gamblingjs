@@ -16,7 +16,8 @@ import {
   _rankOf5onX,
   fillRank5,
   fillRank5PlusFlushes,
-  internalDoublePairsSort
+  internalDoublePairsSort,
+  fillRankFlushes
 } from '../src/routines';
 import { NumberMap, hashRanking } from '../src/interfaces';
 
@@ -140,25 +141,32 @@ describe('ranking calculators and hashes managers', () => {
     expect(_rankOf5onX([1, 1, 1, 1, 1, 1, 2], fakeHash)).toBe(6);
   });
 
-  it('fills rank of 5', () => {
-    expect(fillRank5([1, 1, 1], 3, fakeRankingObj)).toEqual({
-      HASHES: { 3: 3 },
-      FLUSH_CHECK_KEYS: {},
-      FLUSH_RANK_HASHES: {},
-      FLUSH_HASHES: {},
-      baseRankValues: [0, 1, 2],
-      baseSuitValues: [0, 1, 2],
-      rankingInfos: [3]
-    });
+  let tempObj = {
+    HASHES: { 3: 3 },
+    FLUSH_CHECK_KEYS: {},
+    FLUSH_RANK_HASHES: {},
+    FLUSH_HASHES: {},
+    baseRankValues: [0, 1, 2],
+    baseSuitValues: [0, 1, 2],
+    rankingInfos: []
+  };
 
-    expect(fillRank5PlusFlushes([1, 1, 0], 2, fakeRankingObj, 10)).toEqual({
-      HASHES: { 3: 3, 2: 12 },
-      FLUSH_CHECK_KEYS: {},
-      FLUSH_RANK_HASHES: {},
-      FLUSH_HASHES: {},
-      baseRankValues: [0, 1, 2],
-      baseSuitValues: [0, 1, 2],
-      rankingInfos: [3, 12]
-    });
+  it('fills rank of 5', () => {
+    tempObj.rankingInfos[3] = 3;
+    expect(fillRank5([1, 1, 1], 3, fakeRankingObj).HASHES).toEqual(tempObj.HASHES);
+  });
+
+  it('fills with post flush values', () => {
+    tempObj.rankingInfos[12] = 2;
+    tempObj.HASHES[2] = 12;
+    expect(fillRank5PlusFlushes([1, 1, 0], 2, fakeRankingObj, 10).HASHES).toEqual(tempObj.HASHES);
+  });
+
+  it('fills flush ranking', () => {
+    tempObj.FLUSH_RANK_HASHES[2] = 5876;
+    tempObj.rankingInfos[5876] = 2;
+    expect(fillRankFlushes([1, 1, 0], fakeRankingObj).FLUSH_RANK_HASHES).toEqual(
+      tempObj.FLUSH_RANK_HASHES
+    );
   });
 });

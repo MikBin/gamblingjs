@@ -17,3 +17,4 @@ export declare const _rankOfHand: (hand: number[], rankHash: NumberMap) => numbe
 export declare const _rankOf5onX: (hand: number[], rankHash: NumberMap) => number;
 export declare const fillRank5: (h: number[], idx: number, rankingObject: hashRanking) => hashRanking;
 export declare const fillRank5PlusFlushes: (h: number[], idx: number, rankingObject: hashRanking, offset?: number) => hashRanking;
+export declare const fillRankFlushes: (h: number[], rankingObject: hashRanking) => hashRanking;

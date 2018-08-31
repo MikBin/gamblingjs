@@ -48,7 +48,13 @@ export const getFlushSuit7 = (v: number[]): number => {
 
 export const checkStraight5on7 = (arr: number[]): boolean => {
   let c: number = 0;
-  if (arr[6] === 12 && arr[0] === 0 && arr.includes(1) && arr.includes(2) && arr.includes(3)) {
+  if (
+    arr[arr.length - 1] === 12 &&
+    arr[0] === 0 &&
+    arr.includes(1) &&
+    arr.includes(2) &&
+    arr.includes(3)
+  ) {
     return true;
   }
   for (let i = 1; i < arr.length; ++i) {
@@ -88,7 +94,7 @@ export const sortedPairsToAdd = (startSet: number[]): number[][] => {
   let _toAdd = kombinatoricsJs.multiCombinations(startSet, 2, 0);
 
   _toAdd.forEach(pair => {
-    /* istanbul ignore if  */
+    /* istanbul ignore next */
     if (pair[0] < pair[1]) {
       [pair[0], pair[1]] = [pair[1], pair[0]];
     }
@@ -151,6 +157,7 @@ export const checkStraight = (arr: number[]): boolean => {
 };
 
 export const checkDoublePair = (hand: number[]): boolean => {
+  /* istanbul ignore next */
   return (
     (hand[0] === hand[1] && hand[2] === hand[3] && hand[3] !== hand[4] && hand[1] !== hand[4]) ||
     (hand[0] === hand[1] && hand[3] === hand[4] && hand[3] !== hand[2] && hand[1] !== hand[2]) ||
@@ -174,7 +181,7 @@ export const _rankOf5onX = (hand: number[], rankHash: NumberMap) => {
 export const fillRank5 = (h: number[], idx: number, rankingObject: hashRanking): hashRanking => {
   let hash = getVectorSum(h.map(card => rankingObject.baseRankValues[card]));
   rankingObject.HASHES[hash] = idx;
-  rankingObject.rankingInfos.push(idx);
+  rankingObject.rankingInfos[idx] = hash;
   return rankingObject;
 };
 
@@ -186,6 +193,15 @@ export const fillRank5PlusFlushes = (
 ): hashRanking => {
   let hash = getVectorSum(h.map(card => rankingObject.baseRankValues[card]));
   rankingObject.HASHES[hash] = idx + offset;
-  rankingObject.rankingInfos.push(idx + offset);
+  rankingObject.rankingInfos[idx + offset] = hash;
+  return rankingObject;
+};
+
+export const fillRankFlushes = (h: number[], rankingObject: hashRanking): hashRanking => {
+  let hash = getVectorSum(h.map(card => rankingObject.baseRankValues[card]));
+  let rank = rankingObject.HASHES[hash] + CONSTANTS.FLUSHES_BASE_START;
+  rankingObject.FLUSH_RANK_HASHES[hash] = rank;
+  rankingObject.rankingInfos[rank] = hash;
+
   return rankingObject;
 };

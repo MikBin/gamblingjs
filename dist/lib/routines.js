@@ -92,7 +92,7 @@ exports.sortedPairsToAdd = function (startSet) {
     var _toAdd = kombinatoricsJs.multiCombinations(startSet, 2, 0);
     _toAdd.forEach(function (pair) {
         var _a;
-        /* istanbul ignore if  */
+        /* istanbul ignore next */
         if (pair[0] < pair[1]) {
             _a = [pair[1], pair[0]], pair[0] = _a[0], pair[1] = _a[1];
         }
@@ -147,6 +147,7 @@ exports.checkStraight = function (arr) {
     return cond;
 };
 exports.checkDoublePair = function (hand) {
+    /* istanbul ignore next */
     return ((hand[0] === hand[1] && hand[2] === hand[3] && hand[3] !== hand[4] && hand[1] !== hand[4]) ||
         (hand[0] === hand[1] && hand[3] === hand[4] && hand[3] !== hand[2] && hand[1] !== hand[2]) ||
         (hand[1] === hand[2] && hand[3] === hand[4] && hand[3] !== hand[0] && hand[2] !== hand[0]));
@@ -165,14 +166,21 @@ exports._rankOf5onX = function (hand, rankHash) {
 exports.fillRank5 = function (h, idx, rankingObject) {
     var hash = exports.getVectorSum(h.map(function (card) { return rankingObject.baseRankValues[card]; }));
     rankingObject.HASHES[hash] = idx;
-    rankingObject.rankingInfos.push(idx);
+    rankingObject.rankingInfos[idx] = hash;
     return rankingObject;
 };
 exports.fillRank5PlusFlushes = function (h, idx, rankingObject, offset) {
     if (offset === void 0) { offset = CONSTANTS.FLUSHES_BASE_START + CONSTANTS.HIGH_CARDS_5_AMOUNT; }
     var hash = exports.getVectorSum(h.map(function (card) { return rankingObject.baseRankValues[card]; }));
     rankingObject.HASHES[hash] = idx + offset;
-    rankingObject.rankingInfos.push(idx + offset);
+    rankingObject.rankingInfos[idx + offset] = hash;
+    return rankingObject;
+};
+exports.fillRankFlushes = function (h, rankingObject) {
+    var hash = exports.getVectorSum(h.map(function (card) { return rankingObject.baseRankValues[card]; }));
+    var rank = rankingObject.HASHES[hash] + CONSTANTS.FLUSHES_BASE_START;
+    rankingObject.FLUSH_RANK_HASHES[hash] = rank;
+    rankingObject.rankingInfos[rank] = hash;
     return rankingObject;
 };
 //# sourceMappingURL=routines.js.map
