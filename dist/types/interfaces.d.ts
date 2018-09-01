@@ -7,6 +7,11 @@ export interface StringMap {
 export interface NumberToStringMap {
     [s: number]: string | number;
 }
+export interface handInfo {
+    hand: number[];
+    faces: string;
+    handGroup: string;
+}
 export interface hashRanking {
     HASHES: NumberMap;
     FLUSH_HASHES: NumberMap;
@@ -14,5 +19,5 @@ export interface hashRanking {
     FLUSH_RANK_HASHES: NumberMap;
     baseRankValues: number[];
     baseSuitValues: number[];
-    rankingInfos: (string | number)[];
+    rankingInfos: handInfo[];
 }

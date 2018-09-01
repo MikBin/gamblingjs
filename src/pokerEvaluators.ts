@@ -2,12 +2,12 @@ import * as kombinatoricsJs from 'kombinatoricsjs';
 import { createRankOfFiveHashes, createRankOf5On7Hashes } from './hashesCreator';
 import { fullCardsDeckHash_5, fullCardsDeckHash_7, FLUSH_MASK } from './constants';
 
-const HASHES_OF_FIVE = createRankOfFiveHashes();
+export const HASHES_OF_FIVE = createRankOfFiveHashes();
 const FLUSH_CHECK_FIVE = HASHES_OF_FIVE.FLUSH_CHECK_KEYS;
 const HASH_RANK_FIVE = HASHES_OF_FIVE.HASHES;
 const FLUSH_RANK_FIVE = HASHES_OF_FIVE.FLUSH_RANK_HASHES;
 
-const HASHES_OF_FIVE_ON_SEVEN = createRankOf5On7Hashes(HASHES_OF_FIVE);
+export const HASHES_OF_FIVE_ON_SEVEN = createRankOf5On7Hashes(HASHES_OF_FIVE);
 const FLUSH_CHECK_SEVEN = HASHES_OF_FIVE_ON_SEVEN.FLUSH_CHECK_KEYS;
 const HASH_RANK_SEVEN = HASHES_OF_FIVE_ON_SEVEN.HASHES;
 const FLUSH_RANK_SEVEN = HASHES_OF_FIVE_ON_SEVEN.FLUSH_RANK_HASHES;
@@ -80,46 +80,35 @@ export const handOfSevenEval = (
   c7: number
 ): number => {
   let keySum: number = c1 + c2 + c3 + c4 + c5 + c6 + c7;
+  let handRank: number = 0;
   let flush_check_key: number = FLUSH_CHECK_SEVEN[keySum & FLUSH_MASK];
   if (flush_check_key >= 0) {
     /**no full house or quads possible ---> can return flush_rank */
 
-    /*@ts-ignore
-        let flushRankKey: number = ((c1 & FLUSH_MASK) == flush_check_key) * c1 + ((c2 & FLUSH_MASK) == flush_check_key) * c2 +
-            //@ts-ignore
-            ((c3 & FLUSH_MASK) == flush_check_key) * c3 + ((c4 & FLUSH_MASK) == flush_check_key) * c4 +
-            //@ts-ignore
-            ((c5 & FLUSH_MASK) == flush_check_key) * c5 + ((c6 & FLUSH_MASK) == flush_check_key) * c6 + ((c7 & FLUSH_MASK) == flush_check_key) * c7;
-*/
     //@ts-ignore
-    let flushRankKey = ((c1 & FLUSH_MASK) == flush_check_key) * c1;
-    //@ts-ignore
-    flushRankKey += ((c2 & FLUSH_MASK) == flush_check_key) * c2;
-    //@ts-ignore
-    flushRankKey += ((c3 & FLUSH_MASK) == flush_check_key) * c3;
-    //@ts-ignore
-    flushRankKey += ((c4 & FLUSH_MASK) == flush_check_key) * c4;
-    //@ts-ignore
-    flushRankKey += ((c5 & FLUSH_MASK) == flush_check_key) * c5;
-    //@ts-ignore
-    flushRankKey += ((c6 & FLUSH_MASK) == flush_check_key) * c6;
-    //@ts-ignore
-    flushRankKey += ((c7 & FLUSH_MASK) == flush_check_key) * c7;
-    //@ts-ignore
-    console.log(flushRankKey);
-    flushRankKey = flushRankKey >>> 9;
-    console.log(flushRankKey);
-    return FLUSH_RANK_SEVEN[flushRankKey];
+    let flushRankKey: number =
+      ((c1 & FLUSH_MASK) == flush_check_key) * c1 +
+      ((c2 & FLUSH_MASK) == flush_check_key) * c2 +
+      //@ts-ignore
+      ((c3 & FLUSH_MASK) == flush_check_key) * c3 +
+      ((c4 & FLUSH_MASK) == flush_check_key) * c4 +
+      //@ts-ignore
+      ((c5 & FLUSH_MASK) == flush_check_key) * c5 +
+      ((c6 & FLUSH_MASK) == flush_check_key) * c6 +
+      ((c7 & FLUSH_MASK) == flush_check_key) * c7;
+
+    handRank = FLUSH_RANK_SEVEN[flushRankKey >>> 9];
   } else {
-    console.log(keySum, keySum >>> 9);
-    return HASH_RANK_SEVEN[keySum >>> 9];
+    handRank = HASH_RANK_SEVEN[keySum >>> 9];
   }
+
+  return handRank;
 };
 
 /** @function handOfSevenEvalIndexed
  *
- * @param {Number} c1...c5 cards index from [0...51]
- * @returns {Number} hand ranking
+ * @param {Array:Number[]} array of 7 cards making up an hand
+ * @returns {Number} hand ranking ( the best one on all combinations of input card in group of 5)
  */
 export const handOfSevenEvalIndexed = (
   c1: number,
@@ -141,7 +130,4 @@ export const handOfSevenEvalIndexed = (
   );
 };
 
-/**
- *
- *
- */
+/**@TODO getHandInfo(rank:number) */

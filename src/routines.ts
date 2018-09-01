@@ -1,5 +1,5 @@
 import * as kombinatoricsJs from 'kombinatoricsjs';
-import { hashRanking, NumberMap } from './interfaces';
+import { hashRanking, NumberMap, handInfo } from './interfaces';
 import * as CONSTANTS from './constants';
 
 export const atLeast5Eq = (list: (number | string)[][]): (number | string)[][] => {
@@ -178,10 +178,28 @@ export const _rankOf5onX = (hand: number[], rankHash: NumberMap) => {
   return Math.max(...kombinatoricsJs.combinations(hand, 5).map(h => rankHash[getVectorSum(h)]));
 };
 
+export const handToCardsSymbols = (hand: number[]): string => {
+  return hand.map(c => CONSTANTS.rankToFaceSymbol[c % 13]).join('');
+};
+export const handRankToGroup = (rank: number): string => {
+  let groupsRanking = CONSTANTS.handsRankingDelimiter_5cards;
+  let i: number = 0;
+  let groupName: string = CONSTANTS.handRankingGroupNames[i];
+  while (rank > groupsRanking[i]) {
+    i++;
+    groupName = CONSTANTS.handRankingGroupNames[i];
+  }
+  return groupName;
+};
+
 export const fillRank5 = (h: number[], idx: number, rankingObject: hashRanking): hashRanking => {
   let hash = getVectorSum(h.map(card => rankingObject.baseRankValues[card]));
   rankingObject.HASHES[hash] = idx;
-  rankingObject.rankingInfos[idx] = hash;
+  rankingObject.rankingInfos[idx] = {
+    hand: h.slice(),
+    faces: handToCardsSymbols(h),
+    handGroup: handRankToGroup(idx)
+  };
   return rankingObject;
 };
 
@@ -192,8 +210,13 @@ export const fillRank5PlusFlushes = (
   offset: number = CONSTANTS.FLUSHES_BASE_START + CONSTANTS.HIGH_CARDS_5_AMOUNT
 ): hashRanking => {
   let hash = getVectorSum(h.map(card => rankingObject.baseRankValues[card]));
-  rankingObject.HASHES[hash] = idx + offset;
-  rankingObject.rankingInfos[idx + offset] = hash;
+  let r = idx + offset;
+  rankingObject.HASHES[hash] = r;
+  rankingObject.rankingInfos[r] = {
+    hand: h.slice(),
+    faces: handToCardsSymbols(h),
+    handGroup: handRankToGroup(r)
+  };
   return rankingObject;
 };
 
@@ -201,7 +224,11 @@ export const fillRankFlushes = (h: number[], rankingObject: hashRanking): hashRa
   let hash = getVectorSum(h.map(card => rankingObject.baseRankValues[card]));
   let rank = rankingObject.HASHES[hash] + CONSTANTS.FLUSHES_BASE_START;
   rankingObject.FLUSH_RANK_HASHES[hash] = rank;
-  rankingObject.rankingInfos[rank] = hash;
+  rankingObject.rankingInfos[rank] = {
+    hand: h.slice(),
+    faces: handToCardsSymbols(h),
+    handGroup: handRankToGroup(rank)
+  };
 
   return rankingObject;
 };

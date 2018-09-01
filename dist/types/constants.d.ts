@@ -11,6 +11,8 @@ export declare const flush5hHashCheck: Readonly<NumberMap>;
 export declare const flush7HashCheck: Readonly<NumberMap>;
 export declare const ranksHashOn7: number[];
 export declare const ranksHashOn5: number[];
+export declare const rankToFaceSymbol: string[];
+export declare const suitToFaceSymbol: string[];
 export declare const deckOfRanks_5: number[];
 export declare const deckOfRanks_7: number[];
 export declare const deckOfFlushes: number[];
@@ -27,6 +29,7 @@ export declare const STRAIGHT_FLUSH_BASE_START: number;
 export declare const FLUSH_MASK: number;
 export declare const STRAIGHT_FLUSH_OFFSET: number;
 export declare const handsRankingDelimiter_5cards: number[];
+export declare const handRankingGroupNames: string[];
 /**
  * fill with these:
  * https://en.wikipedia.org/wiki/Poker_probability

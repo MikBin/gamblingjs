@@ -1,84 +1,3 @@
-var flushHash = [1, 2, 4, 8, 16, 32, 64, 128, 255, 508, 1012, 2016, 4016]; // 13 one for each rank
-var suitsHash = [0, 57, 1, 8]; // 4 one for each suit
-/**check for !==undefined */
-var flush5hHashCheck = {
-    '0': 0,
-    '5': 1,
-    '40': 8,
-    '285': 57
-};
-var ranksHashOn7 = []; // 13 one for each rank
-ranksHashOn7[0] = 0;
-ranksHashOn7[1] = 1;
-ranksHashOn7[2] = 5;
-ranksHashOn7[3] = 22;
-ranksHashOn7[4] = 98;
-ranksHashOn7[5] = 453;
-ranksHashOn7[6] = 2031;
-ranksHashOn7[7] = 8698;
-ranksHashOn7[8] = 22854;
-ranksHashOn7[9] = 83661;
-ranksHashOn7[10] = 262349;
-ranksHashOn7[11] = 636345;
-ranksHashOn7[12] = 1479181;
-var ranksHashOn5 = []; // one for each rank
-ranksHashOn5[0] = 0; // 2
-ranksHashOn5[1] = 1; // 3
-ranksHashOn5[2] = 5; // 4
-ranksHashOn5[3] = 22; // 5
-ranksHashOn5[4] = 94; // 6
-ranksHashOn5[5] = 312; // 7
-ranksHashOn5[6] = 992; // 8
-ranksHashOn5[7] = 2422; // 9
-ranksHashOn5[8] = 5624; // 10
-ranksHashOn5[9] = 12522; // J
-ranksHashOn5[10] = 19998; // Q
-ranksHashOn5[11] = 43258; // K
-ranksHashOn5[12] = 79415; // A
-/*
-arrays initialization
-*/
-var deckOfRanks_5 = new Array(52);
-var deckOfRanks_7 = new Array(52);
-var deckOfFlushes = new Array(52);
-var deckOfSuits = new Array(52);
-var fullCardsDeckHash_5 = new Array(52);
-var fullCardsDeckHash_7 = new Array(52);
-for (var i = 0; i < 52; i++) {
-    deckOfRanks_5[i] = ranksHashOn5[i % 13];
-    deckOfRanks_7[i] = ranksHashOn7[i % 13];
-    deckOfFlushes[i] = flushHash[i % 13];
-    deckOfSuits[i] = suitsHash[~~(i / 13)];
-    var card5 = (fullCardsDeckHash_5[i] = (deckOfRanks_5[i] << 9) + deckOfSuits[i]);
-    var card7 = (fullCardsDeckHash_7[i] = (deckOfRanks_7[i] << 9) + deckOfSuits[i]);
-}
-var STRAIGHTS = [
-    [12, 0, 1, 2, 3],
-    [0, 1, 2, 3, 4],
-    [1, 2, 3, 4, 5],
-    [2, 3, 4, 5, 6],
-    [3, 4, 5, 6, 7],
-    [4, 5, 6, 7, 8],
-    [5, 6, 7, 8, 9],
-    [6, 7, 8, 9, 10],
-    [7, 8, 9, 10, 11],
-    [8, 9, 10, 11, 12]
-];
-var rankCards = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12];
-var HIGH_CARDS_5_AMOUNT = 1277;
-var FLUSHES_BASE_START = 5864;
-var STRAIGHT_FLUSH_BASE_START = 7453;
-var FLUSH_MASK = 511;
-var STRAIGHT_FLUSH_OFFSET = 1599;
-/**
- * @TODO make function to work with non full decks. ex. deck of 40 cards
- *
- * */
-/**
- * @TODO prepare similar stuff for dice suited poker
- *
- * */
-
 const pick = (n, got, pos, from, limit, cntLimit, callBack) => {
     let cnt = 0, limitCount = cntLimit;
     if (got.length == n) {
@@ -149,6 +68,110 @@ const crossProduct = (list, k) => {
     return crossProdList;
 };
 
+var flushHash = [1, 2, 4, 8, 16, 32, 64, 128, 255, 508, 1012, 2016, 4016]; // 13 one for each rank
+var suitsHash = [0, 57, 1, 8]; // 4 one for each suit
+/**check for !==undefined */
+var flush5hHashCheck = {
+    '0': 0,
+    '5': 1,
+    '40': 8,
+    '285': 57
+};
+var ranksHashOn7 = []; // 13 one for each rank
+ranksHashOn7[0] = 0;
+ranksHashOn7[1] = 1;
+ranksHashOn7[2] = 5;
+ranksHashOn7[3] = 22;
+ranksHashOn7[4] = 98;
+ranksHashOn7[5] = 453;
+ranksHashOn7[6] = 2031;
+ranksHashOn7[7] = 8698;
+ranksHashOn7[8] = 22854;
+ranksHashOn7[9] = 83661;
+ranksHashOn7[10] = 262349;
+ranksHashOn7[11] = 636345;
+ranksHashOn7[12] = 1479181;
+var ranksHashOn5 = []; // one for each rank
+ranksHashOn5[0] = 0; // 2
+ranksHashOn5[1] = 1; // 3
+ranksHashOn5[2] = 5; // 4
+ranksHashOn5[3] = 22; // 5
+ranksHashOn5[4] = 94; // 6
+ranksHashOn5[5] = 312; // 7
+ranksHashOn5[6] = 992; // 8
+ranksHashOn5[7] = 2422; // 9
+ranksHashOn5[8] = 5624; // 10
+ranksHashOn5[9] = 12522; // J
+ranksHashOn5[10] = 19998; // Q
+ranksHashOn5[11] = 43258; // K
+ranksHashOn5[12] = 79415; // A
+var rankToFaceSymbol = ["2", "3", "4", "5", "6", "7", "8", "9", "T", "J", "Q", "K", "A"];
+/*
+arrays initialization
+*/
+var deckOfRanks_5 = new Array(52);
+var deckOfRanks_7 = new Array(52);
+var deckOfFlushes = new Array(52);
+var deckOfSuits = new Array(52);
+var fullCardsDeckHash_5 = new Array(52);
+var fullCardsDeckHash_7 = new Array(52);
+for (var i = 0; i < 52; i++) {
+    deckOfRanks_5[i] = ranksHashOn5[i % 13];
+    deckOfRanks_7[i] = ranksHashOn7[i % 13];
+    deckOfFlushes[i] = flushHash[i % 13];
+    deckOfSuits[i] = suitsHash[~~(i / 13)];
+    var card5 = (fullCardsDeckHash_5[i] = (deckOfRanks_5[i] << 9) + deckOfSuits[i]);
+    var card7 = (fullCardsDeckHash_7[i] = (deckOfRanks_7[i] << 9) + deckOfSuits[i]);
+}
+var STRAIGHTS = [
+    [12, 0, 1, 2, 3],
+    [0, 1, 2, 3, 4],
+    [1, 2, 3, 4, 5],
+    [2, 3, 4, 5, 6],
+    [3, 4, 5, 6, 7],
+    [4, 5, 6, 7, 8],
+    [5, 6, 7, 8, 9],
+    [6, 7, 8, 9, 10],
+    [7, 8, 9, 10, 11],
+    [8, 9, 10, 11, 12]
+];
+var rankCards = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12];
+var HIGH_CARDS_5_AMOUNT = 1277;
+var FLUSHES_BASE_START = 5863;
+var STRAIGHT_FLUSH_BASE_START = 7452;
+var FLUSH_MASK = 511;
+var STRAIGHT_FLUSH_OFFSET = 1599;
+var handsRankingDelimiter_5cards = [
+    1276,
+    4136,
+    4994,
+    5852,
+    5862,
+    7139,
+    7295,
+    7451,
+    7461
+];
+var handRankingGroupNames = [
+    "high card",
+    "one pair",
+    "two pair",
+    "three of a kind",
+    "straight",
+    "flush",
+    "full house",
+    "four of a kind",
+    "straight flush"
+];
+/**
+ * @TODO make function to work with non full decks. ex. deck of 40 cards
+ *
+ * */
+/**
+ * @TODO prepare similar stuff for dice suited poker
+ *
+ * */
+
 var getVectorSum = function (v) {
     var l = v.length;
     var s = 0;
@@ -159,7 +182,11 @@ var getVectorSum = function (v) {
 };
 var checkStraight5on7 = function (arr) {
     var c = 0;
-    if (arr[6] === 12 && arr[0] === 0 && arr.includes(1) && arr.includes(2) && arr.includes(3)) {
+    if (arr[arr.length - 1] === 12 &&
+        arr[0] === 0 &&
+        arr.includes(1) &&
+        arr.includes(2) &&
+        arr.includes(3)) {
         return true;
     }
     for (var i = 1; i < arr.length; ++i) {
@@ -264,24 +291,38 @@ var removeStraights = function (list) {
 var _rankOf5onX = function (hand, rankHash) {
     return Math.max.apply(Math, combinations(hand, 5).map(function (h) { return rankHash[getVectorSum(h)]; }));
 };
+var handToCardsSymbols = function (hand) {
+    return hand.map(function (c) { return rankToFaceSymbol[c % 13]; }).join("");
+};
+var handRankToGroup = function (rank) {
+    var groupsRanking = handsRankingDelimiter_5cards;
+    var i = 0;
+    var groupName = handRankingGroupNames[i];
+    while (rank > groupsRanking[i]) {
+        i++;
+        groupName = handRankingGroupNames[i];
+    }
+    return groupName;
+};
 var fillRank5 = function (h, idx, rankingObject) {
     var hash = getVectorSum(h.map(function (card) { return rankingObject.baseRankValues[card]; }));
     rankingObject.HASHES[hash] = idx;
-    rankingObject.rankingInfos[idx] = hash;
+    rankingObject.rankingInfos[idx] = { hand: h.slice(), faces: handToCardsSymbols(h), handGroup: handRankToGroup(idx) };
     return rankingObject;
 };
 var fillRank5PlusFlushes = function (h, idx, rankingObject, offset) {
     if (offset === void 0) { offset = FLUSHES_BASE_START + HIGH_CARDS_5_AMOUNT; }
     var hash = getVectorSum(h.map(function (card) { return rankingObject.baseRankValues[card]; }));
-    rankingObject.HASHES[hash] = idx + offset;
-    rankingObject.rankingInfos[idx + offset] = hash;
+    var r = idx + offset;
+    rankingObject.HASHES[hash] = r;
+    rankingObject.rankingInfos[r] = { hand: h.slice(), faces: handToCardsSymbols(h), handGroup: handRankToGroup(r) };
     return rankingObject;
 };
 var fillRankFlushes = function (h, rankingObject) {
     var hash = getVectorSum(h.map(function (card) { return rankingObject.baseRankValues[card]; }));
     var rank = rankingObject.HASHES[hash] + FLUSHES_BASE_START;
     rankingObject.FLUSH_RANK_HASHES[hash] = rank;
-    rankingObject.rankingInfos[rank] = hash;
+    rankingObject.rankingInfos[rank] = { hand: h.slice(), faces: handToCardsSymbols(h), handGroup: handRankToGroup(rank) };
     return rankingObject;
 };
 
@@ -333,7 +374,7 @@ var createRankOfFiveHashes = function () {
         var hash = getVectorSum(h.map(function (card) { return hashRankingOfFive.baseRankValues[card]; }));
         var rank = idx + STRAIGHT_FLUSH_BASE_START;
         hashRankingOfFive.FLUSH_RANK_HASHES[hash] = rank;
-        hashRankingOfFive.rankingInfos[rank] = hash;
+        hashRankingOfFive.rankingInfos[rank] = { hand: h.slice(), faces: handToCardsSymbols(h), handGroup: handRankToGroup(rank) };
     });
     return hashRankingOfFive;
 };
@@ -369,9 +410,7 @@ var createRankOf5On7Hashes = function (hashRankOfFive) {
         /**@TODO simply draw rank from hashRankOfFive.FLUSH_RANK_HASHES*/
         var rank = _rankOf5onX(h5, hashRankOfFive.HASHES);
         if (checkStraight5on7(h)) {
-            // console.log("straight rank: ", rank);
             rank += STRAIGHT_FLUSH_OFFSET;
-            // console.log("modified: ", rank);
         }
         else {
             rank += FLUSHES_BASE_START;
@@ -398,68 +437,91 @@ var createRankOf5On7Hashes = function (hashRankOfFive) {
 };
 
 var HASHES_OF_FIVE = createRankOfFiveHashes();
+var FLUSH_CHECK_FIVE = HASHES_OF_FIVE.FLUSH_CHECK_KEYS;
+var HASH_RANK_FIVE = HASHES_OF_FIVE.HASHES;
+var FLUSH_RANK_FIVE = HASHES_OF_FIVE.FLUSH_RANK_HASHES;
 var HASHES_OF_FIVE_ON_SEVEN = createRankOf5On7Hashes(HASHES_OF_FIVE);
 var FLUSH_CHECK_SEVEN = HASHES_OF_FIVE_ON_SEVEN.FLUSH_CHECK_KEYS;
 var HASH_RANK_SEVEN = HASHES_OF_FIVE_ON_SEVEN.HASHES;
 var FLUSH_RANK_SEVEN = HASHES_OF_FIVE_ON_SEVEN.FLUSH_RANK_HASHES;
+/** @function handOfFiveEval
+ *
+ * @param {Number} c1...c5 cards hash from CONSTANTS.fullCardsDeckHash_5
+ * @returns {Number} hand ranking
+ */
+var handOfFiveEval = function (c1, c2, c3, c4, c5) {
+    var keySum = c1 + c2 + c3 + c4 + c5;
+    var rankKey = keySum >>> 9;
+    var flush_check_key = FLUSH_CHECK_FIVE[keySum & FLUSH_MASK];
+    if (flush_check_key >= 0) {
+        return FLUSH_RANK_FIVE[rankKey];
+    }
+    return HASH_RANK_FIVE[rankKey];
+};
+/** @function handOfFiveEvalIndexed
+ *
+ * @param {Number} c1...c5 cards index from [0...51]
+ * @returns {Number} hand ranking
+ */
+var handOfFiveEvalIndexed = function (c1, c2, c3, c4, c5) {
+    return handOfFiveEval(fullCardsDeckHash_5[c1], fullCardsDeckHash_5[c2], fullCardsDeckHash_5[c3], fullCardsDeckHash_5[c4], fullCardsDeckHash_5[c5]);
+};
+/** @function bfBestOfFiveOnX
+ *
+ * @param {Array:Number[]} array of 6 or more cards making up an hand
+ * @returns {Number} hand ranking ( the best one on all combinations of input card in group of 5)
+ */
+var bfBestOfFiveOnX = function (hand) {
+    //@ts-ignore
+    return Math.max.apply(Math, combinations(hand, 5).map(function (h) { return handOfFiveEval.apply(void 0, h); }));
+};
 /** @function handOfSevenEval
  *
  * @param {Number} c1...c7 cards hash from CONSTANTS.fullCardsDeckHash_7
  * @returns {Number} hand ranking
-*/
+ */
 var handOfSevenEval = function (c1, c2, c3, c4, c5, c6, c7) {
     var keySum = c1 + c2 + c3 + c4 + c5 + c6 + c7;
+    var handRank = 0;
     var flush_check_key = FLUSH_CHECK_SEVEN[keySum & FLUSH_MASK];
     if (flush_check_key >= 0) {
         /**no full house or quads possible ---> can return flush_rank */
-        /*@ts-ignore
-        let flushRankKey: number = ((c1 & FLUSH_MASK) == flush_check_key) * c1 + ((c2 & FLUSH_MASK) == flush_check_key) * c2 +
+        //@ts-ignore
+        var flushRankKey = ((c1 & FLUSH_MASK) == flush_check_key) * c1 + ((c2 & FLUSH_MASK) == flush_check_key) * c2 +
             //@ts-ignore
             ((c3 & FLUSH_MASK) == flush_check_key) * c3 + ((c4 & FLUSH_MASK) == flush_check_key) * c4 +
             //@ts-ignore
             ((c5 & FLUSH_MASK) == flush_check_key) * c5 + ((c6 & FLUSH_MASK) == flush_check_key) * c6 + ((c7 & FLUSH_MASK) == flush_check_key) * c7;
-*/
-        //@ts-ignore
-        var flushRankKey = ((c1 & FLUSH_MASK) == flush_check_key) * c1;
-        //@ts-ignore
-        flushRankKey += ((c2 & FLUSH_MASK) == flush_check_key) * c2;
-        //@ts-ignore
-        flushRankKey += ((c3 & FLUSH_MASK) == flush_check_key) * c3;
-        //@ts-ignore
-        flushRankKey += ((c4 & FLUSH_MASK) == flush_check_key) * c4;
-        //@ts-ignore
-        flushRankKey += ((c5 & FLUSH_MASK) == flush_check_key) * c5;
-        //@ts-ignore
-        flushRankKey += ((c6 & FLUSH_MASK) == flush_check_key) * c6;
-        //@ts-ignore
-        flushRankKey += ((c7 & FLUSH_MASK) == flush_check_key) * c7;
-        //@ts-ignore
-        console.log(flushRankKey);
-        flushRankKey = flushRankKey >>> 9;
-        console.log(flushRankKey);
-        return FLUSH_RANK_SEVEN[flushRankKey];
+        handRank = FLUSH_RANK_SEVEN[flushRankKey >>> 9];
     }
     else {
-        console.log(keySum, keySum >>> 9);
-        return HASH_RANK_SEVEN[keySum >>> 9];
+        handRank = HASH_RANK_SEVEN[keySum >>> 9];
     }
+    return handRank;
 };
 /** @function handOfSevenEvalIndexed
  *
- * @param {Number} c1...c5 cards index from [0...51]
- * @returns {Number} hand ranking
-*/
+ * @param {Array:Number[]} array of 7 cards making up an hand
+ * @returns {Number} hand ranking ( the best one on all combinations of input card in group of 5)
+ */
 var handOfSevenEvalIndexed = function (c1, c2, c3, c4, c5, c6, c7) {
     return handOfSevenEval(fullCardsDeckHash_7[c1], fullCardsDeckHash_7[c2], fullCardsDeckHash_7[c3], fullCardsDeckHash_7[c4], fullCardsDeckHash_7[c5], fullCardsDeckHash_7[c6], fullCardsDeckHash_7[c7]);
 };
-/**
- *
- *
- */
+/**@TODO getHandInfo(rank:number) */
 
-var HASHES_OF_FIVE$1 = createRankOfFiveHashes();
-var HASHES_OF_FIVE_ON_SEVEN$1 = createRankOf5On7Hashes(HASHES_OF_FIVE$1);
+var PKEval = /*#__PURE__*/Object.freeze({
+    HASHES_OF_FIVE: HASHES_OF_FIVE,
+    HASHES_OF_FIVE_ON_SEVEN: HASHES_OF_FIVE_ON_SEVEN,
+    handOfFiveEval: handOfFiveEval,
+    handOfFiveEvalIndexed: handOfFiveEvalIndexed,
+    bfBestOfFiveOnX: bfBestOfFiveOnX,
+    handOfSevenEval: handOfSevenEval,
+    handOfSevenEvalIndexed: handOfSevenEvalIndexed
+});
+
+console.log(PKEval);
+//const HASHES_OF_FIVE = createRankOfFiveHashes();
+//const HASHES_OF_FIVE_ON_SEVEN = createRankOf5On7Hashes(HASHES_OF_FIVE);
+//console.log("MAIN:", HASHES_OF_FIVE, HASHES_OF_FIVE_ON_SEVEN, handOfSevenEvalIndexed(12, 0, 1, 2, 3, 34, 23));
 /**@TODO yahtzee ,poker dice,yacht,generala ,cheerio*/
-
-export default handOfSevenEvalIndexed;
 //# sourceMappingURL=gamblingjs.es5.js.map

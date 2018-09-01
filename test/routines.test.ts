@@ -163,8 +163,8 @@ describe('ranking calculators and hashes managers', () => {
   });
 
   it('fills flush ranking', () => {
-    tempObj.FLUSH_RANK_HASHES[2] = 5876;
-    tempObj.rankingInfos[5876] = 2;
+    tempObj.FLUSH_RANK_HASHES[2] = 5875;
+    tempObj.rankingInfos[5875] = 2;
     expect(fillRankFlushes([1, 1, 0], fakeRankingObj).FLUSH_RANK_HASHES).toEqual(
       tempObj.FLUSH_RANK_HASHES
     );

@@ -5,7 +5,9 @@ import {
   fillRank5,
   fillRank5PlusFlushes,
   fillRankFlushes,
-  checkStraight5on7
+  checkStraight5on7,
+  handToCardsSymbols,
+  handRankToGroup
 } from './routines';
 import * as ROUTINES from './routines';
 import * as kombinatoricsJs from 'kombinatoricsjs';
@@ -66,7 +68,11 @@ export const createRankOfFiveHashes = (): Readonly<hashRanking> => {
     let hash = getVectorSum(h.map(card => hashRankingOfFive.baseRankValues[card]));
     let rank = idx + CONSTANTS.STRAIGHT_FLUSH_BASE_START;
     hashRankingOfFive.FLUSH_RANK_HASHES[hash] = rank;
-    hashRankingOfFive.rankingInfos[rank] = hash;
+    hashRankingOfFive.rankingInfos[rank] = {
+      hand: h.slice(),
+      faces: handToCardsSymbols(h),
+      handGroup: handRankToGroup(rank)
+    };
   });
 
   return hashRankingOfFive;
@@ -118,7 +124,6 @@ export const createRankOf5On7Hashes = (hashRankOfFive: hashRanking) => {
       rank += CONSTANTS.FLUSHES_BASE_START;
     }
     hashRankingOfFiveOnSeven.FLUSH_RANK_HASHES[hash7] = rank;
-    if (rank > 7642) console.log('rank too big', rank, h);
   });
 
   let fiveFlushHashes = [[0, 0, 0, 0, 0], [1, 1, 1, 1, 1], [8, 8, 8, 8, 8], [57, 57, 57, 57, 57]];

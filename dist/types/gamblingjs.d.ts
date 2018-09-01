@@ -1,3 +1,2 @@
-import { handOfSevenEvalIndexed } from './pokerEvaluators';
-export default handOfSevenEvalIndexed;
+export {};
 /**@TODO yahtzee ,poker dice,yacht,generala ,cheerio*/

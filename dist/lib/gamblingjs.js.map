@@ -1,1 +1,1 @@
-{"version":3,"file":"gamblingjs.js","sourceRoot":"","sources":["../../src/gamblingjs.ts"],"names":[],"mappings":";;AACA,iDAAgF;AAEhF,qDAA0D;AAE1D,IAAM,cAAc,GAAG,sCAAsB,EAAE,CAAA;AAE/C,IAAM,uBAAuB,GAAG,sCAAsB,CAAC,cAAc,CAAC,CAAA;AAEtE,gHAAgH;AAIhH,kBAAe,wCAAsB,CAAC;AAEtC,sDAAsD"}
+{"version":3,"file":"gamblingjs.js","sourceRoot":"","sources":["../../src/gamblingjs.ts"],"names":[],"mappings":";;AAIA,0CAA2C;AAE3C,OAAO,CAAC,GAAG,CAAC,MAAM,CAAC,CAAC;AAEpB,kDAAkD;AAElD,yEAAyE;AAEzE,gHAAgH;AAGhH,sDAAsD"}

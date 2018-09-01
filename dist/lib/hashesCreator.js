@@ -53,7 +53,7 @@ exports.createRankOfFiveHashes = function () {
         var hash = routines_1.getVectorSum(h.map(function (card) { return hashRankingOfFive.baseRankValues[card]; }));
         var rank = idx + CONSTANTS.STRAIGHT_FLUSH_BASE_START;
         hashRankingOfFive.FLUSH_RANK_HASHES[hash] = rank;
-        hashRankingOfFive.rankingInfos[rank] = hash;
+        hashRankingOfFive.rankingInfos[rank] = { hand: h.slice(), faces: routines_1.handToCardsSymbols(h), handGroup: routines_1.handRankToGroup(rank) };
     });
     return hashRankingOfFive;
 };
@@ -91,9 +91,7 @@ exports.createRankOf5On7Hashes = function (hashRankOfFive) {
         /**@TODO simply draw rank from hashRankOfFive.FLUSH_RANK_HASHES*/
         var rank = routines_1._rankOf5onX(h5, hashRankOfFive.HASHES);
         if (routines_1.checkStraight5on7(h)) {
-            // console.log("straight rank: ", rank);
             rank += CONSTANTS.STRAIGHT_FLUSH_OFFSET;
-            // console.log("modified: ", rank);
         }
         else {
             rank += CONSTANTS.FLUSHES_BASE_START;

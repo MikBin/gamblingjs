@@ -92,6 +92,22 @@ ranksHashOn5[10] = 19998; // Q
 ranksHashOn5[11] = 43258; // K
 ranksHashOn5[12] = 79415; // A
 
+export const rankToFaceSymbol: string[] = [
+  '2',
+  '3',
+  '4',
+  '5',
+  '6',
+  '7',
+  '8',
+  '9',
+  'T',
+  'J',
+  'Q',
+  'K',
+  'A'
+];
+export const suitToFaceSymbol: string[] = ['s', 'd', 'h', 'c'];
 /* 
 arrays initialization
 */
@@ -133,20 +149,31 @@ export const STRAIGHTS: number[][] = [
 
 export const rankCards: number[] = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12];
 export const HIGH_CARDS_5_AMOUNT: number = 1277;
-export const FLUSHES_BASE_START: number = 5864;
-export const STRAIGHT_FLUSH_BASE_START: number = 7453;
+export const FLUSHES_BASE_START: number = 5863;
+export const STRAIGHT_FLUSH_BASE_START: number = 7452;
 export const FLUSH_MASK: number = 511;
-export const STRAIGHT_FLUSH_OFFSET: number = 1600;
+export const STRAIGHT_FLUSH_OFFSET: number = 1599;
 export const handsRankingDelimiter_5cards: number[] = [
-  1277,
-  4137,
-  4995,
-  5853,
-  5863,
-  7140,
-  7296,
-  7452,
-  7462
+  1276,
+  4136,
+  4994,
+  5852,
+  5862,
+  7139,
+  7295,
+  7451,
+  7461
+];
+export const handRankingGroupNames: string[] = [
+  'high card',
+  'one pair',
+  'two pair',
+  'three of a kind',
+  'straight',
+  'flush',
+  'full house',
+  'four of a kind',
+  'straight flush'
 ];
 /**
  * fill with these:
