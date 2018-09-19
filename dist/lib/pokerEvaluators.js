@@ -54,11 +54,21 @@ exports.handOfSevenEval = function (c1, c2, c3, c4, c5, c6, c7) {
     if (flush_check_key >= 0) {
         /**no full house or quads possible ---> can return flush_rank */
         //@ts-ignore
-        var flushRankKey = ((c1 & constants_1.FLUSH_MASK) == flush_check_key) * c1 + ((c2 & constants_1.FLUSH_MASK) == flush_check_key) * c2 +
+        var flushRankKey = 
+        //@ts-ignore
+        ((c1 & constants_1.FLUSH_MASK) == flush_check_key) * c1 +
             //@ts-ignore
-            ((c3 & constants_1.FLUSH_MASK) == flush_check_key) * c3 + ((c4 & constants_1.FLUSH_MASK) == flush_check_key) * c4 +
+            ((c2 & constants_1.FLUSH_MASK) == flush_check_key) * c2 +
             //@ts-ignore
-            ((c5 & constants_1.FLUSH_MASK) == flush_check_key) * c5 + ((c6 & constants_1.FLUSH_MASK) == flush_check_key) * c6 + ((c7 & constants_1.FLUSH_MASK) == flush_check_key) * c7;
+            ((c3 & constants_1.FLUSH_MASK) == flush_check_key) * c3 +
+            //@ts-ignore
+            ((c4 & constants_1.FLUSH_MASK) == flush_check_key) * c4 +
+            //@ts-ignore
+            ((c5 & constants_1.FLUSH_MASK) == flush_check_key) * c5 +
+            //@ts-ignore
+            ((c6 & constants_1.FLUSH_MASK) == flush_check_key) * c6 +
+            //@ts-ignore
+            ((c7 & constants_1.FLUSH_MASK) == flush_check_key) * c7;
         handRank = FLUSH_RANK_SEVEN[flushRankKey >>> 9];
     }
     else {
@@ -74,5 +84,50 @@ exports.handOfSevenEval = function (c1, c2, c3, c4, c5, c6, c7) {
 exports.handOfSevenEvalIndexed = function (c1, c2, c3, c4, c5, c6, c7) {
     return exports.handOfSevenEval(constants_1.fullCardsDeckHash_7[c1], constants_1.fullCardsDeckHash_7[c2], constants_1.fullCardsDeckHash_7[c3], constants_1.fullCardsDeckHash_7[c4], constants_1.fullCardsDeckHash_7[c5], constants_1.fullCardsDeckHash_7[c6], constants_1.fullCardsDeckHash_7[c7]);
 };
-/**@TODO getHandInfo(rank:number) */ 
+/** @function handOfSevenEval
+ *
+ * @param {Number} c1...c7 cards hash from CONSTANTS.fullCardsDeckHash_7
+ * @returns {Number} hand ranking
+ */
+exports.handOfSevenEval_Verbose = function (c1, c2, c3, c4, c5, c6, c7) {
+    var keySum = c1 + c2 + c3 + c4 + c5 + c6 + c7;
+    var handRank = 0;
+    var flush_check_key = FLUSH_CHECK_SEVEN[keySum & constants_1.FLUSH_MASK];
+    var flushRankKey = 0;
+    if (flush_check_key >= 0) {
+        /**no full house or quads possible ---> can return flush_rank */
+        var flushingCards = [c1, c2, c3, c4, c5, c6, c7].filter(function (c, i) { return (c1 & constants_1.FLUSH_MASK) == flush_check_key; });
+        //@ts-ignore
+        flushingCards.forEach(function (c) { return flushRankKey += c; });
+        handRank = FLUSH_RANK_SEVEN[flushRankKey >>> 9];
+    }
+    else {
+        handRank = HASH_RANK_SEVEN[keySum >>> 9];
+        flushRankKey = -1;
+    }
+    return {
+        handRank: handRank,
+        hand: exports.HASHES_OF_FIVE.rankingInfos[handRank].hand,
+        faces: exports.HASHES_OF_FIVE.rankingInfos[handRank].faces,
+        handGroup: exports.HASHES_OF_FIVE.rankingInfos[handRank].handGroup,
+        winningCards: [],
+        flushSuit: flushRankKey
+    };
+};
+/** @function handOfSevenEvalIndexed_Verbose
+ *
+ * @param {Array:Number[]} array of 7 cards making up an hand
+ * @returns {Number} hand ranking ( the best one on all combinations of input card in group of 5) + ranking info including flush suit and winning cards
+ */
+exports.handOfSevenEvalIndexed_Verbose = function (c1, c2, c3, c4, c5, c6, c7) {
+    return exports.handOfSevenEval_Verbose(constants_1.fullCardsDeckHash_7[c1], constants_1.fullCardsDeckHash_7[c2], constants_1.fullCardsDeckHash_7[c3], constants_1.fullCardsDeckHash_7[c4], constants_1.fullCardsDeckHash_7[c5], constants_1.fullCardsDeckHash_7[c6], constants_1.fullCardsDeckHash_7[c7]);
+};
+/** @function getHandInfo
+ *
+ * @param {Number} hand rank
+ * @returns {Number} object containing hand info
+ */
+exports.getHandInfo = function (rank) {
+    return exports.HASHES_OF_FIVE.rankingInfos[rank];
+};
 //# sourceMappingURL=pokerEvaluators.js.map

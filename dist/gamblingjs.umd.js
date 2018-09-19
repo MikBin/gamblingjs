@@ -1,8 +1,8 @@
 (function (global, factory) {
-    typeof exports === 'object' && typeof module !== 'undefined' ? factory() :
-    typeof define === 'function' && define.amd ? define(factory) :
-    (factory());
-}(this, (function () { 'use strict';
+    typeof exports === 'object' && typeof module !== 'undefined' ? factory(exports) :
+    typeof define === 'function' && define.amd ? define(['exports'], factory) :
+    (factory((global.gamblingjs = {})));
+}(this, (function (exports) { 'use strict';
 
     const pick = (n, got, pos, from, limit, cntLimit, callBack) => {
         let cnt = 0, limitCount = cntLimit;
@@ -111,7 +111,21 @@
     ranksHashOn5[10] = 19998; // Q
     ranksHashOn5[11] = 43258; // K
     ranksHashOn5[12] = 79415; // A
-    var rankToFaceSymbol = ["2", "3", "4", "5", "6", "7", "8", "9", "T", "J", "Q", "K", "A"];
+    var rankToFaceSymbol = [
+        '2',
+        '3',
+        '4',
+        '5',
+        '6',
+        '7',
+        '8',
+        '9',
+        'T',
+        'J',
+        'Q',
+        'K',
+        'A'
+    ];
     /*
     arrays initialization
     */
@@ -159,15 +173,15 @@
         7461
     ];
     var handRankingGroupNames = [
-        "high card",
-        "one pair",
-        "two pair",
-        "three of a kind",
-        "straight",
-        "flush",
-        "full house",
-        "four of a kind",
-        "straight flush"
+        'high card',
+        'one pair',
+        'two pair',
+        'three of a kind',
+        'straight',
+        'flush',
+        'full house',
+        'four of a kind',
+        'straight flush'
     ];
     /**
      * @TODO make function to work with non full decks. ex. deck of 40 cards
@@ -298,7 +312,7 @@
         return Math.max.apply(Math, combinations(hand, 5).map(function (h) { return rankHash[getVectorSum(h)]; }));
     };
     var handToCardsSymbols = function (hand) {
-        return hand.map(function (c) { return rankToFaceSymbol[c % 13]; }).join("");
+        return hand.map(function (c) { return rankToFaceSymbol[c % 13]; }).join('');
     };
     var handRankToGroup = function (rank) {
         var groupsRanking = handsRankingDelimiter_5cards;
@@ -313,7 +327,11 @@
     var fillRank5 = function (h, idx, rankingObject) {
         var hash = getVectorSum(h.map(function (card) { return rankingObject.baseRankValues[card]; }));
         rankingObject.HASHES[hash] = idx;
-        rankingObject.rankingInfos[idx] = { hand: h.slice(), faces: handToCardsSymbols(h), handGroup: handRankToGroup(idx) };
+        rankingObject.rankingInfos[idx] = {
+            hand: h.slice(),
+            faces: handToCardsSymbols(h),
+            handGroup: handRankToGroup(idx)
+        };
         return rankingObject;
     };
     var fillRank5PlusFlushes = function (h, idx, rankingObject, offset) {
@@ -321,14 +339,22 @@
         var hash = getVectorSum(h.map(function (card) { return rankingObject.baseRankValues[card]; }));
         var r = idx + offset;
         rankingObject.HASHES[hash] = r;
-        rankingObject.rankingInfos[r] = { hand: h.slice(), faces: handToCardsSymbols(h), handGroup: handRankToGroup(r) };
+        rankingObject.rankingInfos[r] = {
+            hand: h.slice(),
+            faces: handToCardsSymbols(h),
+            handGroup: handRankToGroup(r)
+        };
         return rankingObject;
     };
     var fillRankFlushes = function (h, rankingObject) {
         var hash = getVectorSum(h.map(function (card) { return rankingObject.baseRankValues[card]; }));
         var rank = rankingObject.HASHES[hash] + FLUSHES_BASE_START;
         rankingObject.FLUSH_RANK_HASHES[hash] = rank;
-        rankingObject.rankingInfos[rank] = { hand: h.slice(), faces: handToCardsSymbols(h), handGroup: handRankToGroup(rank) };
+        rankingObject.rankingInfos[rank] = {
+            hand: h.slice(),
+            faces: handToCardsSymbols(h),
+            handGroup: handRankToGroup(rank)
+        };
         return rankingObject;
     };
 
@@ -380,7 +406,11 @@
             var hash = getVectorSum(h.map(function (card) { return hashRankingOfFive.baseRankValues[card]; }));
             var rank = idx + STRAIGHT_FLUSH_BASE_START;
             hashRankingOfFive.FLUSH_RANK_HASHES[hash] = rank;
-            hashRankingOfFive.rankingInfos[rank] = { hand: h.slice(), faces: handToCardsSymbols(h), handGroup: handRankToGroup(rank) };
+            hashRankingOfFive.rankingInfos[rank] = {
+                hand: h.slice(),
+                faces: handToCardsSymbols(h),
+                handGroup: handRankToGroup(rank)
+            };
         });
         return hashRankingOfFive;
     };
@@ -493,11 +523,21 @@
         if (flush_check_key >= 0) {
             /**no full house or quads possible ---> can return flush_rank */
             //@ts-ignore
-            var flushRankKey = ((c1 & FLUSH_MASK) == flush_check_key) * c1 + ((c2 & FLUSH_MASK) == flush_check_key) * c2 +
+            var flushRankKey = 
+            //@ts-ignore
+            ((c1 & FLUSH_MASK) == flush_check_key) * c1 +
                 //@ts-ignore
-                ((c3 & FLUSH_MASK) == flush_check_key) * c3 + ((c4 & FLUSH_MASK) == flush_check_key) * c4 +
+                ((c2 & FLUSH_MASK) == flush_check_key) * c2 +
                 //@ts-ignore
-                ((c5 & FLUSH_MASK) == flush_check_key) * c5 + ((c6 & FLUSH_MASK) == flush_check_key) * c6 + ((c7 & FLUSH_MASK) == flush_check_key) * c7;
+                ((c3 & FLUSH_MASK) == flush_check_key) * c3 +
+                //@ts-ignore
+                ((c4 & FLUSH_MASK) == flush_check_key) * c4 +
+                //@ts-ignore
+                ((c5 & FLUSH_MASK) == flush_check_key) * c5 +
+                //@ts-ignore
+                ((c6 & FLUSH_MASK) == flush_check_key) * c6 +
+                //@ts-ignore
+                ((c7 & FLUSH_MASK) == flush_check_key) * c7;
             handRank = FLUSH_RANK_SEVEN[flushRankKey >>> 9];
         }
         else {
@@ -513,7 +553,52 @@
     var handOfSevenEvalIndexed = function (c1, c2, c3, c4, c5, c6, c7) {
         return handOfSevenEval(fullCardsDeckHash_7[c1], fullCardsDeckHash_7[c2], fullCardsDeckHash_7[c3], fullCardsDeckHash_7[c4], fullCardsDeckHash_7[c5], fullCardsDeckHash_7[c6], fullCardsDeckHash_7[c7]);
     };
-    /**@TODO getHandInfo(rank:number) */
+    /** @function handOfSevenEval
+     *
+     * @param {Number} c1...c7 cards hash from CONSTANTS.fullCardsDeckHash_7
+     * @returns {Number} hand ranking
+     */
+    var handOfSevenEval_Verbose = function (c1, c2, c3, c4, c5, c6, c7) {
+        var keySum = c1 + c2 + c3 + c4 + c5 + c6 + c7;
+        var handRank = 0;
+        var flush_check_key = FLUSH_CHECK_SEVEN[keySum & FLUSH_MASK];
+        var flushRankKey = 0;
+        if (flush_check_key >= 0) {
+            /**no full house or quads possible ---> can return flush_rank */
+            var flushingCards = [c1, c2, c3, c4, c5, c6, c7].filter(function (c, i) { return (c1 & FLUSH_MASK) == flush_check_key; });
+            //@ts-ignore
+            flushingCards.forEach(function (c) { return flushRankKey += c; });
+            handRank = FLUSH_RANK_SEVEN[flushRankKey >>> 9];
+        }
+        else {
+            handRank = HASH_RANK_SEVEN[keySum >>> 9];
+            flushRankKey = -1;
+        }
+        return {
+            handRank: handRank,
+            hand: HASHES_OF_FIVE.rankingInfos[handRank].hand,
+            faces: HASHES_OF_FIVE.rankingInfos[handRank].faces,
+            handGroup: HASHES_OF_FIVE.rankingInfos[handRank].handGroup,
+            winningCards: [],
+            flushSuit: flushRankKey
+        };
+    };
+    /** @function handOfSevenEvalIndexed_Verbose
+     *
+     * @param {Array:Number[]} array of 7 cards making up an hand
+     * @returns {Number} hand ranking ( the best one on all combinations of input card in group of 5) + ranking info including flush suit and winning cards
+     */
+    var handOfSevenEvalIndexed_Verbose = function (c1, c2, c3, c4, c5, c6, c7) {
+        return handOfSevenEval_Verbose(fullCardsDeckHash_7[c1], fullCardsDeckHash_7[c2], fullCardsDeckHash_7[c3], fullCardsDeckHash_7[c4], fullCardsDeckHash_7[c5], fullCardsDeckHash_7[c6], fullCardsDeckHash_7[c7]);
+    };
+    /** @function getHandInfo
+     *
+     * @param {Number} hand rank
+     * @returns {Number} object containing hand info
+     */
+    var getHandInfo = function (rank) {
+        return HASHES_OF_FIVE.rankingInfos[rank];
+    };
 
     var PKEval = /*#__PURE__*/Object.freeze({
         HASHES_OF_FIVE: HASHES_OF_FIVE,
@@ -522,14 +607,23 @@
         handOfFiveEvalIndexed: handOfFiveEvalIndexed,
         bfBestOfFiveOnX: bfBestOfFiveOnX,
         handOfSevenEval: handOfSevenEval,
-        handOfSevenEvalIndexed: handOfSevenEvalIndexed
+        handOfSevenEvalIndexed: handOfSevenEvalIndexed,
+        handOfSevenEval_Verbose: handOfSevenEval_Verbose,
+        handOfSevenEvalIndexed_Verbose: handOfSevenEvalIndexed_Verbose,
+        getHandInfo: getHandInfo
     });
 
-    console.log(PKEval);
     //const HASHES_OF_FIVE = createRankOfFiveHashes();
     //const HASHES_OF_FIVE_ON_SEVEN = createRankOf5On7Hashes(HASHES_OF_FIVE);
     //console.log("MAIN:", HASHES_OF_FIVE, HASHES_OF_FIVE_ON_SEVEN, handOfSevenEvalIndexed(12, 0, 1, 2, 3, 34, 23));
     /**@TODO yahtzee ,poker dice,yacht,generala ,cheerio*/
+
+    exports.default = PKEval;
+    exports.handOfSevenEvalIndexed = handOfSevenEvalIndexed;
+    exports.handOfFiveEvalIndexed = handOfFiveEvalIndexed;
+    exports.getHandInfo = getHandInfo;
+
+    Object.defineProperty(exports, '__esModule', { value: true });
 
 })));
 //# sourceMappingURL=gamblingjs.umd.js.map

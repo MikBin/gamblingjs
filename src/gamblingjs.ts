@@ -1,9 +1,10 @@
 import * as kombinatoricsJs from 'kombinatoricsjs';
 
-import { handOfSevenEvalIndexed } from './pokerEvaluators';
+import { handOfSevenEvalIndexed, handOfFiveEvalIndexed, getHandInfo } from './pokerEvaluators';
 import * as PKEval from './pokerEvaluators';
 
 export default PKEval;
+export { handOfSevenEvalIndexed, handOfFiveEvalIndexed, getHandInfo };
 
 //const HASHES_OF_FIVE = createRankOfFiveHashes();
 

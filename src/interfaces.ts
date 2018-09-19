@@ -15,6 +15,12 @@ export interface handInfo {
   handGroup: string;
 }
 
+export interface verboseHandInfo extends handInfo {
+  winningCards: number[];
+  flushSuit: number;
+  handRank: number;
+}
+
 export interface hashRanking {
   HASHES: NumberMap;
   FLUSH_HASHES: NumberMap;

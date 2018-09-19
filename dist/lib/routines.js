@@ -168,7 +168,7 @@ exports._rankOf5onX = function (hand, rankHash) {
     return Math.max.apply(Math, kombinatoricsJs.combinations(hand, 5).map(function (h) { return rankHash[exports.getVectorSum(h)]; }));
 };
 exports.handToCardsSymbols = function (hand) {
-    return hand.map(function (c) { return CONSTANTS.rankToFaceSymbol[c % 13]; }).join("");
+    return hand.map(function (c) { return CONSTANTS.rankToFaceSymbol[c % 13]; }).join('');
 };
 exports.handRankToGroup = function (rank) {
     var groupsRanking = CONSTANTS.handsRankingDelimiter_5cards;
@@ -183,7 +183,11 @@ exports.handRankToGroup = function (rank) {
 exports.fillRank5 = function (h, idx, rankingObject) {
     var hash = exports.getVectorSum(h.map(function (card) { return rankingObject.baseRankValues[card]; }));
     rankingObject.HASHES[hash] = idx;
-    rankingObject.rankingInfos[idx] = { hand: h.slice(), faces: exports.handToCardsSymbols(h), handGroup: exports.handRankToGroup(idx) };
+    rankingObject.rankingInfos[idx] = {
+        hand: h.slice(),
+        faces: exports.handToCardsSymbols(h),
+        handGroup: exports.handRankToGroup(idx)
+    };
     return rankingObject;
 };
 exports.fillRank5PlusFlushes = function (h, idx, rankingObject, offset) {
@@ -191,14 +195,22 @@ exports.fillRank5PlusFlushes = function (h, idx, rankingObject, offset) {
     var hash = exports.getVectorSum(h.map(function (card) { return rankingObject.baseRankValues[card]; }));
     var r = idx + offset;
     rankingObject.HASHES[hash] = r;
-    rankingObject.rankingInfos[r] = { hand: h.slice(), faces: exports.handToCardsSymbols(h), handGroup: exports.handRankToGroup(r) };
+    rankingObject.rankingInfos[r] = {
+        hand: h.slice(),
+        faces: exports.handToCardsSymbols(h),
+        handGroup: exports.handRankToGroup(r)
+    };
     return rankingObject;
 };
 exports.fillRankFlushes = function (h, rankingObject) {
     var hash = exports.getVectorSum(h.map(function (card) { return rankingObject.baseRankValues[card]; }));
     var rank = rankingObject.HASHES[hash] + CONSTANTS.FLUSHES_BASE_START;
     rankingObject.FLUSH_RANK_HASHES[hash] = rank;
-    rankingObject.rankingInfos[rank] = { hand: h.slice(), faces: exports.handToCardsSymbols(h), handGroup: exports.handRankToGroup(rank) };
+    rankingObject.rankingInfos[rank] = {
+        hand: h.slice(),
+        faces: exports.handToCardsSymbols(h),
+        handGroup: exports.handRankToGroup(rank)
+    };
     return rankingObject;
 };
 //# sourceMappingURL=routines.js.map

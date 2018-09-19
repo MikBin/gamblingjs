@@ -53,7 +53,11 @@ exports.createRankOfFiveHashes = function () {
         var hash = routines_1.getVectorSum(h.map(function (card) { return hashRankingOfFive.baseRankValues[card]; }));
         var rank = idx + CONSTANTS.STRAIGHT_FLUSH_BASE_START;
         hashRankingOfFive.FLUSH_RANK_HASHES[hash] = rank;
-        hashRankingOfFive.rankingInfos[rank] = { hand: h.slice(), faces: routines_1.handToCardsSymbols(h), handGroup: routines_1.handRankToGroup(rank) };
+        hashRankingOfFive.rankingInfos[rank] = {
+            hand: h.slice(),
+            faces: routines_1.handToCardsSymbols(h),
+            handGroup: routines_1.handRankToGroup(rank)
+        };
     });
     return hashRankingOfFive;
 };

@@ -79,8 +79,22 @@ exports.ranksHashOn5[9] = 12522; // J
 exports.ranksHashOn5[10] = 19998; // Q
 exports.ranksHashOn5[11] = 43258; // K
 exports.ranksHashOn5[12] = 79415; // A
-exports.rankToFaceSymbol = ["2", "3", "4", "5", "6", "7", "8", "9", "T", "J", "Q", "K", "A"];
-exports.suitToFaceSymbol = ["s", "d", "h", "c"];
+exports.rankToFaceSymbol = [
+    '2',
+    '3',
+    '4',
+    '5',
+    '6',
+    '7',
+    '8',
+    '9',
+    'T',
+    'J',
+    'Q',
+    'K',
+    'A'
+];
+exports.suitToFaceSymbol = ['s', 'd', 'h', 'c'];
 /*
 arrays initialization
 */
@@ -132,15 +146,15 @@ exports.handsRankingDelimiter_5cards = [
     7461
 ];
 exports.handRankingGroupNames = [
-    "high card",
-    "one pair",
-    "two pair",
-    "three of a kind",
-    "straight",
-    "flush",
-    "full house",
-    "four of a kind",
-    "straight flush"
+    'high card',
+    'one pair',
+    'two pair',
+    'three of a kind',
+    'straight',
+    'flush',
+    'full house',
+    'four of a kind',
+    'straight flush'
 ];
 /**
  * fill with these:
