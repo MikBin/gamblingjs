@@ -2,6 +2,20 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 var kombinatoricsJs = require("kombinatoricsjs");
 var CONSTANTS = require("./constants");
+exports.getDiffDeck5 = function (listOfHands) {
+    var deck = CONSTANTS.fullCardsDeckHash_5.slice().filter(function (c) { return !listOfHands.includes(c); });
+    return deck;
+};
+exports.getDiffDeck7 = function (listOfHands) {
+    var deck = CONSTANTS.fullCardsDeckHash_7.slice().filter(function (c) { return !listOfHands.includes(c); });
+    return deck;
+};
+exports.getDiffDeckIndexed5 = function (listOfHands) {
+    return CONSTANTS.fullCardsDeckHash_5.slice().map(function (c, i) { return i; }).filter(function (c) { return !listOfHands.includes(c); });
+};
+exports.getDiffDeckIndexed7 = function (listOfHands) {
+    return CONSTANTS.fullCardsDeckHash_7.slice().map(function (c, i) { return i; }).filter(function (c) { return !listOfHands.includes(c); });
+};
 exports.atLeast5Eq = function (list) {
     return list.filter(function (v) {
         var l = v.length;

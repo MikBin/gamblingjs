@@ -79,7 +79,11 @@ exports.createRankOf5On7Hashes = function (hashRankOfFive) {
     var rankCards = CONSTANTS.rankCards;
     var ranksHashOn7 = hashRankingOfFiveOnSeven.baseRankValues;
     var suit7Hash = hashRankingOfFiveOnSeven.baseSuitValues;
-    kombinatoricsJs.multiCombinations(rankCards, 7, 3).forEach(function (hand, i) {
+    var multicom = kombinatoricsJs.combinationsMultiSets([0, 0, 0, 0, 1, 1, 1, 1, 2, 2, 2, 2,
+        3, 3, 3, 3, 4, 4, 4, 4, 5, 5, 5, 5, 6, 6, 6, 6, 7, 7, 7, 7, 8, 8, 8, 8, 9, 9, 9, 9,
+        10, 10, 10, 10, 11, 11, 11, 11, 12, 12, 12, 12], 7);
+    // kombinatoricsJs.multiCombinations(rankCards, 7, 4 )
+    multicom.forEach(function (hand, i) {
         var h7 = hand.map(function (card) { return ranksHashOn7[card]; });
         var h5 = hand.map(function (card) { return hashRankOfFive.baseRankValues[card]; });
         var hash7 = routines_1.getVectorSum(h7);

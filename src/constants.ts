@@ -16,6 +16,12 @@ export const flush5hHashCheck: Readonly<NumberMap> = {
   '40': 8,
   '285': 57
 };
+export const flushHashToName: Readonly<NumberToStringMap> = {
+  0: 'spades',
+  1: 'diamonds',
+  8: 'hearts',
+  9: 'clubs'
+};
 
 export const flush7HashCheck: Readonly<NumberMap> = {
   '0': 0,

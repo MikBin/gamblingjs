@@ -9,6 +9,12 @@ exports.flush5hHashCheck = {
     '40': 8,
     '285': 57
 };
+exports.flushHashToName = {
+    0: "spades",
+    1: "diamonds",
+    8: "hearts",
+    9: "clubs"
+};
 exports.flush7HashCheck = {
     '0': 0,
     '1': 0,

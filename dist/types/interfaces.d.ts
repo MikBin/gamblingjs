@@ -7,15 +7,30 @@ export interface StringMap {
 export interface NumberToStringMap {
     [s: number]: string | number;
 }
+export interface StringToNumberMap {
+    [s: string]: number;
+}
 export interface handInfo {
     hand: number[];
     faces: string;
     handGroup: string;
 }
 export interface verboseHandInfo extends handInfo {
-    winningCards: number[];
-    flushSuit: number;
+    winningCards: (number | string)[];
+    flushSuit: string | number;
     handRank: number;
+}
+export interface handCategoryDistribution extends StringToNumberMap {
+    'high card': number;
+    'one pair': number;
+    'two pair': number;
+    'three of a kind': number;
+    'straight': number;
+    'flush': number;
+    'full house': number;
+    'four of a kind': number;
+    'straight flush': number;
+    'average': number;
 }
 export interface hashRanking {
     HASHES: NumberMap;

@@ -1,4 +1,8 @@
 import { hashRanking, NumberMap } from './interfaces';
+export declare const getDiffDeck5: (listOfHands: number[]) => number[];
+export declare const getDiffDeck7: (listOfHands: number[]) => number[];
+export declare const getDiffDeckIndexed5: (listOfHands: number[]) => number[];
+export declare const getDiffDeckIndexed7: (listOfHands: number[]) => number[];
 export declare const atLeast5Eq: (list: (string | number)[][]) => (string | number)[][];
 export declare const getVectorSum: (v: number[]) => number;
 export declare const getFlushSuit7: (v: number[]) => number;

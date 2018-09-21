@@ -99,7 +99,65 @@ export const createRankOf5On7Hashes = (hashRankOfFive: hashRanking) => {
   const ranksHashOn7 = hashRankingOfFiveOnSeven.baseRankValues;
   const suit7Hash = hashRankingOfFiveOnSeven.baseSuitValues;
 
-  kombinatoricsJs.multiCombinations(rankCards, 7, 3).forEach((hand: number[], i: number) => {
+  const multicom = kombinatoricsJs.combinationsMultiSets(
+    [
+      0,
+      0,
+      0,
+      0,
+      1,
+      1,
+      1,
+      1,
+      2,
+      2,
+      2,
+      2,
+      3,
+      3,
+      3,
+      3,
+      4,
+      4,
+      4,
+      4,
+      5,
+      5,
+      5,
+      5,
+      6,
+      6,
+      6,
+      6,
+      7,
+      7,
+      7,
+      7,
+      8,
+      8,
+      8,
+      8,
+      9,
+      9,
+      9,
+      9,
+      10,
+      10,
+      10,
+      10,
+      11,
+      11,
+      11,
+      11,
+      12,
+      12,
+      12,
+      12
+    ],
+    7
+  );
+
+  kombinatoricsJs.multiCombinations(rankCards, 7, 4).forEach((hand: number[], i: number) => {
     let h7 = hand.map(card => ranksHashOn7[card]);
     let h5 = hand.map(card => hashRankOfFive.baseRankValues[card]);
     let hash7: number = getVectorSum(h7);

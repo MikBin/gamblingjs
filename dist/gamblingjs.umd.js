@@ -4,6 +4,19 @@
     (factory((global.gamblingjs = {})));
 }(this, (function (exports) { 'use strict';
 
+    /**
+     *@method
+     *
+     *@param
+     *@return
+     */
+    const shuffle = (ar) => {
+        let i, r, l = ar.length;
+        for (i = 0; i < l; ++i) {
+            r = ~~(Math.random() * l);
+            [ar[r], ar[i]] = [ar[i], ar[r]];
+        }
+    };
     const pick = (n, got, pos, from, limit, cntLimit, callBack) => {
         let cnt = 0, limitCount = cntLimit;
         if (got.length == n) {
@@ -42,6 +55,27 @@
         });
         return comb;
     };
+    const pickMulti = (n, got, pos, from, limit, limitCount, callBack) => {
+        /*let limitCount = limitCnt.slice();*/
+        if (got.length == n) {
+            callBack(got);
+        }
+        for (let i = pos; i < from.length; i++) {
+            got.push(from[i]);
+            if (limitCount[i] === limit[i]) {
+                limitCount[i] = 0;
+                pickMulti(n, got, i + 1, from, limit, limitCount, callBack);
+            }
+            else {
+                if (pos === 0 || limitCount[i] === 0 || got[got.length - 1] === got[got.length - 2]) {
+                    limitCount[i]++;
+                }
+                pickMulti(n, got, i, from, limit, limitCount, callBack);
+            }
+            got.pop();
+        }
+        return 1;
+    };
     /**
      *@method
      *
@@ -51,6 +85,31 @@
     const multiCombinations = (_collection, n, repetition) => {
         let multiComb = [];
         pick(n, [], 0, _collection, repetition, 0, (c) => {
+            multiComb.push(c.slice());
+        });
+        return multiComb;
+    };
+    /**
+     *@method
+     *
+     *@param
+     *@return
+     */
+    const combinationsMultiSets = (_collection, n) => {
+        var l = _collection.length, limitCount = [0], limits = [0], list = [_collection[0]], j = 0;
+        for (var i = 1; i < l; ++i) {
+            if (_collection[i] === _collection[i - 1]) {
+                limits[j]++;
+            }
+            else {
+                j++;
+                list[j] = _collection[i];
+                limitCount.push(0);
+                limits.push(0);
+            }
+        }
+        var multiComb = [];
+        pickMulti(n, [], 0, list, limits, limitCount, (c) => {
             multiComb.push(c.slice());
         });
         return multiComb;
@@ -82,6 +141,12 @@
         '5': 1,
         '40': 8,
         '285': 57
+    };
+    var flushHashToName = {
+        0: "spades",
+        1: "diamonds",
+        8: "hearts",
+        9: "clubs"
     };
     var ranksHashOn7 = []; // 13 one for each rank
     ranksHashOn7[0] = 0;
@@ -135,6 +200,7 @@
     var deckOfSuits = new Array(52);
     var fullCardsDeckHash_5 = new Array(52);
     var fullCardsDeckHash_7 = new Array(52);
+    var cardHashToDescription_7 = {};
     for (var i = 0; i < 52; i++) {
         deckOfRanks_5[i] = ranksHashOn5[i % 13];
         deckOfRanks_7[i] = ranksHashOn7[i % 13];
@@ -142,6 +208,7 @@
         deckOfSuits[i] = suitsHash[~~(i / 13)];
         var card5 = (fullCardsDeckHash_5[i] = (deckOfRanks_5[i] << 9) + deckOfSuits[i]);
         var card7 = (fullCardsDeckHash_7[i] = (deckOfRanks_7[i] << 9) + deckOfSuits[i]);
+        cardHashToDescription_7[card7] = i;
     }
     var STRAIGHTS = [
         [12, 0, 1, 2, 3],
@@ -192,6 +259,10 @@
      *
      * */
 
+    var getDiffDeck7 = function (listOfHands) {
+        var deck = fullCardsDeckHash_7.slice().filter(function (c) { return !listOfHands.includes(c); });
+        return deck;
+    };
     var getVectorSum = function (v) {
         var l = v.length;
         var s = 0;
@@ -430,7 +501,11 @@
         };
         var rankCards$$1 = rankCards;
         var ranksHashOn7$$1 = hashRankingOfFiveOnSeven.baseRankValues;
-        multiCombinations(rankCards$$1, 7, 3).forEach(function (hand, i) {
+        var multicom = combinationsMultiSets([0, 0, 0, 0, 1, 1, 1, 1, 2, 2, 2, 2,
+            3, 3, 3, 3, 4, 4, 4, 4, 5, 5, 5, 5, 6, 6, 6, 6, 7, 7, 7, 7, 8, 8, 8, 8, 9, 9, 9, 9,
+            10, 10, 10, 10, 11, 11, 11, 11, 12, 12, 12, 12], 7);
+        // kombinatoricsJs.multiCombinations(rankCards, 7, 4 )
+        multicom.forEach(function (hand, i) {
             var h7 = hand.map(function (card) { return ranksHashOn7$$1[card]; });
             var h5 = hand.map(function (card) { return hashRankOfFive.baseRankValues[card]; });
             var hash7 = getVectorSum(h7);
@@ -545,6 +620,14 @@
         }
         return handRank;
     };
+    /** @function handOfSixEvalIndexed
+     *
+     * @param {Array:Number[]} array of 7 cards making up an hand
+     * @returns {Number} hand ranking ( the best one on all combinations of input card in group of 5)
+     */
+    var handOfSixEvalIndexed = function (c1, c2, c3, c4, c5, c6) {
+        return bfBestOfFiveOnX([fullCardsDeckHash_5[c1], fullCardsDeckHash_5[c2], fullCardsDeckHash_5[c3], fullCardsDeckHash_5[c4], fullCardsDeckHash_5[c5], fullCardsDeckHash_5[c6]]);
+    };
     /** @function handOfSevenEvalIndexed
      *
      * @param {Array:Number[]} array of 7 cards making up an hand
@@ -563,24 +646,27 @@
         var handRank = 0;
         var flush_check_key = FLUSH_CHECK_SEVEN[keySum & FLUSH_MASK];
         var flushRankKey = 0;
+        var handVector = [c1, c2, c3, c4, c5, c6, c7];
         if (flush_check_key >= 0) {
-            /**no full house or quads possible ---> can return flush_rank */
-            var flushingCards = [c1, c2, c3, c4, c5, c6, c7].filter(function (c, i) { return (c1 & FLUSH_MASK) == flush_check_key; });
-            //@ts-ignore
-            flushingCards.forEach(function (c) { return flushRankKey += c; });
+            handVector = handVector.filter(function (c, i) {
+                return (c & FLUSH_MASK) == flush_check_key;
+            });
+            handVector.forEach(function (c) { return (flushRankKey += c); });
             handRank = FLUSH_RANK_SEVEN[flushRankKey >>> 9];
         }
         else {
             handRank = HASH_RANK_SEVEN[keySum >>> 9];
             flushRankKey = -1;
         }
+        var wHand = HASHES_OF_FIVE.rankingInfos[handRank].hand;
+        var handIndexes = handVector.map(function (c) { return cardHashToDescription_7[c]; });
         return {
             handRank: handRank,
-            hand: HASHES_OF_FIVE.rankingInfos[handRank].hand,
+            hand: wHand,
             faces: HASHES_OF_FIVE.rankingInfos[handRank].faces,
             handGroup: HASHES_OF_FIVE.rankingInfos[handRank].handGroup,
-            winningCards: [],
-            flushSuit: flushRankKey
+            winningCards: handIndexes.filter(function (c) { return wHand.includes(c % 13); }),
+            flushSuit: flushRankKey > -1 ? flushHashToName[flush_check_key] : "no flush"
         };
     };
     /** @function handOfSevenEvalIndexed_Verbose
@@ -607,21 +693,81 @@
         handOfFiveEvalIndexed: handOfFiveEvalIndexed,
         bfBestOfFiveOnX: bfBestOfFiveOnX,
         handOfSevenEval: handOfSevenEval,
+        handOfSixEvalIndexed: handOfSixEvalIndexed,
         handOfSevenEvalIndexed: handOfSevenEvalIndexed,
         handOfSevenEval_Verbose: handOfSevenEval_Verbose,
         handOfSevenEvalIndexed_Verbose: handOfSevenEvalIndexed_Verbose,
         getHandInfo: getHandInfo
     });
 
-    //const HASHES_OF_FIVE = createRankOfFiveHashes();
-    //const HASHES_OF_FIVE_ON_SEVEN = createRankOf5On7Hashes(HASHES_OF_FIVE);
-    //console.log("MAIN:", HASHES_OF_FIVE, HASHES_OF_FIVE_ON_SEVEN, handOfSevenEvalIndexed(12, 0, 1, 2, 3, 34, 23));
+    var DEFAULT_N_RUNS = 10000;
+    var categoryByRankingValue = function (rank) {
+        var i = 0;
+        while (rank > handsRankingDelimiter_5cards[i])
+            i++;
+        return handRankingGroupNames[i];
+    };
+    var getPartialHandStatsIndexed_7 = function (partialHand, totalRuns) {
+        if (totalRuns === void 0) { totalRuns = DEFAULT_N_RUNS; }
+        var stats = {
+            'high card': 0,
+            'one pair': 0,
+            'two pair': 0,
+            'three of a kind': 0,
+            'straight': 0,
+            'flush': 0,
+            'full house': 0,
+            'four of a kind': 0,
+            'straight flush': 0,
+            'average': 0
+        };
+        var pHand = partialHand.map(function (c) { return fullCardsDeckHash_7[c]; });
+        var partialDeck = getDiffDeck7(pHand);
+        var L = partialDeck.length;
+        var missingCardsLength = 7 - partialHand.length;
+        var fullHand = pHand.slice();
+        fullHand.length = 7;
+        var totalHandComputed = 0;
+        var wrongH = [];
+        for (var i = 0; i < totalRuns; i++) {
+            shuffle(partialDeck);
+            var j = 0, t = 0;
+            while (j < L) {
+                fullHand[pHand.length + t] = partialDeck[j];
+                if (t === missingCardsLength) {
+                    //@ts-ignore
+                    var rank = handOfSevenEval.apply(void 0, fullHand);
+                    if (!rank) {
+                        //console.log(`not rank: ${rank} `, fullHand.slice(), fullHand.map(c => cardHashToDescription_7[c]));
+                        wrongH.push([fullHand.slice(), fullHand.map(function (c) { return cardHashToDescription_7[c]; })]);
+                    }
+                    stats.average += rank;
+                    stats[categoryByRankingValue(rank)]++;
+                    t = 0;
+                    totalHandComputed++;
+                }
+                else {
+                    t++;
+                }
+                j++;
+            }
+        }
+        for (var p in stats) {
+            stats[p] /= totalHandComputed;
+        }
+        console.log(wrongH);
+        return stats;
+    };
+
     /**@TODO yahtzee ,poker dice,yacht,generala ,cheerio*/
 
     exports.default = PKEval;
     exports.handOfSevenEvalIndexed = handOfSevenEvalIndexed;
     exports.handOfFiveEvalIndexed = handOfFiveEvalIndexed;
     exports.getHandInfo = getHandInfo;
+    exports.handOfSevenEvalIndexed_Verbose = handOfSevenEvalIndexed_Verbose;
+    exports.handOfSixEvalIndexed = handOfSixEvalIndexed;
+    exports.getPartialHandStatsIndexed_7 = getPartialHandStatsIndexed_7;
 
     Object.defineProperty(exports, '__esModule', { value: true });
 

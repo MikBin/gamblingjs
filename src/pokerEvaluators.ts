@@ -1,6 +1,12 @@
 import * as kombinatoricsJs from 'kombinatoricsjs';
 import { createRankOfFiveHashes, createRankOf5On7Hashes } from './hashesCreator';
-import { fullCardsDeckHash_5, fullCardsDeckHash_7, FLUSH_MASK } from './constants';
+import {
+  fullCardsDeckHash_5,
+  fullCardsDeckHash_7,
+  FLUSH_MASK,
+  flushHashToName,
+  cardHashToDescription_7
+} from './constants';
 import { handInfo, verboseHandInfo } from './interfaces';
 
 export const HASHES_OF_FIVE = createRankOfFiveHashes();
@@ -111,6 +117,29 @@ export const handOfSevenEval = (
   return handRank;
 };
 
+/** @function handOfSixEvalIndexed
+ *
+ * @param {Array:Number[]} array of 7 cards making up an hand
+ * @returns {Number} hand ranking ( the best one on all combinations of input card in group of 5)
+ */
+export const handOfSixEvalIndexed = (
+  c1: number,
+  c2: number,
+  c3: number,
+  c4: number,
+  c5: number,
+  c6: number
+): number => {
+  return bfBestOfFiveOnX([
+    fullCardsDeckHash_5[c1],
+    fullCardsDeckHash_5[c2],
+    fullCardsDeckHash_5[c3],
+    fullCardsDeckHash_5[c4],
+    fullCardsDeckHash_5[c5],
+    fullCardsDeckHash_5[c6]
+  ]);
+};
+
 /** @function handOfSevenEvalIndexed
  *
  * @param {Array:Number[]} array of 7 cards making up an hand
@@ -154,14 +183,13 @@ export const handOfSevenEval_Verbose = (
   let handRank: number = 0;
   let flush_check_key: number = FLUSH_CHECK_SEVEN[keySum & FLUSH_MASK];
   let flushRankKey = 0;
+  let handVector = [c1, c2, c3, c4, c5, c6, c7];
   if (flush_check_key >= 0) {
-    /**no full house or quads possible ---> can return flush_rank */
-    let flushingCards = [c1, c2, c3, c4, c5, c6, c7].filter((c, i) => {
-      return (c1 & FLUSH_MASK) == flush_check_key;
+    handVector = handVector.filter((c, i) => {
+      return (c & FLUSH_MASK) == flush_check_key;
     });
-    //@ts-ignore
 
-    flushingCards.forEach(c => (flushRankKey += c));
+    handVector.forEach(c => (flushRankKey += c));
 
     handRank = FLUSH_RANK_SEVEN[flushRankKey >>> 9];
   } else {
@@ -169,13 +197,15 @@ export const handOfSevenEval_Verbose = (
     flushRankKey = -1;
   }
 
+  let wHand = HASHES_OF_FIVE.rankingInfos[handRank].hand;
+  let handIndexes = handVector.map(c => cardHashToDescription_7[c]);
   return {
     handRank: handRank,
-    hand: HASHES_OF_FIVE.rankingInfos[handRank].hand,
+    hand: wHand,
     faces: HASHES_OF_FIVE.rankingInfos[handRank].faces,
     handGroup: HASHES_OF_FIVE.rankingInfos[handRank].handGroup,
-    winningCards: [],
-    flushSuit: flushRankKey
+    winningCards: handIndexes.filter(c => wHand.includes(<number>c % 13)),
+    flushSuit: flushRankKey > -1 ? flushHashToName[flush_check_key] : 'no flush'
   };
 };
 

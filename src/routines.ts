@@ -1,6 +1,31 @@
 import * as kombinatoricsJs from 'kombinatoricsjs';
-import { hashRanking, NumberMap, handInfo } from './interfaces';
+import { hashRanking, NumberMap } from './interfaces';
 import * as CONSTANTS from './constants';
+
+export const getDiffDeck5 = (listOfHands: number[]): number[] => {
+  let deck = CONSTANTS.fullCardsDeckHash_5.slice().filter(c => !listOfHands.includes(c));
+  return deck;
+};
+export const getDiffDeck7 = (listOfHands: number[]): number[] => {
+  let deck = CONSTANTS.fullCardsDeckHash_7.slice().filter(c => !listOfHands.includes(c));
+  return deck;
+};
+export const getDiffDeckIndexed5 = (listOfHands: number[]): number[] => {
+  return CONSTANTS.fullCardsDeckHash_5
+    .slice()
+    .map((c, i) => {
+      return i;
+    })
+    .filter(c => !listOfHands.includes(c));
+};
+export const getDiffDeckIndexed7 = (listOfHands: number[]): number[] => {
+  return CONSTANTS.fullCardsDeckHash_7
+    .slice()
+    .map((c, i) => {
+      return i;
+    })
+    .filter(c => !listOfHands.includes(c));
+};
 
 export const atLeast5Eq = (list: (number | string)[][]): (number | string)[][] => {
   return list.filter(v => {

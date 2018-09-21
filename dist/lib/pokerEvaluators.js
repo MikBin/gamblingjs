@@ -76,6 +76,14 @@ exports.handOfSevenEval = function (c1, c2, c3, c4, c5, c6, c7) {
     }
     return handRank;
 };
+/** @function handOfSixEvalIndexed
+ *
+ * @param {Array:Number[]} array of 7 cards making up an hand
+ * @returns {Number} hand ranking ( the best one on all combinations of input card in group of 5)
+ */
+exports.handOfSixEvalIndexed = function (c1, c2, c3, c4, c5, c6) {
+    return exports.bfBestOfFiveOnX([constants_1.fullCardsDeckHash_5[c1], constants_1.fullCardsDeckHash_5[c2], constants_1.fullCardsDeckHash_5[c3], constants_1.fullCardsDeckHash_5[c4], constants_1.fullCardsDeckHash_5[c5], constants_1.fullCardsDeckHash_5[c6]]);
+};
 /** @function handOfSevenEvalIndexed
  *
  * @param {Array:Number[]} array of 7 cards making up an hand
@@ -94,24 +102,27 @@ exports.handOfSevenEval_Verbose = function (c1, c2, c3, c4, c5, c6, c7) {
     var handRank = 0;
     var flush_check_key = FLUSH_CHECK_SEVEN[keySum & constants_1.FLUSH_MASK];
     var flushRankKey = 0;
+    var handVector = [c1, c2, c3, c4, c5, c6, c7];
     if (flush_check_key >= 0) {
-        /**no full house or quads possible ---> can return flush_rank */
-        var flushingCards = [c1, c2, c3, c4, c5, c6, c7].filter(function (c, i) { return (c1 & constants_1.FLUSH_MASK) == flush_check_key; });
-        //@ts-ignore
-        flushingCards.forEach(function (c) { return flushRankKey += c; });
+        handVector = handVector.filter(function (c, i) {
+            return (c & constants_1.FLUSH_MASK) == flush_check_key;
+        });
+        handVector.forEach(function (c) { return (flushRankKey += c); });
         handRank = FLUSH_RANK_SEVEN[flushRankKey >>> 9];
     }
     else {
         handRank = HASH_RANK_SEVEN[keySum >>> 9];
         flushRankKey = -1;
     }
+    var wHand = exports.HASHES_OF_FIVE.rankingInfos[handRank].hand;
+    var handIndexes = handVector.map(function (c) { return constants_1.cardHashToDescription_7[c]; });
     return {
         handRank: handRank,
-        hand: exports.HASHES_OF_FIVE.rankingInfos[handRank].hand,
+        hand: wHand,
         faces: exports.HASHES_OF_FIVE.rankingInfos[handRank].faces,
         handGroup: exports.HASHES_OF_FIVE.rankingInfos[handRank].handGroup,
-        winningCards: [],
-        flushSuit: flushRankKey
+        winningCards: handIndexes.filter(function (c) { return wHand.includes(c % 13); }),
+        flushSuit: flushRankKey > -1 ? constants_1.flushHashToName[flush_check_key] : "no flush"
     };
 };
 /** @function handOfSevenEvalIndexed_Verbose

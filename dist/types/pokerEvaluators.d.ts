@@ -25,6 +25,12 @@ export declare const bfBestOfFiveOnX: (hand: number[]) => number;
  * @returns {Number} hand ranking
  */
 export declare const handOfSevenEval: (c1: number, c2: number, c3: number, c4: number, c5: number, c6: number, c7: number) => number;
+/** @function handOfSixEvalIndexed
+ *
+ * @param {Array:Number[]} array of 7 cards making up an hand
+ * @returns {Number} hand ranking ( the best one on all combinations of input card in group of 5)
+ */
+export declare const handOfSixEvalIndexed: (c1: number, c2: number, c3: number, c4: number, c5: number, c6: number) => number;
 /** @function handOfSevenEvalIndexed
  *
  * @param {Array:Number[]} array of 7 cards making up an hand

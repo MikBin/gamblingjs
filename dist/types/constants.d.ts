@@ -8,6 +8,7 @@ export declare const flushHash: number[];
 export declare const suitsHash: number[];
 /**check for !==undefined */
 export declare const flush5hHashCheck: Readonly<NumberMap>;
+export declare const flushHashToName: Readonly<NumberToStringMap>;
 export declare const flush7HashCheck: Readonly<NumberMap>;
 export declare const ranksHashOn7: number[];
 export declare const ranksHashOn5: number[];
