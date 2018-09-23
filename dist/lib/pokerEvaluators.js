@@ -82,7 +82,14 @@ exports.handOfSevenEval = function (c1, c2, c3, c4, c5, c6, c7) {
  * @returns {Number} hand ranking ( the best one on all combinations of input card in group of 5)
  */
 exports.handOfSixEvalIndexed = function (c1, c2, c3, c4, c5, c6) {
-    return exports.bfBestOfFiveOnX([constants_1.fullCardsDeckHash_5[c1], constants_1.fullCardsDeckHash_5[c2], constants_1.fullCardsDeckHash_5[c3], constants_1.fullCardsDeckHash_5[c4], constants_1.fullCardsDeckHash_5[c5], constants_1.fullCardsDeckHash_5[c6]]);
+    return exports.bfBestOfFiveOnX([
+        constants_1.fullCardsDeckHash_5[c1],
+        constants_1.fullCardsDeckHash_5[c2],
+        constants_1.fullCardsDeckHash_5[c3],
+        constants_1.fullCardsDeckHash_5[c4],
+        constants_1.fullCardsDeckHash_5[c5],
+        constants_1.fullCardsDeckHash_5[c6]
+    ]);
 };
 /** @function handOfSevenEvalIndexed
  *
@@ -104,10 +111,13 @@ exports.handOfSevenEval_Verbose = function (c1, c2, c3, c4, c5, c6, c7) {
     var flushRankKey = 0;
     var handVector = [c1, c2, c3, c4, c5, c6, c7];
     if (flush_check_key >= 0) {
+        /* istanbul ignore next */
         handVector = handVector.filter(function (c, i) {
             return (c & constants_1.FLUSH_MASK) == flush_check_key;
         });
+        /* istanbul ignore next */
         handVector.forEach(function (c) { return (flushRankKey += c); });
+        /* istanbul ignore next */
         handRank = FLUSH_RANK_SEVEN[flushRankKey >>> 9];
     }
     else {
@@ -122,7 +132,7 @@ exports.handOfSevenEval_Verbose = function (c1, c2, c3, c4, c5, c6, c7) {
         faces: exports.HASHES_OF_FIVE.rankingInfos[handRank].faces,
         handGroup: exports.HASHES_OF_FIVE.rankingInfos[handRank].handGroup,
         winningCards: handIndexes.filter(function (c) { return wHand.includes(c % 13); }),
-        flushSuit: flushRankKey > -1 ? constants_1.flushHashToName[flush_check_key] : "no flush"
+        flushSuit: flushRankKey > -1 ? constants_1.flushHashToName[flush_check_key] : 'no flush'
     };
 };
 /** @function handOfSevenEvalIndexed_Verbose

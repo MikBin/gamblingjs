@@ -3,7 +3,11 @@ import {
   handOfFiveEvalIndexed,
   handOfSevenEval,
   handOfSevenEvalIndexed,
-  bfBestOfFiveOnX
+  bfBestOfFiveOnX,
+  handOfSevenEval_Verbose,
+  handOfSevenEvalIndexed_Verbose,
+  handOfSixEvalIndexed,
+  getHandInfo
 } from '../src/pokerEvaluators';
 import { fullCardsDeckHash_5, fullCardsDeckHash_7 } from '../src/constants';
 
@@ -24,6 +28,53 @@ describe('testing hand of five eval', () => {
     expect(handOfFiveEvalIndexed(0, 1, 2, 3, 18)).toBe(0);
     expect(handOfFiveEvalIndexed(13, 14, 15, 16, 31)).toBe(0);
     expect(handOfFiveEvalIndexed(25, 13, 14, 15, 16)).toBe(7452);
+  });
+});
+
+describe('testing handOfSevenEval_Verbose: ', () => {
+  it('should get some infos: ', () => {
+    expect(getHandInfo(2345)).toBeInstanceOf(Object);
+  });
+
+  it('should get one pair category: ', () => {
+    expect(
+      handOfSevenEval_Verbose(
+        fullCardsDeckHash_7[12],
+        fullCardsDeckHash_7[15],
+        fullCardsDeckHash_7[1],
+        fullCardsDeckHash_7[2],
+        fullCardsDeckHash_7[3],
+        fullCardsDeckHash_7[21],
+        fullCardsDeckHash_7[17]
+      )
+    ).toEqual({
+      handRank: 1874,
+      hand: [2, 2, 4, 8, 12],
+      faces: '446TA',
+      handGroup: 'one pair',
+      winningCards: [12, 15, 2, 21, 17],
+      flushSuit: 'no flush'
+    });
+  });
+
+  it('should get same results in indexed version: ', () => {
+    expect(handOfSevenEvalIndexed_Verbose(12, 15, 1, 2, 3, 21, 17)).toEqual({
+      handRank: 1874,
+      hand: [2, 2, 4, 8, 12],
+      faces: '446TA',
+      handGroup: 'one pair',
+      winningCards: [12, 15, 2, 21, 17],
+      flushSuit: 'no flush'
+    });
+
+    expect(handOfSevenEvalIndexed_Verbose(0, 1, 2, 3, 18, 19, 20)).toEqual({
+      faces: '45789',
+      flushSuit: 'no flush',
+      hand: [2, 3, 5, 6, 7],
+      handGroup: 'high card',
+      handRank: 849,
+      winningCards: [2, 3, 18, 19, 20]
+    });
   });
 });
 
@@ -64,5 +115,10 @@ describe('testing hand of seven eval', () => {
     expect(handOfSevenEvalIndexed(12, 0, 14, 15, 29, 44, 25)).toBe(5853);
     expect(handOfSevenEvalIndexed(12, 0, 14, 15, 29, 50, 30)).toBe(5854);
     expect(handOfSevenEvalIndexed(31, 50, 14, 15, 29, 44, 30)).toBe(5855);
+  });
+
+  it('checks hand of six eval: ', () => {
+    expect(handOfSixEvalIndexed(3, 23, 4, 45, 27, 7)).toBe(1053);
+    expect(handOfSixEvalIndexed(0, 1, 2, 3, 18, 19)).toBe(500);
   });
 });

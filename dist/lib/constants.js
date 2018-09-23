@@ -10,10 +10,10 @@ exports.flush5hHashCheck = {
     '285': 57
 };
 exports.flushHashToName = {
-    0: "spades",
-    1: "diamonds",
-    8: "hearts",
-    9: "clubs"
+    0: 'spades',
+    1: 'diamonds',
+    8: 'hearts',
+    9: 'clubs'
 };
 exports.flush7HashCheck = {
     '0': 0,

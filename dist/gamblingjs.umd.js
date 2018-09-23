@@ -55,26 +55,70 @@
         });
         return comb;
     };
-    const pickMulti = (n, got, pos, from, limit, limitCount, callBack) => {
-        /*let limitCount = limitCnt.slice();*/
-        if (got.length == n) {
-            callBack(got);
-        }
-        for (let i = pos; i < from.length; i++) {
-            got.push(from[i]);
-            if (limitCount[i] === limit[i]) {
-                limitCount[i] = 0;
-                pickMulti(n, got, i + 1, from, limit, limitCount, callBack);
+    const generateFirstMultiSetIndex = (n, k, limits) => {
+        let index = new Array(k);
+        let limitsCounter = (new Array(n)).fill(0);
+        let lastVal = 0;
+        for (let i = 0; i < k; i++) {
+            index[i] = lastVal;
+            limitsCounter[lastVal]++;
+            if (limitsCounter[lastVal] == limits[lastVal]) {
+                lastVal++;
             }
-            else {
-                if (pos === 0 || limitCount[i] === 0 || got[got.length - 1] === got[got.length - 2]) {
-                    limitCount[i]++;
+        }
+        return {
+            limitsCounter: limitsCounter,
+            index: index
+        };
+    };
+    const multiSetCombinationsStep = (index, maxVal, limits, limitsCount) => {
+        let k = index.length - 1;
+        if (index[k] < maxVal) {
+            limitsCount[index[k]]--;
+            index[k]++;
+            limitsCount[index[k]]++;
+        }
+        else {
+            /*find the first to increment*/
+            let lastMaxVal = maxVal;
+            let lastMaxValCounter = 0;
+            while (index[k] == lastMaxVal) {
+                limitsCount[index[k]]--;
+                index[k] = 0;
+                k--;
+                lastMaxValCounter++;
+                if (lastMaxValCounter == limits[lastMaxVal]) {
+                    lastMaxVal--;
+                    lastMaxValCounter = 0;
                 }
-                pickMulti(n, got, i, from, limit, limitCount, callBack);
             }
-            got.pop();
+            if (k == -1) {
+                return false;
+                /*ended*/
+            }
+            limitsCount[index[k]]--;
+            index[k]++;
+            limitsCount[index[k]]++;
+            k++;
+            /*now set the following elements*/
+            while (k < index.length) {
+                let lastVal = index[k - 1];
+                if (limitsCount[lastVal] < limits[lastVal]) {
+                    index[k] = lastVal;
+                    limitsCount[lastVal]++;
+                }
+                else if (lastVal < maxVal) {
+                    lastVal++;
+                    index[k] = lastVal;
+                    limitsCount[lastVal]++;
+                }
+                else if (k = index.length - 1) {
+                    return false;
+                }
+                k++;
+            }
         }
-        return 1;
+        return index;
     };
     /**
      *@method
@@ -82,36 +126,22 @@
      *@param
      *@return
      */
-    const multiCombinations = (_collection, n, repetition) => {
+    const multiCombinations = (_collection, k, repetition) => {
         let multiComb = [];
-        pick(n, [], 0, _collection, repetition, 0, (c) => {
-            multiComb.push(c.slice());
-        });
-        return multiComb;
-    };
-    /**
-     *@method
-     *
-     *@param
-     *@return
-     */
-    const combinationsMultiSets = (_collection, n) => {
-        var l = _collection.length, limitCount = [0], limits = [0], list = [_collection[0]], j = 0;
-        for (var i = 1; i < l; ++i) {
-            if (_collection[i] === _collection[i - 1]) {
-                limits[j]++;
-            }
-            else {
-                j++;
-                list[j] = _collection[i];
-                limitCount.push(0);
-                limits.push(0);
-            }
+        let maxVal = _collection.length - 1;
+        let limits = (new Array(_collection.length)).fill(repetition);
+        let { limitsCounter, index } = generateFirstMultiSetIndex(_collection.length, k, limits);
+        //first element
+        multiComb.push(index.map(v => _collection[v]));
+        let next = [];
+        while (next = multiSetCombinationsStep(index, maxVal, limits, limitsCounter)) {
+            multiComb.push(next.map(v => _collection[v]));
         }
-        var multiComb = [];
-        pickMulti(n, [], 0, list, limits, limitCount, (c) => {
-            multiComb.push(c.slice());
-        });
+        /*
+          pick(n, [], 0, _collection, repetition, 0, (c: any[]) => {
+            multiComb.push(c.slice())
+          })
+        */
         return multiComb;
     };
     const crossProduct = (list, k) => {
@@ -122,10 +152,10 @@
         let ln = list.length;
         for (let i = 0; i < l; ++i) {
             let tmpList = [];
-            let number = i;
+            let N = i;
             for (let j = k - 1; j >= 0; --j) {
-                let digit = number % ln;
-                number = Math.floor(number / ln);
+                let digit = N % ln;
+                N = Math.floor(N / ln);
                 tmpList[j] = list[digit];
             }
             crossProdList[i] = tmpList;
@@ -143,10 +173,10 @@
         '285': 57
     };
     var flushHashToName = {
-        0: "spades",
-        1: "diamonds",
-        8: "hearts",
-        9: "clubs"
+        0: 'spades',
+        1: 'diamonds',
+        8: 'hearts',
+        9: 'clubs'
     };
     var ranksHashOn7 = []; // 13 one for each rank
     ranksHashOn7[0] = 0;
@@ -294,7 +324,7 @@
         return c >= 4;
     };
     var singlePairsList = function (startSet) {
-        var toAdd = multiCombinations(startSet, 3, 0);
+        var toAdd = multiCombinations(startSet, 3, 1);
         var singlePairs = [];
         for (var i = 0; i < startSet.length; ++i) {
             for (var j = 0; j < toAdd.length; ++j) {
@@ -317,7 +347,7 @@
         return 0;
     };
     var sortedPairsToAdd = function (startSet) {
-        var _toAdd = multiCombinations(startSet, 2, 0);
+        var _toAdd = multiCombinations(startSet, 2, 1);
         _toAdd.forEach(function (pair) {
             var _a;
             /* istanbul ignore next */
@@ -442,7 +472,7 @@
         //const handRankingInfos: (string | number)[] = hashRankingOfFive.rankingInfos;
         var rankCards$$1 = rankCards;
         var STRAIGHTS$$1 = STRAIGHTS;
-        var highCards = multiCombinations(rankCards$$1, 5, 0);
+        var highCards = multiCombinations(rankCards$$1, 5, 1);
         var HIGH_CARDS = removeStraights(highCards);
         var SINGLE_PAIRS = singlePairsList(rankCards$$1);
         var DOUBLE_PAIRS = doublePairsList(rankCards$$1);
@@ -501,11 +531,7 @@
         };
         var rankCards$$1 = rankCards;
         var ranksHashOn7$$1 = hashRankingOfFiveOnSeven.baseRankValues;
-        var multicom = combinationsMultiSets([0, 0, 0, 0, 1, 1, 1, 1, 2, 2, 2, 2,
-            3, 3, 3, 3, 4, 4, 4, 4, 5, 5, 5, 5, 6, 6, 6, 6, 7, 7, 7, 7, 8, 8, 8, 8, 9, 9, 9, 9,
-            10, 10, 10, 10, 11, 11, 11, 11, 12, 12, 12, 12], 7);
-        // kombinatoricsJs.multiCombinations(rankCards, 7, 4 )
-        multicom.forEach(function (hand, i) {
+        multiCombinations(rankCards$$1, 7, 4).forEach(function (hand, i) {
             var h7 = hand.map(function (card) { return ranksHashOn7$$1[card]; });
             var h5 = hand.map(function (card) { return hashRankOfFive.baseRankValues[card]; });
             var hash7 = getVectorSum(h7);
@@ -626,7 +652,14 @@
      * @returns {Number} hand ranking ( the best one on all combinations of input card in group of 5)
      */
     var handOfSixEvalIndexed = function (c1, c2, c3, c4, c5, c6) {
-        return bfBestOfFiveOnX([fullCardsDeckHash_5[c1], fullCardsDeckHash_5[c2], fullCardsDeckHash_5[c3], fullCardsDeckHash_5[c4], fullCardsDeckHash_5[c5], fullCardsDeckHash_5[c6]]);
+        return bfBestOfFiveOnX([
+            fullCardsDeckHash_5[c1],
+            fullCardsDeckHash_5[c2],
+            fullCardsDeckHash_5[c3],
+            fullCardsDeckHash_5[c4],
+            fullCardsDeckHash_5[c5],
+            fullCardsDeckHash_5[c6]
+        ]);
     };
     /** @function handOfSevenEvalIndexed
      *
@@ -648,10 +681,13 @@
         var flushRankKey = 0;
         var handVector = [c1, c2, c3, c4, c5, c6, c7];
         if (flush_check_key >= 0) {
+            /* istanbul ignore next */
             handVector = handVector.filter(function (c, i) {
                 return (c & FLUSH_MASK) == flush_check_key;
             });
+            /* istanbul ignore next */
             handVector.forEach(function (c) { return (flushRankKey += c); });
+            /* istanbul ignore next */
             handRank = FLUSH_RANK_SEVEN[flushRankKey >>> 9];
         }
         else {
@@ -666,7 +702,7 @@
             faces: HASHES_OF_FIVE.rankingInfos[handRank].faces,
             handGroup: HASHES_OF_FIVE.rankingInfos[handRank].handGroup,
             winningCards: handIndexes.filter(function (c) { return wHand.includes(c % 13); }),
-            flushSuit: flushRankKey > -1 ? flushHashToName[flush_check_key] : "no flush"
+            flushSuit: flushRankKey > -1 ? flushHashToName[flush_check_key] : 'no flush'
         };
     };
     /** @function handOfSevenEvalIndexed_Verbose
@@ -728,7 +764,6 @@
         var fullHand = pHand.slice();
         fullHand.length = 7;
         var totalHandComputed = 0;
-        var wrongH = [];
         for (var i = 0; i < totalRuns; i++) {
             shuffle(partialDeck);
             var j = 0, t = 0;
@@ -737,10 +772,6 @@
                 if (t === missingCardsLength) {
                     //@ts-ignore
                     var rank = handOfSevenEval.apply(void 0, fullHand);
-                    if (!rank) {
-                        //console.log(`not rank: ${rank} `, fullHand.slice(), fullHand.map(c => cardHashToDescription_7[c]));
-                        wrongH.push([fullHand.slice(), fullHand.map(function (c) { return cardHashToDescription_7[c]; })]);
-                    }
                     stats.average += rank;
                     stats[categoryByRankingValue(rank)]++;
                     t = 0;
@@ -755,7 +786,6 @@
         for (var p in stats) {
             stats[p] /= totalHandComputed;
         }
-        console.log(wrongH);
         return stats;
     };
 

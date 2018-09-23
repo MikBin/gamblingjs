@@ -34,7 +34,7 @@ describe('testing rank of 5 and 7 hashes creator', () => {
     for (let h in HASHES_OF_FIVE_ON_SEVEN.HASHES) {
       counter++;
     }
-    expect(counter).toBe(48347);
+    expect(counter).toBe(49205);
   });
 
   it('has a lot of hands for flush too', () => {

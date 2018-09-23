@@ -10,22 +10,6 @@ export const getDiffDeck7 = (listOfHands: number[]): number[] => {
   let deck = CONSTANTS.fullCardsDeckHash_7.slice().filter(c => !listOfHands.includes(c));
   return deck;
 };
-export const getDiffDeckIndexed5 = (listOfHands: number[]): number[] => {
-  return CONSTANTS.fullCardsDeckHash_5
-    .slice()
-    .map((c, i) => {
-      return i;
-    })
-    .filter(c => !listOfHands.includes(c));
-};
-export const getDiffDeckIndexed7 = (listOfHands: number[]): number[] => {
-  return CONSTANTS.fullCardsDeckHash_7
-    .slice()
-    .map((c, i) => {
-      return i;
-    })
-    .filter(c => !listOfHands.includes(c));
-};
 
 export const atLeast5Eq = (list: (number | string)[][]): (number | string)[][] => {
   return list.filter(v => {
@@ -95,7 +79,7 @@ export const checkStraight5on7 = (arr: number[]): boolean => {
 };
 
 export const singlePairsList = (startSet: number[]): number[][] => {
-  let toAdd = kombinatoricsJs.multiCombinations(startSet, 3, 0);
+  let toAdd = kombinatoricsJs.multiCombinations(startSet, 3, 1);
   let singlePairs = [];
   for (let i = 0; i < startSet.length; ++i) {
     for (let j = 0; j < toAdd.length; ++j) {
@@ -116,7 +100,7 @@ export const internalDoublePairsSort = (a: number[], b: number[]): number => {
 };
 
 export const sortedPairsToAdd = (startSet: number[]): number[][] => {
-  let _toAdd = kombinatoricsJs.multiCombinations(startSet, 2, 0);
+  let _toAdd = kombinatoricsJs.multiCombinations(startSet, 2, 1);
 
   _toAdd.forEach(pair => {
     /* istanbul ignore next */

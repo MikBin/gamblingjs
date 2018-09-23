@@ -29,7 +29,7 @@ export const createRankOfFiveHashes = (): Readonly<hashRanking> => {
   const rankCards = CONSTANTS.rankCards;
   const STRAIGHTS = CONSTANTS.STRAIGHTS;
   const HIGH_CARDS_5_AMOUNT = CONSTANTS.HIGH_CARDS_5_AMOUNT;
-  let highCards = kombinatoricsJs.multiCombinations(rankCards, 5, 0);
+  let highCards = kombinatoricsJs.multiCombinations(rankCards, 5, 1);
   const HIGH_CARDS = ROUTINES.removeStraights(highCards);
   const SINGLE_PAIRS = ROUTINES.singlePairsList(rankCards);
   const DOUBLE_PAIRS = ROUTINES.doublePairsList(rankCards);
@@ -98,64 +98,6 @@ export const createRankOf5On7Hashes = (hashRankOfFive: hashRanking) => {
   const rankCards = CONSTANTS.rankCards;
   const ranksHashOn7 = hashRankingOfFiveOnSeven.baseRankValues;
   const suit7Hash = hashRankingOfFiveOnSeven.baseSuitValues;
-
-  const multicom = kombinatoricsJs.combinationsMultiSets(
-    [
-      0,
-      0,
-      0,
-      0,
-      1,
-      1,
-      1,
-      1,
-      2,
-      2,
-      2,
-      2,
-      3,
-      3,
-      3,
-      3,
-      4,
-      4,
-      4,
-      4,
-      5,
-      5,
-      5,
-      5,
-      6,
-      6,
-      6,
-      6,
-      7,
-      7,
-      7,
-      7,
-      8,
-      8,
-      8,
-      8,
-      9,
-      9,
-      9,
-      9,
-      10,
-      10,
-      10,
-      10,
-      11,
-      11,
-      11,
-      11,
-      12,
-      12,
-      12,
-      12
-    ],
-    7
-  );
 
   kombinatoricsJs.multiCombinations(rankCards, 7, 4).forEach((hand: number[], i: number) => {
     let h7 = hand.map(card => ranksHashOn7[card]);

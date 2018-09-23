@@ -17,10 +17,26 @@ import {
   fillRank5,
   fillRank5PlusFlushes,
   internalDoublePairsSort,
-  fillRankFlushes
+  fillRankFlushes,
+  getDiffDeck5,
+  getDiffDeck7
 } from '../src/routines';
 import { NumberMap, hashRanking } from '../src/interfaces';
+import { fullCardsDeckHash_5, fullCardsDeckHash_7 } from '../src/constants';
 
+describe('testing diffs: ', () => {
+  let hd5 = fullCardsDeckHash_5.slice();
+  let f2 = hd5.splice(0, 2);
+  it('should get diff of deck 5', () => {
+    expect(getDiffDeck5(f2)).toEqual(hd5);
+  });
+
+  let hd7 = fullCardsDeckHash_7.slice();
+  let f27 = hd7.splice(0, 2);
+  it('should get diff of deck 7', () => {
+    expect(getDiffDeck7(f27)).toEqual(hd7);
+  });
+});
 describe('testing basic routines', () => {
   it('returns the only element with 5 equals', () => {
     expect(atLeast5Eq([[2, 3, 1, 1, 1, 1, 1, 5], [1, 1, 1, 1]])).toEqual([

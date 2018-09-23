@@ -25,12 +25,12 @@ export interface handCategoryDistribution extends StringToNumberMap {
     'one pair': number;
     'two pair': number;
     'three of a kind': number;
-    'straight': number;
-    'flush': number;
+    straight: number;
+    flush: number;
     'full house': number;
     'four of a kind': number;
     'straight flush': number;
-    'average': number;
+    average: number;
 }
 export interface hashRanking {
     HASHES: NumberMap;

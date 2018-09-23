@@ -185,12 +185,14 @@ export const handOfSevenEval_Verbose = (
   let flushRankKey = 0;
   let handVector = [c1, c2, c3, c4, c5, c6, c7];
   if (flush_check_key >= 0) {
+    /* istanbul ignore next */
     handVector = handVector.filter((c, i) => {
       return (c & FLUSH_MASK) == flush_check_key;
     });
 
+    /* istanbul ignore next */
     handVector.forEach(c => (flushRankKey += c));
-
+    /* istanbul ignore next */
     handRank = FLUSH_RANK_SEVEN[flushRankKey >>> 9];
   } else {
     handRank = HASH_RANK_SEVEN[keySum >>> 9];

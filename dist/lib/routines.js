@@ -10,12 +10,6 @@ exports.getDiffDeck7 = function (listOfHands) {
     var deck = CONSTANTS.fullCardsDeckHash_7.slice().filter(function (c) { return !listOfHands.includes(c); });
     return deck;
 };
-exports.getDiffDeckIndexed5 = function (listOfHands) {
-    return CONSTANTS.fullCardsDeckHash_5.slice().map(function (c, i) { return i; }).filter(function (c) { return !listOfHands.includes(c); });
-};
-exports.getDiffDeckIndexed7 = function (listOfHands) {
-    return CONSTANTS.fullCardsDeckHash_7.slice().map(function (c, i) { return i; }).filter(function (c) { return !listOfHands.includes(c); });
-};
 exports.atLeast5Eq = function (list) {
     return list.filter(function (v) {
         var l = v.length;
@@ -84,7 +78,7 @@ exports.checkStraight5on7 = function (arr) {
     return c >= 4;
 };
 exports.singlePairsList = function (startSet) {
-    var toAdd = kombinatoricsJs.multiCombinations(startSet, 3, 0);
+    var toAdd = kombinatoricsJs.multiCombinations(startSet, 3, 1);
     var singlePairs = [];
     for (var i = 0; i < startSet.length; ++i) {
         for (var j = 0; j < toAdd.length; ++j) {
@@ -107,7 +101,7 @@ exports.internalDoublePairsSort = function (a, b) {
     return 0;
 };
 exports.sortedPairsToAdd = function (startSet) {
-    var _toAdd = kombinatoricsJs.multiCombinations(startSet, 2, 0);
+    var _toAdd = kombinatoricsJs.multiCombinations(startSet, 2, 1);
     _toAdd.forEach(function (pair) {
         var _a;
         /* istanbul ignore next */
