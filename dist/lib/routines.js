@@ -173,7 +173,14 @@ exports._rankOfHand = function (hand, rankHash) {
     return rankHash[exports.getVectorSum(hand)];
 };
 exports._rankOf5onX = function (hand, rankHash) {
-    return Math.max.apply(Math, kombinatoricsJs.combinations(hand, 5).map(function (h) { return rankHash[exports.getVectorSum(h)]; }));
+    var comb = kombinatoricsJs.combinations(hand, 5);
+    var max = 0;
+    comb.forEach(function (h) {
+        var s = exports.getVectorSum(h);
+        var r = rankHash[s];
+        max = max < r ? r : max;
+    });
+    return max;
 };
 exports.handToCardsSymbols = function (hand) {
     return hand.map(function (c) { return CONSTANTS.rankToFaceSymbol[c % 13]; }).join('');

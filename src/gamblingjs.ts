@@ -10,7 +10,7 @@ import * as PKEval from './pokerEvaluators';
 import { getPartialHandStatsIndexed_7 } from './pokerMontecarloSym';
 
 /* istanbul ignore next */
-export default PKEval;
+export { PKEval };
 
 export {
   handOfSevenEvalIndexed,

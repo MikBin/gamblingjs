@@ -18,12 +18,12 @@ exports.getPartialHandStatsIndexed_7 = function (partialHand, totalRuns) {
         'one pair': 0,
         'two pair': 0,
         'three of a kind': 0,
-        'straight': 0,
-        'flush': 0,
+        straight: 0,
+        flush: 0,
         'full house': 0,
         'four of a kind': 0,
         'straight flush': 0,
-        'average': 0
+        average: 0
     };
     var pHand = partialHand.map(function (c) { return constants_1.fullCardsDeckHash_7[c]; });
     var partialDeck = routines_1.getDiffDeck7(pHand);

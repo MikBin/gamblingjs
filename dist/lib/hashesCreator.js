@@ -25,18 +25,6 @@ exports.createRankOfFiveHashes = function () {
     var TRIPLES = ROUTINES.trisList(rankCards);
     var FULLHOUSES = ROUTINES.fullHouseList(rankCards);
     var QUADS = ROUTINES.quadsList(rankCards);
-    /*
-    let inc = 0;
-    console.log('high cards', (inc += HIGH_CARDS.length));
-    console.log('single pairs', (inc += SINGLE_PAIRS.length));
-    console.log('double pairs', (inc += DOUBLE_PAIRS.length));
-    console.log('triples', (inc += TRIPLES.length));
-    console.log('straights', (inc += STRAIGHTS.length));
-    
-    console.log('flushes', (inc += HIGH_CARDS_5_AMOUNT));
-    console.log('full houses', (inc += FULLHOUSES.length));
-    console.log('quads', (inc += QUADS.length));
-  */
     var upToStraights = HIGH_CARDS.concat(SINGLE_PAIRS, DOUBLE_PAIRS, TRIPLES, STRAIGHTS);
     upToStraights.forEach(function (h, idx) {
         routines_1.fillRank5(h, idx, hashRankingOfFive);
@@ -119,5 +107,85 @@ exports.createRankOf5On7Hashes = function (hashRankOfFive) {
       console.log(cc, fiveFlushHashes, sixFlushHashes, sevenFlushHashes, hashRankingOfFiveOnSeven.FLUSH_CHECK_KEYS);
       console.log("--------", hashRankingOfFiveOnSeven);*/
     return hashRankingOfFiveOnSeven;
+};
+exports.createRankOf5AceToFive_Low8 = function () {
+    var lowHands = kombinatoricsJs.multiCombinations([6, 5, 4, 3, 2, 1, 0, 12], 5, 1);
+    var hashRankingLow8 = {
+        HASHES: {},
+        FLUSH_CHECK_KEYS: {},
+        FLUSH_RANK_HASHES: {},
+        FLUSH_HASHES: {},
+        baseRankValues: CONSTANTS.ranksHashOn5,
+        baseSuitValues: CONSTANTS.suitsHash,
+        rankingInfos: new Array(lowHands.length)
+    };
+    lowHands.forEach(function (h, idx) {
+        routines_1.fillRank5(h, idx, hashRankingLow8);
+    });
+    /**change rankking infos as straights have to have different names */
+    return hashRankingLow8;
+};
+exports.createRankOf7AceToFive_Low = function (hashRankOfFive, baseLowRanking) {
+    var hashRankingLow = {
+        HASHES: {},
+        FLUSH_CHECK_KEYS: {},
+        FLUSH_RANK_HASHES: {},
+        FLUSH_HASHES: {},
+        baseRankValues: CONSTANTS.ranksHashOn7,
+        baseSuitValues: CONSTANTS.suitsHash,
+        rankingInfos: hashRankOfFive.rankingInfos
+    };
+    var ranksHashOn7 = CONSTANTS.ranksHashOn7;
+    var lowHands = kombinatoricsJs.multiCombinations(baseLowRanking, 5, 1);
+    /**create pairs to cross with lowHands */
+    kombinatoricsJs.multiCombinations(CONSTANTS.rankCards, 2, 2).forEach(function (pair, i) {
+        lowHands.forEach(function (lo, idx) {
+            var hand = lo.concat(pair);
+            var h7 = hand.map(function (card) { return ranksHashOn7[card]; });
+            var h5 = hand.map(function (card) { return hashRankOfFive.baseRankValues[card]; });
+            var hash7 = routines_1.getVectorSum(h7);
+            hashRankingLow.HASHES[hash7] = routines_1._rankOf5onX(h5, hashRankOfFive.HASHES);
+        });
+    });
+    return hashRankingLow;
+};
+exports.createRankOf5AceToFive_Low9 = function () {
+    var lowHands = kombinatoricsJs.multiCombinations([7, 6, 5, 4, 3, 2, 1, 0, 12], 5, 1);
+    var hashRankingLow9 = {
+        HASHES: {},
+        FLUSH_CHECK_KEYS: {},
+        FLUSH_RANK_HASHES: {},
+        FLUSH_HASHES: {},
+        baseRankValues: CONSTANTS.ranksHashOn5,
+        baseSuitValues: CONSTANTS.suitsHash,
+        rankingInfos: new Array(lowHands.length)
+    };
+    lowHands.forEach(function (h, idx) {
+        routines_1.fillRank5(h, idx, hashRankingLow9);
+    });
+    return hashRankingLow9;
+};
+exports.createRankOf5AceToFive_Full = function () {
+    var rankCards = [11, 10, 9, 8, 7, 6, 5, 4, 3, 2, 1, 0, 12];
+    var hashRankingLow = {
+        HASHES: {},
+        FLUSH_CHECK_KEYS: {},
+        FLUSH_RANK_HASHES: {},
+        FLUSH_HASHES: {},
+        baseRankValues: CONSTANTS.ranksHashOn5,
+        baseSuitValues: CONSTANTS.suitsHash,
+        rankingInfos: new Array(6175)
+    };
+    var QUADS = ROUTINES.quadsList(rankCards);
+    var FULLHOUSES = ROUTINES.fullHouseList(rankCards);
+    var TRIPLES = ROUTINES.trisList(rankCards);
+    var DOUBLE_PAIRS = ROUTINES.doublePairsList(rankCards);
+    var SINGLE_PAIRS = ROUTINES.singlePairsList(rankCards);
+    var HIGH_CARDS = kombinatoricsJs.multiCombinations(rankCards, 5, 1);
+    var all = QUADS.concat(FULLHOUSES, TRIPLES, DOUBLE_PAIRS, SINGLE_PAIRS, HIGH_CARDS);
+    all.forEach(function (h, idx) {
+        routines_1.fillRank5(h, idx, hashRankingLow);
+    });
+    return hashRankingLow;
 };
 //# sourceMappingURL=hashesCreator.js.map

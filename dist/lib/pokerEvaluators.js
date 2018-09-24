@@ -3,6 +3,9 @@ Object.defineProperty(exports, "__esModule", { value: true });
 var kombinatoricsJs = require("kombinatoricsjs");
 var hashesCreator_1 = require("./hashesCreator");
 var constants_1 = require("./constants");
+/**low hands ato5 as well as hand on 6 and omaha optimization are not created at boot,
+ * they have to be instantiated explicitly
+ */
 exports.HASHES_OF_FIVE = hashesCreator_1.createRankOfFiveHashes();
 var FLUSH_CHECK_FIVE = exports.HASHES_OF_FIVE.FLUSH_CHECK_KEYS;
 var HASH_RANK_FIVE = exports.HASHES_OF_FIVE.HASHES;
@@ -11,6 +14,13 @@ exports.HASHES_OF_FIVE_ON_SEVEN = hashesCreator_1.createRankOf5On7Hashes(exports
 var FLUSH_CHECK_SEVEN = exports.HASHES_OF_FIVE_ON_SEVEN.FLUSH_CHECK_KEYS;
 var HASH_RANK_SEVEN = exports.HASHES_OF_FIVE_ON_SEVEN.HASHES;
 var FLUSH_RANK_SEVEN = exports.HASHES_OF_FIVE_ON_SEVEN.FLUSH_RANK_HASHES;
+/**LOW Ato5 HASHES */
+exports.HASHES_OF_FIVE_LOW8 = hashesCreator_1.createRankOf5AceToFive_Low8();
+exports.HASHES_OF_FIVE_LOW9 = hashesCreator_1.createRankOf5AceToFive_Low9();
+exports.HASEHS_OF_FIVE_LOW_Ato5 = hashesCreator_1.createRankOf5AceToFive_Full();
+exports.HASHES_OF_SEVEN_LOW8 = hashesCreator_1.createRankOf7AceToFive_Low(exports.HASHES_OF_FIVE_LOW8, constants_1.rankCards_low8);
+exports.HASHES_OF_SEVEN_LOW9 = hashesCreator_1.createRankOf7AceToFive_Low(exports.HASHES_OF_FIVE_LOW9, constants_1.rankCards_low9);
+exports.HASEHS_OF_SEVEN_LOW_Ato5 = hashesCreator_1.createRankOf7AceToFive_Low(exports.HASEHS_OF_FIVE_LOW_Ato5, constants_1.rankCards_low);
 /** @function handOfFiveEval
  *
  * @param {Number} c1...c5 cards hash from CONSTANTS.fullCardsDeckHash_5

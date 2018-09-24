@@ -37,19 +37,6 @@ export const createRankOfFiveHashes = (): Readonly<hashRanking> => {
   const FULLHOUSES = ROUTINES.fullHouseList(rankCards);
   const QUADS = ROUTINES.quadsList(rankCards);
 
-  /*
-  let inc = 0;
-  console.log('high cards', (inc += HIGH_CARDS.length));
-  console.log('single pairs', (inc += SINGLE_PAIRS.length));
-  console.log('double pairs', (inc += DOUBLE_PAIRS.length));
-  console.log('triples', (inc += TRIPLES.length));
-  console.log('straights', (inc += STRAIGHTS.length));
-  
-  console.log('flushes', (inc += HIGH_CARDS_5_AMOUNT));
-  console.log('full houses', (inc += FULLHOUSES.length));
-  console.log('quads', (inc += QUADS.length));
-*/
-
   let upToStraights = HIGH_CARDS.concat(SINGLE_PAIRS, DOUBLE_PAIRS, TRIPLES, STRAIGHTS);
   upToStraights.forEach((h, idx) => {
     fillRank5(h, idx, hashRankingOfFive);
@@ -148,4 +135,102 @@ export const createRankOf5On7Hashes = (hashRankOfFive: hashRanking) => {
     console.log("--------", hashRankingOfFiveOnSeven);*/
 
   return hashRankingOfFiveOnSeven;
+};
+
+export const createRankOf5AceToFive_Low8 = (): Readonly<hashRanking> => {
+  let lowHands: number[][] = kombinatoricsJs.multiCombinations([6, 5, 4, 3, 2, 1, 0, 12], 5, 1);
+  const hashRankingLow8: hashRanking = {
+    HASHES: {},
+    FLUSH_CHECK_KEYS: {},
+    FLUSH_RANK_HASHES: {},
+    FLUSH_HASHES: {},
+    baseRankValues: CONSTANTS.ranksHashOn5,
+    baseSuitValues: CONSTANTS.suitsHash,
+    rankingInfos: new Array(lowHands.length)
+  };
+
+  lowHands.forEach((h, idx) => {
+    fillRank5(h, idx, hashRankingLow8);
+  });
+  /**change rankking infos as straights have to have different names */
+
+  return hashRankingLow8;
+};
+
+export const createRankOf7AceToFive_Low = (
+  hashRankOfFive: hashRanking,
+  baseLowRanking: number[]
+): Readonly<hashRanking> => {
+  const hashRankingLow: hashRanking = {
+    HASHES: {},
+    FLUSH_CHECK_KEYS: {},
+    FLUSH_RANK_HASHES: {},
+    FLUSH_HASHES: {},
+    baseRankValues: CONSTANTS.ranksHashOn7,
+    baseSuitValues: CONSTANTS.suitsHash,
+    rankingInfos: hashRankOfFive.rankingInfos
+  };
+
+  let ranksHashOn7 = CONSTANTS.ranksHashOn7;
+
+  let lowHands: number[][] = kombinatoricsJs.multiCombinations(baseLowRanking, 5, 1);
+  /**create pairs to cross with lowHands */
+  kombinatoricsJs.multiCombinations(CONSTANTS.rankCards, 2, 2).forEach((pair, i) => {
+    lowHands.forEach((lo, idx) => {
+      let hand = lo.concat(pair);
+      let h7 = hand.map(card => ranksHashOn7[card]);
+      let h5 = hand.map(card => hashRankOfFive.baseRankValues[card]);
+      let hash7: number = getVectorSum(h7);
+
+      hashRankingLow.HASHES[hash7] = _rankOf5onX(h5, hashRankOfFive.HASHES);
+    });
+  });
+
+  return hashRankingLow;
+};
+
+export const createRankOf5AceToFive_Low9 = () => {
+  let lowHands: number[][] = kombinatoricsJs.multiCombinations([7, 6, 5, 4, 3, 2, 1, 0, 12], 5, 1);
+  const hashRankingLow9: hashRanking = {
+    HASHES: {},
+    FLUSH_CHECK_KEYS: {},
+    FLUSH_RANK_HASHES: {},
+    FLUSH_HASHES: {},
+    baseRankValues: CONSTANTS.ranksHashOn5,
+    baseSuitValues: CONSTANTS.suitsHash,
+    rankingInfos: new Array(lowHands.length)
+  };
+
+  lowHands.forEach((h, idx) => {
+    fillRank5(h, idx, hashRankingLow9);
+  });
+
+  return hashRankingLow9;
+};
+
+export const createRankOf5AceToFive_Full = () => {
+  const rankCards: number[] = [11, 10, 9, 8, 7, 6, 5, 4, 3, 2, 1, 0, 12];
+
+  const hashRankingLow: hashRanking = {
+    HASHES: {},
+    FLUSH_CHECK_KEYS: {},
+    FLUSH_RANK_HASHES: {},
+    FLUSH_HASHES: {},
+    baseRankValues: CONSTANTS.ranksHashOn5,
+    baseSuitValues: CONSTANTS.suitsHash,
+    rankingInfos: new Array(6175)
+  };
+  const QUADS = ROUTINES.quadsList(rankCards);
+  const FULLHOUSES = ROUTINES.fullHouseList(rankCards);
+  const TRIPLES = ROUTINES.trisList(rankCards);
+  const DOUBLE_PAIRS = ROUTINES.doublePairsList(rankCards);
+  const SINGLE_PAIRS = ROUTINES.singlePairsList(rankCards);
+  let HIGH_CARDS: number[][] = kombinatoricsJs.multiCombinations(rankCards, 5, 1);
+
+  let all = QUADS.concat(FULLHOUSES, TRIPLES, DOUBLE_PAIRS, SINGLE_PAIRS, HIGH_CARDS);
+  all.forEach((h, idx) => {
+    fillRank5(h, idx, hashRankingLow);
+  });
+
+  return hashRankingLow;
 };

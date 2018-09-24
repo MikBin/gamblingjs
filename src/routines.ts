@@ -184,7 +184,14 @@ export const _rankOfHand = (hand: number[], rankHash: NumberMap) => {
   return rankHash[getVectorSum(hand)];
 };
 export const _rankOf5onX = (hand: number[], rankHash: NumberMap) => {
-  return Math.max(...kombinatoricsJs.combinations(hand, 5).map(h => rankHash[getVectorSum(h)]));
+  let comb = kombinatoricsJs.combinations(hand, 5);
+  let max = 0;
+  comb.forEach(h => {
+    let s = getVectorSum(h);
+    let r = rankHash[s];
+    max = max < r ? r : max;
+  });
+  return max;
 };
 
 export const handToCardsSymbols = (hand: number[]): string => {

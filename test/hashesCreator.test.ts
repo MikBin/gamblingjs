@@ -1,4 +1,12 @@
-import { createRankOfFiveHashes, createRankOf5On7Hashes } from '../src/hashesCreator';
+import {
+  createRankOfFiveHashes,
+  createRankOf5On7Hashes,
+  createRankOf5AceToFive_Low8,
+  createRankOf5AceToFive_Low9,
+  createRankOf5AceToFive_Full,
+  createRankOf7AceToFive_Low
+} from '../src/hashesCreator';
+import * as CONSTANTS from '../src/constants';
 
 describe('testing rank of 5 and 7 hashes creator', () => {
   let HASHES_OF_FIVE;
@@ -43,5 +51,32 @@ describe('testing rank of 5 and 7 hashes creator', () => {
       counter++;
     }
     expect(counter).toBe(3003);
+  });
+});
+
+describe('testing hash of low Ato5: ', () => {
+  let HASHES_OF_LOW8_on5;
+  it('low8 hash 56 hands', () => {
+    expect((HASHES_OF_LOW8_on5 = createRankOf5AceToFive_Low8())).toBeTruthy();
+    expect(HASHES_OF_LOW8_on5.rankingInfos.length).toBe(56);
+  });
+
+  let HASHES_OF_LOW9_on5;
+  it('low8 hash 56 hands', () => {
+    expect((HASHES_OF_LOW9_on5 = createRankOf5AceToFive_Low9())).toBeTruthy();
+    expect(HASHES_OF_LOW9_on5.rankingInfos.length).toBe(126);
+  });
+
+  it('creates all ace to five ranking: ', () => {
+    let HASHES_OF_LOW_on5;
+    expect((HASHES_OF_LOW_on5 = createRankOf5AceToFive_Full())).toBeTruthy();
+    expect(HASHES_OF_LOW_on5.rankingInfos.length).toBe(6175);
+  });
+
+  it('creates hash low8 for 7 cards hand', () => {
+    let HASHES_OF_LOW_on7;
+    expect(
+      (HASHES_OF_LOW_on7 = createRankOf7AceToFive_Low(HASHES_OF_LOW8_on5, CONSTANTS.rankCards))
+    ).toBeTruthy();
   });
 });

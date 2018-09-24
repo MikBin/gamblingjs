@@ -1,6 +1,16 @@
 import { handInfo, verboseHandInfo } from './interfaces';
+/**low hands ato5 as well as hand on 6 and omaha optimization are not created at boot,
+ * they have to be instantiated explicitly
+ */
 export declare const HASHES_OF_FIVE: Readonly<import("./interfaces").hashRanking>;
 export declare const HASHES_OF_FIVE_ON_SEVEN: import("./interfaces").hashRanking;
+/**LOW Ato5 HASHES */
+export declare const HASHES_OF_FIVE_LOW8: Readonly<import("./interfaces").hashRanking>;
+export declare const HASHES_OF_FIVE_LOW9: import("./interfaces").hashRanking;
+export declare const HASEHS_OF_FIVE_LOW_Ato5: import("./interfaces").hashRanking;
+export declare const HASHES_OF_SEVEN_LOW8: Readonly<import("./interfaces").hashRanking>;
+export declare const HASHES_OF_SEVEN_LOW9: Readonly<import("./interfaces").hashRanking>;
+export declare const HASEHS_OF_SEVEN_LOW_Ato5: Readonly<import("./interfaces").hashRanking>;
 /** @function handOfFiveEval
  *
  * @param {Number} c1...c5 cards hash from CONSTANTS.fullCardsDeckHash_5

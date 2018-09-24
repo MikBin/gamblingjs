@@ -154,6 +154,9 @@ export const STRAIGHTS: number[][] = [
 ];
 
 export const rankCards: number[] = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12];
+export const rankCards_low8: number[] = [6, 5, 4, 3, 2, 1, 0, 12];
+export const rankCards_low9: number[] = [7, 6, 5, 4, 3, 2, 1, 0, 12];
+export const rankCards_low: number[] = [11, 10, 9, 8, 7, 6, 5, 4, 3, 2, 1, 0, 12];
 export const HIGH_CARDS_5_AMOUNT: number = 1277;
 export const FLUSHES_BASE_START: number = 5863;
 export const STRAIGHT_FLUSH_BASE_START: number = 7452;

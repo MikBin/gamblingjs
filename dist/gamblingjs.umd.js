@@ -253,6 +253,9 @@
         [8, 9, 10, 11, 12]
     ];
     var rankCards = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12];
+    var rankCards_low8 = [6, 5, 4, 3, 2, 1, 0, 12];
+    var rankCards_low9 = [7, 6, 5, 4, 3, 2, 1, 0, 12];
+    var rankCards_low = [11, 10, 9, 8, 7, 6, 5, 4, 3, 2, 1, 0, 12];
     var HIGH_CARDS_5_AMOUNT = 1277;
     var FLUSHES_BASE_START = 5863;
     var STRAIGHT_FLUSH_BASE_START = 7452;
@@ -410,7 +413,14 @@
         });
     };
     var _rankOf5onX = function (hand, rankHash) {
-        return Math.max.apply(Math, combinations(hand, 5).map(function (h) { return rankHash[getVectorSum(h)]; }));
+        var comb = combinations(hand, 5);
+        var max = 0;
+        comb.forEach(function (h) {
+            var s = getVectorSum(h);
+            var r = rankHash[s];
+            max = max < r ? r : max;
+        });
+        return max;
     };
     var handToCardsSymbols = function (hand) {
         return hand.map(function (c) { return rankToFaceSymbol[c % 13]; }).join('');
@@ -479,18 +489,6 @@
         var TRIPLES = trisList(rankCards$$1);
         var FULLHOUSES = fullHouseList(rankCards$$1);
         var QUADS = quadsList(rankCards$$1);
-        /*
-        let inc = 0;
-        console.log('high cards', (inc += HIGH_CARDS.length));
-        console.log('single pairs', (inc += SINGLE_PAIRS.length));
-        console.log('double pairs', (inc += DOUBLE_PAIRS.length));
-        console.log('triples', (inc += TRIPLES.length));
-        console.log('straights', (inc += STRAIGHTS.length));
-        
-        console.log('flushes', (inc += HIGH_CARDS_5_AMOUNT));
-        console.log('full houses', (inc += FULLHOUSES.length));
-        console.log('quads', (inc += QUADS.length));
-      */
         var upToStraights = HIGH_CARDS.concat(SINGLE_PAIRS, DOUBLE_PAIRS, TRIPLES, STRAIGHTS$$1);
         upToStraights.forEach(function (h, idx) {
             fillRank5(h, idx, hashRankingOfFive);
@@ -572,7 +570,90 @@
           console.log("--------", hashRankingOfFiveOnSeven);*/
         return hashRankingOfFiveOnSeven;
     };
+    var createRankOf5AceToFive_Low8 = function () {
+        var lowHands = multiCombinations([6, 5, 4, 3, 2, 1, 0, 12], 5, 1);
+        var hashRankingLow8 = {
+            HASHES: {},
+            FLUSH_CHECK_KEYS: {},
+            FLUSH_RANK_HASHES: {},
+            FLUSH_HASHES: {},
+            baseRankValues: ranksHashOn5,
+            baseSuitValues: suitsHash,
+            rankingInfos: new Array(lowHands.length)
+        };
+        lowHands.forEach(function (h, idx) {
+            fillRank5(h, idx, hashRankingLow8);
+        });
+        /**change rankking infos as straights have to have different names */
+        return hashRankingLow8;
+    };
+    var createRankOf7AceToFive_Low = function (hashRankOfFive, baseLowRanking) {
+        var hashRankingLow = {
+            HASHES: {},
+            FLUSH_CHECK_KEYS: {},
+            FLUSH_RANK_HASHES: {},
+            FLUSH_HASHES: {},
+            baseRankValues: ranksHashOn7,
+            baseSuitValues: suitsHash,
+            rankingInfos: hashRankOfFive.rankingInfos
+        };
+        var ranksHashOn7$$1 = ranksHashOn7;
+        var lowHands = multiCombinations(baseLowRanking, 5, 1);
+        /**create pairs to cross with lowHands */
+        multiCombinations(rankCards, 2, 2).forEach(function (pair, i) {
+            lowHands.forEach(function (lo, idx) {
+                var hand = lo.concat(pair);
+                var h7 = hand.map(function (card) { return ranksHashOn7$$1[card]; });
+                var h5 = hand.map(function (card) { return hashRankOfFive.baseRankValues[card]; });
+                var hash7 = getVectorSum(h7);
+                hashRankingLow.HASHES[hash7] = _rankOf5onX(h5, hashRankOfFive.HASHES);
+            });
+        });
+        return hashRankingLow;
+    };
+    var createRankOf5AceToFive_Low9 = function () {
+        var lowHands = multiCombinations([7, 6, 5, 4, 3, 2, 1, 0, 12], 5, 1);
+        var hashRankingLow9 = {
+            HASHES: {},
+            FLUSH_CHECK_KEYS: {},
+            FLUSH_RANK_HASHES: {},
+            FLUSH_HASHES: {},
+            baseRankValues: ranksHashOn5,
+            baseSuitValues: suitsHash,
+            rankingInfos: new Array(lowHands.length)
+        };
+        lowHands.forEach(function (h, idx) {
+            fillRank5(h, idx, hashRankingLow9);
+        });
+        return hashRankingLow9;
+    };
+    var createRankOf5AceToFive_Full = function () {
+        var rankCards$$1 = [11, 10, 9, 8, 7, 6, 5, 4, 3, 2, 1, 0, 12];
+        var hashRankingLow = {
+            HASHES: {},
+            FLUSH_CHECK_KEYS: {},
+            FLUSH_RANK_HASHES: {},
+            FLUSH_HASHES: {},
+            baseRankValues: ranksHashOn5,
+            baseSuitValues: suitsHash,
+            rankingInfos: new Array(6175)
+        };
+        var QUADS = quadsList(rankCards$$1);
+        var FULLHOUSES = fullHouseList(rankCards$$1);
+        var TRIPLES = trisList(rankCards$$1);
+        var DOUBLE_PAIRS = doublePairsList(rankCards$$1);
+        var SINGLE_PAIRS = singlePairsList(rankCards$$1);
+        var HIGH_CARDS = multiCombinations(rankCards$$1, 5, 1);
+        var all = QUADS.concat(FULLHOUSES, TRIPLES, DOUBLE_PAIRS, SINGLE_PAIRS, HIGH_CARDS);
+        all.forEach(function (h, idx) {
+            fillRank5(h, idx, hashRankingLow);
+        });
+        return hashRankingLow;
+    };
 
+    /**low hands ato5 as well as hand on 6 and omaha optimization are not created at boot,
+     * they have to be instantiated explicitly
+     */
     var HASHES_OF_FIVE = createRankOfFiveHashes();
     var FLUSH_CHECK_FIVE = HASHES_OF_FIVE.FLUSH_CHECK_KEYS;
     var HASH_RANK_FIVE = HASHES_OF_FIVE.HASHES;
@@ -581,6 +662,13 @@
     var FLUSH_CHECK_SEVEN = HASHES_OF_FIVE_ON_SEVEN.FLUSH_CHECK_KEYS;
     var HASH_RANK_SEVEN = HASHES_OF_FIVE_ON_SEVEN.HASHES;
     var FLUSH_RANK_SEVEN = HASHES_OF_FIVE_ON_SEVEN.FLUSH_RANK_HASHES;
+    /**LOW Ato5 HASHES */
+    var HASHES_OF_FIVE_LOW8 = createRankOf5AceToFive_Low8();
+    var HASHES_OF_FIVE_LOW9 = createRankOf5AceToFive_Low9();
+    var HASEHS_OF_FIVE_LOW_Ato5 = createRankOf5AceToFive_Full();
+    var HASHES_OF_SEVEN_LOW8 = createRankOf7AceToFive_Low(HASHES_OF_FIVE_LOW8, rankCards_low8);
+    var HASHES_OF_SEVEN_LOW9 = createRankOf7AceToFive_Low(HASHES_OF_FIVE_LOW9, rankCards_low9);
+    var HASEHS_OF_SEVEN_LOW_Ato5 = createRankOf7AceToFive_Low(HASEHS_OF_FIVE_LOW_Ato5, rankCards_low);
     /** @function handOfFiveEval
      *
      * @param {Number} c1...c5 cards hash from CONSTANTS.fullCardsDeckHash_5
@@ -722,9 +810,15 @@
         return HASHES_OF_FIVE.rankingInfos[rank];
     };
 
-    var PKEval = /*#__PURE__*/Object.freeze({
+    var pokerEvaluators = /*#__PURE__*/Object.freeze({
         HASHES_OF_FIVE: HASHES_OF_FIVE,
         HASHES_OF_FIVE_ON_SEVEN: HASHES_OF_FIVE_ON_SEVEN,
+        HASHES_OF_FIVE_LOW8: HASHES_OF_FIVE_LOW8,
+        HASHES_OF_FIVE_LOW9: HASHES_OF_FIVE_LOW9,
+        HASEHS_OF_FIVE_LOW_Ato5: HASEHS_OF_FIVE_LOW_Ato5,
+        HASHES_OF_SEVEN_LOW8: HASHES_OF_SEVEN_LOW8,
+        HASHES_OF_SEVEN_LOW9: HASHES_OF_SEVEN_LOW9,
+        HASEHS_OF_SEVEN_LOW_Ato5: HASEHS_OF_SEVEN_LOW_Ato5,
         handOfFiveEval: handOfFiveEval,
         handOfFiveEvalIndexed: handOfFiveEvalIndexed,
         bfBestOfFiveOnX: bfBestOfFiveOnX,
@@ -750,12 +844,12 @@
             'one pair': 0,
             'two pair': 0,
             'three of a kind': 0,
-            'straight': 0,
-            'flush': 0,
+            straight: 0,
+            flush: 0,
             'full house': 0,
             'four of a kind': 0,
             'straight flush': 0,
-            'average': 0
+            average: 0
         };
         var pHand = partialHand.map(function (c) { return fullCardsDeckHash_7[c]; });
         var partialDeck = getDiffDeck7(pHand);
@@ -791,7 +885,7 @@
 
     /**@TODO yahtzee ,poker dice,yacht,generala ,cheerio*/
 
-    exports.default = PKEval;
+    exports.PKEval = pokerEvaluators;
     exports.handOfSevenEvalIndexed = handOfSevenEvalIndexed;
     exports.handOfFiveEvalIndexed = handOfFiveEvalIndexed;
     exports.getHandInfo = getHandInfo;

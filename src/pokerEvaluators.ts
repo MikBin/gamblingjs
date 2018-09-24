@@ -1,13 +1,27 @@
 import * as kombinatoricsJs from 'kombinatoricsjs';
-import { createRankOfFiveHashes, createRankOf5On7Hashes } from './hashesCreator';
+import {
+  createRankOfFiveHashes,
+  createRankOf5On7Hashes,
+  createRankOf5AceToFive_Low8,
+  createRankOf7AceToFive_Low,
+  createRankOf5AceToFive_Low9,
+  createRankOf5AceToFive_Full
+} from './hashesCreator';
 import {
   fullCardsDeckHash_5,
   fullCardsDeckHash_7,
   FLUSH_MASK,
   flushHashToName,
-  cardHashToDescription_7
+  cardHashToDescription_7,
+  rankCards_low8,
+  rankCards_low9,
+  rankCards_low
 } from './constants';
 import { handInfo, verboseHandInfo } from './interfaces';
+
+/**low hands ato5 as well as hand on 6 and omaha optimization are not created at boot,
+ * they have to be instantiated explicitly
+ */
 
 export const HASHES_OF_FIVE = createRankOfFiveHashes();
 const FLUSH_CHECK_FIVE = HASHES_OF_FIVE.FLUSH_CHECK_KEYS;
@@ -18,6 +32,17 @@ export const HASHES_OF_FIVE_ON_SEVEN = createRankOf5On7Hashes(HASHES_OF_FIVE);
 const FLUSH_CHECK_SEVEN = HASHES_OF_FIVE_ON_SEVEN.FLUSH_CHECK_KEYS;
 const HASH_RANK_SEVEN = HASHES_OF_FIVE_ON_SEVEN.HASHES;
 const FLUSH_RANK_SEVEN = HASHES_OF_FIVE_ON_SEVEN.FLUSH_RANK_HASHES;
+
+/**LOW Ato5 HASHES */
+export const HASHES_OF_FIVE_LOW8 = createRankOf5AceToFive_Low8();
+export const HASHES_OF_FIVE_LOW9 = createRankOf5AceToFive_Low9();
+export const HASEHS_OF_FIVE_LOW_Ato5 = createRankOf5AceToFive_Full();
+export const HASHES_OF_SEVEN_LOW8 = createRankOf7AceToFive_Low(HASHES_OF_FIVE_LOW8, rankCards_low8);
+export const HASHES_OF_SEVEN_LOW9 = createRankOf7AceToFive_Low(HASHES_OF_FIVE_LOW9, rankCards_low9);
+export const HASEHS_OF_SEVEN_LOW_Ato5 = createRankOf7AceToFive_Low(
+  HASEHS_OF_FIVE_LOW_Ato5,
+  rankCards_low
+);
 
 /** @function handOfFiveEval
  *
