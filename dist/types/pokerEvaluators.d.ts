@@ -1,4 +1,4 @@
-import { handInfo, verboseHandInfo } from './interfaces';
+import { handInfo, verboseHandInfo, hiLowRank, NumberMap } from './interfaces';
 /**low hands ato5 as well as hand on 6 and omaha optimization are not created at boot,
  * they have to be instantiated explicitly
  */
@@ -17,6 +17,18 @@ export declare const HASEHS_OF_SEVEN_LOW_Ato5: Readonly<import("./interfaces").h
  * @returns {Number} hand ranking
  */
 export declare const handOfFiveEval: (c1: number, c2: number, c3: number, c4: number, c5: number) => number;
+/** @function handOfFiveEvalHiLow
+ *
+ * @param {NumberMap} hash rannking for low hands, depending on which ato5 low is used: can be low8 low9 or lowAll
+ * @param {Number} c1...c5 cards hash from CONSTANTS.fullCardsDeckHash_5
+ * @returns {hiLowRank} hand ranking object for both low and high ( if doesnt qualify for low it returns -1)
+ */
+export declare const handOfFiveEvalHiLow: (LOW_RANK_HASH: NumberMap, c1: number, c2: number, c3: number, c4: number, c5: number) => hiLowRank;
+export declare const handOfFiveEvalHiLow8: (c1: number, c2: number, c3: number, c4: number, c5: number) => hiLowRank;
+export declare const handOfFiveEvalHiLow9: (c1: number, c2: number, c3: number, c4: number, c5: number) => hiLowRank;
+export declare const handOfFiveEvalLow_Ato5: (c1: number, c2: number, c3: number, c4: number, c5: number) => number;
+/**inverse ranking */
+export declare const handOfFiveEvalLowBall27: (c1: number, c2: number, c3: number, c4: number, c5: number) => number;
 /** @function handOfFiveEvalIndexed
  *
  * @param {Number} c1...c5 cards index from [0...51]

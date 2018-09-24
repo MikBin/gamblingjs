@@ -15,9 +15,10 @@ import {
   cardHashToDescription_7,
   rankCards_low8,
   rankCards_low9,
-  rankCards_low
+  rankCards_low,
+  HIGH_MAX_RANK
 } from './constants';
-import { handInfo, verboseHandInfo } from './interfaces';
+import { handInfo, verboseHandInfo, hiLowRank, NumberMap } from './interfaces';
 
 /**low hands ato5 as well as hand on 6 and omaha optimization are not created at boot,
  * they have to be instantiated explicitly
@@ -35,8 +36,11 @@ const FLUSH_RANK_SEVEN = HASHES_OF_FIVE_ON_SEVEN.FLUSH_RANK_HASHES;
 
 /**LOW Ato5 HASHES */
 export const HASHES_OF_FIVE_LOW8 = createRankOf5AceToFive_Low8();
+const HASH_RANK_FIVE_LOW8 = HASHES_OF_FIVE_LOW8.HASHES;
 export const HASHES_OF_FIVE_LOW9 = createRankOf5AceToFive_Low9();
+const HASH_RANK_FIVE_LOW9 = HASHES_OF_FIVE_LOW9.HASHES;
 export const HASEHS_OF_FIVE_LOW_Ato5 = createRankOf5AceToFive_Full();
+const HASH_RANK_FIVE_LOW_Ato5 = HASEHS_OF_FIVE_LOW_Ato5.HASHES;
 export const HASHES_OF_SEVEN_LOW8 = createRankOf7AceToFive_Low(HASHES_OF_FIVE_LOW8, rankCards_low8);
 export const HASHES_OF_SEVEN_LOW9 = createRankOf7AceToFive_Low(HASHES_OF_FIVE_LOW9, rankCards_low9);
 export const HASEHS_OF_SEVEN_LOW_Ato5 = createRankOf7AceToFive_Low(
@@ -64,6 +68,79 @@ export const handOfFiveEval = (
   }
 
   return HASH_RANK_FIVE[rankKey];
+};
+
+/** @function handOfFiveEvalHiLow
+ *
+ * @param {NumberMap} hash rannking for low hands, depending on which ato5 low is used: can be low8 low9 or lowAll
+ * @param {Number} c1...c5 cards hash from CONSTANTS.fullCardsDeckHash_5
+ * @returns {hiLowRank} hand ranking object for both low and high ( if doesnt qualify for low it returns -1)
+ */
+export const handOfFiveEvalHiLow = (
+  LOW_RANK_HASH: NumberMap,
+  c1: number,
+  c2: number,
+  c3: number,
+  c4: number,
+  c5: number
+): hiLowRank => {
+  let keySum: number = c1 + c2 + c3 + c4 + c5;
+  let rankKey: number = keySum >>> 9;
+  let low = LOW_RANK_HASH[rankKey];
+  let bothRank: hiLowRank = {
+    hi: 0,
+    low: isNaN(low) ? -1 : low
+  };
+  let flush_check_key: number = FLUSH_CHECK_FIVE[keySum & FLUSH_MASK];
+  if (flush_check_key >= 0) {
+    bothRank.hi = FLUSH_RANK_FIVE[rankKey];
+  } else {
+    bothRank.hi = HASH_RANK_FIVE[rankKey];
+  }
+  return bothRank;
+};
+
+export const handOfFiveEvalHiLow8 = (
+  c1: number,
+  c2: number,
+  c3: number,
+  c4: number,
+  c5: number
+): hiLowRank => {
+  return handOfFiveEvalHiLow(HASH_RANK_FIVE_LOW8, c1, c2, c3, c4, c5);
+};
+
+export const handOfFiveEvalHiLow9 = (
+  c1: number,
+  c2: number,
+  c3: number,
+  c4: number,
+  c5: number
+): hiLowRank => {
+  return handOfFiveEvalHiLow(HASH_RANK_FIVE_LOW9, c1, c2, c3, c4, c5);
+};
+export const handOfFiveEvalLow_Ato5 = (
+  c1: number,
+  c2: number,
+  c3: number,
+  c4: number,
+  c5: number
+): number => {
+  let keySum: number = c1 + c2 + c3 + c4 + c5;
+  let rankKey: number = keySum >>> 9;
+  let rank = HASH_RANK_FIVE_LOW_Ato5[rankKey];
+  return rank;
+};
+
+/**inverse ranking */
+export const handOfFiveEvalLowBall27 = (
+  c1: number,
+  c2: number,
+  c3: number,
+  c4: number,
+  c5: number
+): number => {
+  return HIGH_MAX_RANK - handOfFiveEval(c1, c2, c3, c4, c5);
 };
 
 /** @function handOfFiveEvalIndexed

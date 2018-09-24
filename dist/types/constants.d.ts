@@ -30,6 +30,7 @@ export declare const rankCards_low: number[];
 export declare const HIGH_CARDS_5_AMOUNT: number;
 export declare const FLUSHES_BASE_START: number;
 export declare const STRAIGHT_FLUSH_BASE_START: number;
+export declare const HIGH_MAX_RANK: number;
 export declare const FLUSH_MASK: number;
 export declare const STRAIGHT_FLUSH_OFFSET: number;
 export declare const handsRankingDelimiter_5cards: number[];

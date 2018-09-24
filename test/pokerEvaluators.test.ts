@@ -7,6 +7,10 @@ import {
   handOfSevenEval_Verbose,
   handOfSevenEvalIndexed_Verbose,
   handOfSixEvalIndexed,
+  handOfFiveEvalLowBall27,
+  handOfFiveEvalHiLow8,
+  handOfFiveEvalHiLow9,
+  handOfFiveEvalLow_Ato5,
   getHandInfo
 } from '../src/pokerEvaluators';
 import { fullCardsDeckHash_5, fullCardsDeckHash_7 } from '../src/constants';
@@ -28,6 +32,116 @@ describe('testing hand of five eval', () => {
     expect(handOfFiveEvalIndexed(0, 1, 2, 3, 18)).toBe(0);
     expect(handOfFiveEvalIndexed(13, 14, 15, 16, 31)).toBe(0);
     expect(handOfFiveEvalIndexed(25, 13, 14, 15, 16)).toBe(7452);
+  });
+});
+
+describe('testing hilo 8 and 9 routines: ', () => {
+  expect(
+    handOfFiveEvalHiLow8(
+      fullCardsDeckHash_5[12],
+      fullCardsDeckHash_5[11],
+      fullCardsDeckHash_5[10],
+      fullCardsDeckHash_5[9],
+      fullCardsDeckHash_5[8]
+    )
+  ).toEqual({ hi: 7461, low: -1 });
+
+  expect(
+    handOfFiveEvalHiLow8(
+      fullCardsDeckHash_5[6],
+      fullCardsDeckHash_5[5],
+      fullCardsDeckHash_5[4],
+      fullCardsDeckHash_5[3],
+      fullCardsDeckHash_5[2]
+    )
+  ).toEqual({ hi: 7455, low: 0 });
+
+  expect(
+    handOfFiveEvalHiLow8(
+      fullCardsDeckHash_5[6],
+      fullCardsDeckHash_5[5],
+      fullCardsDeckHash_5[4],
+      fullCardsDeckHash_5[3],
+      fullCardsDeckHash_5[12]
+    )
+  ).toEqual({ hi: 6898, low: 3 });
+
+  expect(
+    handOfFiveEvalHiLow8(
+      fullCardsDeckHash_5[7],
+      fullCardsDeckHash_5[5],
+      fullCardsDeckHash_5[4],
+      fullCardsDeckHash_5[3],
+      fullCardsDeckHash_5[12]
+    )
+  ).toEqual({ hi: 6903, low: -1 });
+
+  expect(
+    handOfFiveEvalHiLow9(
+      fullCardsDeckHash_5[7],
+      fullCardsDeckHash_5[5],
+      fullCardsDeckHash_5[4],
+      fullCardsDeckHash_5[3],
+      fullCardsDeckHash_5[12]
+    )
+  ).toEqual({ hi: 6903, low: 38 });
+});
+
+describe('ace to five lowball: ', () => {
+  expect(
+    handOfFiveEvalLow_Ato5(
+      fullCardsDeckHash_5[11],
+      fullCardsDeckHash_5[11],
+      fullCardsDeckHash_5[11],
+      fullCardsDeckHash_5[11],
+      fullCardsDeckHash_5[10]
+    )
+  ).toBe(0);
+
+  expect(
+    handOfFiveEvalLow_Ato5(
+      fullCardsDeckHash_5[7],
+      fullCardsDeckHash_5[11],
+      fullCardsDeckHash_5[10],
+      fullCardsDeckHash_5[9],
+      fullCardsDeckHash_5[8]
+    )
+  ).toBe(4888);
+
+  expect(
+    handOfFiveEvalLow_Ato5(
+      fullCardsDeckHash_5[12],
+      fullCardsDeckHash_5[0],
+      fullCardsDeckHash_5[1],
+      fullCardsDeckHash_5[2],
+      fullCardsDeckHash_5[3]
+    )
+  ).toBe(6174);
+});
+
+describe('testing handOfFiveEvalLowBall27: ', () => {
+  it('top straight flush is the lowest', () => {
+    expect(
+      handOfFiveEvalLowBall27(
+        fullCardsDeckHash_5[12],
+        fullCardsDeckHash_5[11],
+        fullCardsDeckHash_5[10],
+        fullCardsDeckHash_5[9],
+        fullCardsDeckHash_5[8]
+      )
+    ).toBe(0);
+  });
+
+  it('2 to 7 is the highest', () => {
+    expect(
+      handOfFiveEvalLowBall27(
+        fullCardsDeckHash_5[0],
+        fullCardsDeckHash_5[1],
+        fullCardsDeckHash_5[2],
+        fullCardsDeckHash_5[3],
+        fullCardsDeckHash_5[18]
+      )
+    ).toBe(7461);
   });
 });
 

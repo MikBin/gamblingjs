@@ -141,6 +141,7 @@ exports.rankCards_low = [11, 10, 9, 8, 7, 6, 5, 4, 3, 2, 1, 0, 12];
 exports.HIGH_CARDS_5_AMOUNT = 1277;
 exports.FLUSHES_BASE_START = 5863;
 exports.STRAIGHT_FLUSH_BASE_START = 7452;
+exports.HIGH_MAX_RANK = 7461;
 exports.FLUSH_MASK = 511;
 exports.STRAIGHT_FLUSH_OFFSET = 1599;
 exports.handsRankingDelimiter_5cards = [

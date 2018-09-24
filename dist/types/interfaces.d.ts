@@ -15,6 +15,10 @@ export interface handInfo {
     faces: string;
     handGroup: string;
 }
+export interface hiLowRank {
+    hi: number;
+    low: number;
+}
 export interface verboseHandInfo extends handInfo {
     winningCards: (number | string)[];
     flushSuit: string | number;

@@ -8,6 +8,7 @@ import {
 } from '../src/hashesCreator';
 import * as CONSTANTS from '../src/constants';
 
+/**something wrong in length and max rank value---> @TODO verify */
 describe('testing rank of 5 and 7 hashes creator', () => {
   let HASHES_OF_FIVE;
   it('has 7462 hands', () => {
@@ -20,6 +21,7 @@ describe('testing rank of 5 and 7 hashes creator', () => {
     for (let h in HASHES_OF_FIVE.HASHES) {
       HASHES_OF_FIVE.HASHES[h] > m ? (m = HASHES_OF_FIVE.HASHES[h]) : null;
     }
+    console.log(m, HASHES_OF_FIVE.rankingInfos[m]);
     expect(m).toBe(7451);
   });
 

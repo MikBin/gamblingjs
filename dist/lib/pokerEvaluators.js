@@ -16,8 +16,11 @@ var HASH_RANK_SEVEN = exports.HASHES_OF_FIVE_ON_SEVEN.HASHES;
 var FLUSH_RANK_SEVEN = exports.HASHES_OF_FIVE_ON_SEVEN.FLUSH_RANK_HASHES;
 /**LOW Ato5 HASHES */
 exports.HASHES_OF_FIVE_LOW8 = hashesCreator_1.createRankOf5AceToFive_Low8();
+var HASH_RANK_FIVE_LOW8 = exports.HASHES_OF_FIVE_LOW8.HASHES;
 exports.HASHES_OF_FIVE_LOW9 = hashesCreator_1.createRankOf5AceToFive_Low9();
+var HASH_RANK_FIVE_LOW9 = exports.HASHES_OF_FIVE_LOW9.HASHES;
 exports.HASEHS_OF_FIVE_LOW_Ato5 = hashesCreator_1.createRankOf5AceToFive_Full();
+var HASH_RANK_FIVE_LOW_Ato5 = exports.HASEHS_OF_FIVE_LOW_Ato5.HASHES;
 exports.HASHES_OF_SEVEN_LOW8 = hashesCreator_1.createRankOf7AceToFive_Low(exports.HASHES_OF_FIVE_LOW8, constants_1.rankCards_low8);
 exports.HASHES_OF_SEVEN_LOW9 = hashesCreator_1.createRankOf7AceToFive_Low(exports.HASHES_OF_FIVE_LOW9, constants_1.rankCards_low9);
 exports.HASEHS_OF_SEVEN_LOW_Ato5 = hashesCreator_1.createRankOf7AceToFive_Low(exports.HASEHS_OF_FIVE_LOW_Ato5, constants_1.rankCards_low);
@@ -34,6 +37,45 @@ exports.handOfFiveEval = function (c1, c2, c3, c4, c5) {
         return FLUSH_RANK_FIVE[rankKey];
     }
     return HASH_RANK_FIVE[rankKey];
+};
+/** @function handOfFiveEvalHiLow
+ *
+ * @param {NumberMap} hash rannking for low hands, depending on which ato5 low is used: can be low8 low9 or lowAll
+ * @param {Number} c1...c5 cards hash from CONSTANTS.fullCardsDeckHash_5
+ * @returns {hiLowRank} hand ranking object for both low and high ( if doesnt qualify for low it returns -1)
+ */
+exports.handOfFiveEvalHiLow = function (LOW_RANK_HASH, c1, c2, c3, c4, c5) {
+    var keySum = c1 + c2 + c3 + c4 + c5;
+    var rankKey = keySum >>> 9;
+    var low = LOW_RANK_HASH[rankKey];
+    var bothRank = {
+        hi: 0,
+        low: isNaN(low) ? -1 : low
+    };
+    var flush_check_key = FLUSH_CHECK_FIVE[keySum & constants_1.FLUSH_MASK];
+    if (flush_check_key >= 0) {
+        bothRank.hi = FLUSH_RANK_FIVE[rankKey];
+    }
+    else {
+        bothRank.hi = HASH_RANK_FIVE[rankKey];
+    }
+    return bothRank;
+};
+exports.handOfFiveEvalHiLow8 = function (c1, c2, c3, c4, c5) {
+    return exports.handOfFiveEvalHiLow(HASH_RANK_FIVE_LOW8, c1, c2, c3, c4, c5);
+};
+exports.handOfFiveEvalHiLow9 = function (c1, c2, c3, c4, c5) {
+    return exports.handOfFiveEvalHiLow(HASH_RANK_FIVE_LOW9, c1, c2, c3, c4, c5);
+};
+exports.handOfFiveEvalLow_Ato5 = function (c1, c2, c3, c4, c5) {
+    var keySum = c1 + c2 + c3 + c4 + c5;
+    var rankKey = keySum >>> 9;
+    var rank = HASH_RANK_FIVE_LOW_Ato5[rankKey];
+    return rank;
+};
+/**inverse ranking */
+exports.handOfFiveEvalLowBall27 = function (c1, c2, c3, c4, c5) {
+    return constants_1.HIGH_MAX_RANK - exports.handOfFiveEval(c1, c2, c3, c4, c5);
 };
 /** @function handOfFiveEvalIndexed
  *

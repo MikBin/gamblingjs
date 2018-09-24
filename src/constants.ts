@@ -160,6 +160,7 @@ export const rankCards_low: number[] = [11, 10, 9, 8, 7, 6, 5, 4, 3, 2, 1, 0, 12
 export const HIGH_CARDS_5_AMOUNT: number = 1277;
 export const FLUSHES_BASE_START: number = 5863;
 export const STRAIGHT_FLUSH_BASE_START: number = 7452;
+export const HIGH_MAX_RANK: number = 7461;
 export const FLUSH_MASK: number = 511;
 export const STRAIGHT_FLUSH_OFFSET: number = 1599;
 export const handsRankingDelimiter_5cards: number[] = [
