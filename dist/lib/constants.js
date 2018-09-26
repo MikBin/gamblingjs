@@ -85,6 +85,7 @@ exports.ranksHashOn5[9] = 12522; // J
 exports.ranksHashOn5[10] = 19998; // Q
 exports.ranksHashOn5[11] = 43258; // K
 exports.ranksHashOn5[12] = 79415; // A
+/** @TODO to be tested tuples for hasof5 and 7 */
 exports.rankToFaceSymbol = [
     '2',
     '3',

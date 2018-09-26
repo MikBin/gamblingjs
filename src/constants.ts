@@ -98,6 +98,8 @@ ranksHashOn5[10] = 19998; // Q
 ranksHashOn5[11] = 43258; // K
 ranksHashOn5[12] = 79415; // A
 
+/** @TODO to be tested tuples for hasof5 and 7 */
+
 export const rankToFaceSymbol: string[] = [
   '2',
   '3',

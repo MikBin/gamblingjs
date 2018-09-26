@@ -11,7 +11,7 @@ import {
 } from './routines';
 import * as ROUTINES from './routines';
 import * as kombinatoricsJs from 'kombinatoricsjs';
-import { hashRanking, NumberMap } from './interfaces';
+import { hashRanking, NumberMap, hashRankingSeven } from './interfaces';
 
 export const createRankOfFiveHashes = (): Readonly<hashRanking> => {
   const hashRankingOfFive: hashRanking = {
@@ -67,15 +67,13 @@ export const createRankOfFiveHashes = (): Readonly<hashRanking> => {
 
 //export const createRankOf5On6Hashes = () => { };
 
-/**@TODO add hand code to rankingInfo : [12,0,1,2,3,10,11] this is straight A2345KQ
- * or just retrieve category from rankValue the fine hightest card or components by statical exaustive hand analisys
- */
 export const createRankOf5On7Hashes = (hashRankOfFive: hashRanking) => {
-  const hashRankingOfFiveOnSeven: hashRanking = {
+  const hashRankingOfFiveOnSeven: hashRankingSeven = {
     HASHES: {},
     FLUSH_CHECK_KEYS: {},
     FLUSH_RANK_HASHES: {},
     FLUSH_HASHES: {},
+    MULTI_FLUSH_RANK_HASHES: { 5: {}, 6: {}, 7: {} },
     baseRankValues: CONSTANTS.ranksHashOn7,
     baseSuitValues: CONSTANTS.suitsHash,
     rankingInfos: hashRankOfFive.rankingInfos
@@ -94,11 +92,14 @@ export const createRankOf5On7Hashes = (hashRankOfFive: hashRanking) => {
     hashRankingOfFiveOnSeven.HASHES[hash7] = _rankOf5onX(h5, hashRankOfFive.HASHES);
   });
 
+  let FLUSH_RANK_HASHES = hashRankingOfFiveOnSeven.MULTI_FLUSH_RANK_HASHES;
+
+  /**@TODO separate five six and seven: FLUSH_RANK_HASHES = {5:{},6:{},7:{}} */
   let fiveFlushes = kombinatoricsJs.combinations(rankCards, 5);
   let sixFlushes = kombinatoricsJs.combinations(rankCards, 6);
   let sevenFlushes = kombinatoricsJs.combinations(rankCards, 7);
 
-  fiveFlushes.concat(sixFlushes, sevenFlushes).forEach(h => {
+  fiveFlushes.concat(sixFlushes, sevenFlushes).forEach((h: number[]) => {
     let h5: number[] = h.map(c => hashRankOfFive.baseRankValues[c]);
     let h7: number[] = h.map(c => hashRankingOfFiveOnSeven.baseRankValues[c]);
     let hash7 = getVectorSum(h7);
@@ -110,7 +111,8 @@ export const createRankOf5On7Hashes = (hashRankOfFive: hashRanking) => {
     } else {
       rank += CONSTANTS.FLUSHES_BASE_START;
     }
-    hashRankingOfFiveOnSeven.FLUSH_RANK_HASHES[hash7] = rank;
+
+    FLUSH_RANK_HASHES[h.length][hash7] = rank;
   });
 
   let fiveFlushHashes = [[0, 0, 0, 0, 0], [1, 1, 1, 1, 1], [8, 8, 8, 8, 8], [57, 57, 57, 57, 57]];
@@ -159,7 +161,8 @@ export const createRankOf5AceToFive_Low8 = (): Readonly<hashRanking> => {
 
 export const createRankOf7AceToFive_Low = (
   hashRankOfFive: hashRanking,
-  baseLowRanking: number[]
+  baseLowRanking: number[],
+  fullFlag: boolean = false
 ): Readonly<hashRanking> => {
   const hashRankingLow: hashRanking = {
     HASHES: {},
@@ -173,18 +176,28 @@ export const createRankOf7AceToFive_Low = (
 
   let ranksHashOn7 = CONSTANTS.ranksHashOn7;
 
-  let lowHands: number[][] = kombinatoricsJs.multiCombinations(baseLowRanking, 5, 1);
-  /**create pairs to cross with lowHands */
-  kombinatoricsJs.multiCombinations(CONSTANTS.rankCards, 2, 2).forEach((pair, i) => {
-    lowHands.forEach((lo, idx) => {
-      let hand = lo.concat(pair);
+  if (fullFlag) {
+    kombinatoricsJs.multiCombinations(baseLowRanking, 7, 4).forEach((hand, idx) => {
       let h7 = hand.map(card => ranksHashOn7[card]);
       let h5 = hand.map(card => hashRankOfFive.baseRankValues[card]);
       let hash7: number = getVectorSum(h7);
 
       hashRankingLow.HASHES[hash7] = _rankOf5onX(h5, hashRankOfFive.HASHES);
     });
-  });
+  } else {
+    let lowHands: number[][] = kombinatoricsJs.multiCombinations(baseLowRanking, 5, 1);
+    kombinatoricsJs.multiCombinations(CONSTANTS.rankCards, 2, 2).forEach((pair, i) => {
+      lowHands.forEach((lo, idx) => {
+        let hand = lo.concat(pair);
+
+        let h7 = hand.map(card => ranksHashOn7[card]);
+        let h5 = hand.map(card => hashRankOfFive.baseRankValues[card]);
+        let hash7: number = getVectorSum(h7);
+
+        hashRankingLow.HASHES[hash7] = _rankOf5onX(h5, hashRankOfFive.HASHES);
+      });
+    });
+  }
 
   return hashRankingLow;
 };

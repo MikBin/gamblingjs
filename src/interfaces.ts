@@ -1,6 +1,9 @@
 export interface NumberMap {
   [s: number]: number;
 }
+export interface MultiNumberMap {
+  [s: number]: NumberMap;
+}
 export interface StringMap {
   [s: string]: string;
 }
@@ -50,3 +53,40 @@ export interface hashRanking {
   baseSuitValues: number[];
   rankingInfos: handInfo[];
 }
+
+export interface hashRankingSeven extends hashRanking {
+  MULTI_FLUSH_RANK_HASHES: MultiNumberMap;
+}
+
+export type singleRankFiveCardHandEvalFn = (
+  c1: number,
+  c2: number,
+  c3: number,
+  c4: number,
+  c5: number
+) => number;
+export type hiLowRankFiveCardHandEvalFn = (
+  c1: number,
+  c2: number,
+  c3: number,
+  c4: number,
+  c5: number
+) => hiLowRank;
+export type singleRankSevenCardHandEvalFn = (
+  c1: number,
+  c2: number,
+  c3: number,
+  c4: number,
+  c5: number,
+  c6: number,
+  c7: number
+) => number;
+export type hiLowRankSevenCardHandEvalFn = (
+  c1: number,
+  c2: number,
+  c3: number,
+  c4: number,
+  c5: number,
+  c6: number,
+  c7: number
+) => hiLowRank;

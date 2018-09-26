@@ -3,8 +3,8 @@ import { getPartialHandStatsIndexed_7, categoryByRankingValue } from '../src/pok
 describe('testing montecarlo sym on 7 hand holdem: ', () => {
   it('should return an object of stats: ', () => {
     expect(getPartialHandStatsIndexed_7([1, 2, 3, 4], 100)).toBeInstanceOf(Object);
-    let stats = getPartialHandStatsIndexed_7([1, 2, 3, 4], 1000);
-    expect(stats.average).toBeGreaterThan(5500);
+    let stats = getPartialHandStatsIndexed_7([1, 2, 3, 4], 5000);
+    expect(stats.average).toBeGreaterThan(5280);
     expect(stats.straight).toBeGreaterThan(0.2);
     console.log(stats);
     let sum = 0;

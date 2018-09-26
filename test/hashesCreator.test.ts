@@ -49,10 +49,16 @@ describe('testing rank of 5 and 7 hashes creator', () => {
 
   it('has a lot of hands for flush too', () => {
     let counter = 0;
-    for (let h in HASHES_OF_FIVE_ON_SEVEN.FLUSH_RANK_HASHES) {
+    for (let h in HASHES_OF_FIVE_ON_SEVEN.MULTI_FLUSH_RANK_HASHES[5]) {
       counter++;
     }
-    expect(counter).toBe(3003);
+    for (let h in HASHES_OF_FIVE_ON_SEVEN.MULTI_FLUSH_RANK_HASHES[6]) {
+      counter++;
+    }
+    for (let h in HASHES_OF_FIVE_ON_SEVEN.MULTI_FLUSH_RANK_HASHES[7]) {
+      counter++;
+    }
+    expect(counter).toBe(4719);
   });
 });
 
