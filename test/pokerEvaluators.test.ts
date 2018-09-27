@@ -10,8 +10,11 @@ import {
   handOfSixEvalIndexed,
   handOfFiveEvalLowBall27,
   handOfFiveEvalHiLow8,
+  handOfFiveEvalHiLow8Indexed,
   handOfFiveEvalHiLow9,
+  handOfFiveEvalHiLow9Indexed,
   handOfFiveEvalLow_Ato5,
+  handOfFiveEvalLow_Ato5Indexed,
   handOfFiveEvalHiLow,
   handOfSevenEvalHiLow,
   getHandInfo,
@@ -26,9 +29,16 @@ import {
   bfBestOfFiveFromTwoSets,
   bfBestOfFiveFromTwoSetsHiLow,
   bfBestOfFiveFromTwoSetsHiLow8,
+  bfBestOfFiveFromTwoSetsHiLow8Indexed,
   bfBestOfFiveFromTwoSetsHiLow9,
+  bfBestOfFiveFromTwoSetsHiLow9Indexed,
   bfBestOfFiveFromTwoSetsHiLow_Ato5,
-  bfBestOfFiveFromTwoSetsLowBall27
+  bfBestOfFiveFromTwoSetsHiLow_Ato5Indexed,
+  bfBestOfFiveFromTwoSetsLowBall27,
+  bfBestOfFiveFromTwoSetsLowBall27Indexed,
+  handOfSevenEvalLow_Ato5Indexed,
+  handOfSevenEvalHiLow8Indexed,
+  handOfSevenEvalHiLow9Indexed
 } from '../src/pokerEvaluators';
 import { fullCardsDeckHash_5, fullCardsDeckHash_7 } from '../src/constants';
 
@@ -45,11 +55,27 @@ describe('testing hand of five eval', () => {
     ).toBe(7452);
   });
 
+  it('23457 unsuited rank should be 0', () => {
+    expect(
+      handOfFiveEval(
+        fullCardsDeckHash_5[5],
+        fullCardsDeckHash_5[13],
+        fullCardsDeckHash_5[1],
+        fullCardsDeckHash_5[2],
+        fullCardsDeckHash_5[3]
+      )
+    ).toBe(0);
+  });
+
   it('indexed eval have lowest hand as 0 rank and highest 7452', () => {
     expect(handOfFiveEvalIndexed(0, 1, 2, 3, 18)).toBe(0);
     expect(handOfFiveEvalIndexed(13, 14, 15, 16, 31)).toBe(0);
     expect(handOfFiveEvalIndexed(25, 13, 14, 15, 16)).toBe(7452);
   });
+
+  /**test all ranks and all flush by making a sequence
+   * kombinatoricsJs.multiCombinations(ranks,5,4).evaluate().sort() must equal all ranks hash
+   */
 });
 
 describe('testing hilo 8 and 9 routines: ', () => {
@@ -105,6 +131,8 @@ describe('testing hilo 8 and 9 routines: ', () => {
     )
   ).toEqual({ hi: 6903, low: -1 });
 
+  expect(handOfFiveEvalHiLow8Indexed(7, 5, 4, 3, 12)).toEqual({ hi: 6903, low: -1 });
+
   expect(
     handOfFiveEvalHiLow9(
       fullCardsDeckHash_5[7],
@@ -114,6 +142,8 @@ describe('testing hilo 8 and 9 routines: ', () => {
       fullCardsDeckHash_5[12]
     )
   ).toEqual({ hi: 6903, low: 38 });
+
+  expect(handOfFiveEvalHiLow9Indexed(7, 5, 4, 3, 12)).toEqual({ hi: 6903, low: 38 });
 
   expect(
     handOfFiveEvalHiLow(
@@ -180,6 +210,19 @@ describe('testing hilo 8 and 9 on SEVEN cards', () => {
   ).toEqual({ hi: 5813, low: -1 });
 
   expect(
+    handOfSevenEvalHiLow(
+      HASHES_OF_SEVEN_LOW9.HASHES,
+      fullCardsDeckHash_7[7],
+      fullCardsDeckHash_7[3],
+      fullCardsDeckHash_7[4],
+      fullCardsDeckHash_7[9],
+      fullCardsDeckHash_7[2],
+      fullCardsDeckHash_7[5],
+      fullCardsDeckHash_7[11]
+    )
+  ).toEqual({ hi: 7038, low: 35 });
+
+  expect(
     handOfSevenEvalHiLow8(
       fullCardsDeckHash_7[7],
       fullCardsDeckHash_7[5],
@@ -190,6 +233,8 @@ describe('testing hilo 8 and 9 on SEVEN cards', () => {
       fullCardsDeckHash_7[38]
     )
   ).toEqual({ hi: 6903, low: -1 });
+
+  expect(handOfSevenEvalHiLow8Indexed(7, 5, 4, 3, 12, 25, 38)).toEqual({ hi: 6903, low: -1 });
 
   expect(
     handOfSevenEvalHiLow9(
@@ -203,6 +248,8 @@ describe('testing hilo 8 and 9 on SEVEN cards', () => {
     )
   ).toEqual({ hi: 6903, low: 38 });
 
+  expect(handOfSevenEvalHiLow9Indexed(7, 5, 4, 3, 12, 25, 38)).toEqual({ hi: 6903, low: 38 });
+
   it('handOfSevenEvalLow_Ato5 has max on 6174 and min on 168', () => {
     expect(
       handOfSevenEvalLow_Ato5(
@@ -215,6 +262,10 @@ describe('testing hilo 8 and 9 on SEVEN cards', () => {
         fullCardsDeckHash_7[10]
       )
     ).toBe(168);
+
+    expect(handOfSevenEvalLow_Ato5Indexed(11, 11, 11, 11, 10, 10, 10)).toBe(168);
+
+    expect(handOfSevenEvalLow_Ato5Indexed(12, 0, 1, 2, 16, 29, 42)).toBe(6174);
 
     expect(
       handOfSevenEvalLow_Ato5(
@@ -261,6 +312,14 @@ describe('ace to five lowball: ', () => {
         fullCardsDeckHash_5[3]
       )
     ).toBe(6174);
+  });
+
+  it('ace to five lowball full have ranks inverted', () => {
+    expect(handOfFiveEvalLow_Ato5Indexed(10, 10, 9, 9, 0)).toBe(1311);
+    expect(handOfFiveEvalLow_Ato5Indexed(10, 10, 9, 9, 12)).toBe(1312);
+
+    expect(handOfFiveEvalLow_Ato5Indexed(10, 10, 9, 8, 0)).toBe(2310);
+    expect(handOfFiveEvalLow_Ato5Indexed(10, 10, 9, 8, 12)).toBe(2311);
   });
 });
 
@@ -538,6 +597,11 @@ describe('bfBestOfFiveFromTwoSets', () => {
         3
       )
     ).toEqual({ hi: 7452, low: 55 });
+
+    expect(bfBestOfFiveFromTwoSetsHiLow8Indexed([12, 25, 0, 36], [1, 2, 3, 38, 51], 2, 3)).toEqual({
+      hi: 7452,
+      low: 55
+    });
   });
 
   it('bfBestOfFiveFromTwoSetsHiLow9 a straight flush wheel', () => {
@@ -560,6 +624,11 @@ describe('bfBestOfFiveFromTwoSets', () => {
         3
       )
     ).toEqual({ hi: 7452, low: 125 });
+
+    expect(bfBestOfFiveFromTwoSetsHiLow9Indexed([12, 25, 0, 36], [1, 2, 3, 38, 51], 2, 3)).toEqual({
+      hi: 7452,
+      low: 125
+    });
   });
 
   it('bfBestOfFiveFromTwoSetsHiLow_Ato5 a straight flush wheel', () => {
@@ -582,6 +651,10 @@ describe('bfBestOfFiveFromTwoSets', () => {
         3
       )
     ).toBe(6174);
+
+    expect(bfBestOfFiveFromTwoSetsHiLow_Ato5Indexed([12, 25, 36, 0], [1, 3, 2, 38, 51], 2, 3)).toBe(
+      6174
+    );
   });
 
   it('bfBestOfFiveFromTwoSetsHiLow_Ato5 a  wheel ranks highest at 6174', () => {
@@ -625,6 +698,10 @@ describe('bfBestOfFiveFromTwoSets', () => {
         2,
         3
       )
+    ).toBe(3548);
+
+    expect(
+      bfBestOfFiveFromTwoSetsLowBall27Indexed([12, 25, 11, 24], [10, 9, 8, 38, 51], 2, 3)
     ).toBe(3548);
   });
 

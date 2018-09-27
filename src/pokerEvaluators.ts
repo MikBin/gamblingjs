@@ -132,7 +132,23 @@ export const handOfFiveEvalHiLow8: hiLowRankFiveCardHandEvalFn = (
   return handOfFiveEvalHiLow(HASH_RANK_FIVE_LOW8, c1, c2, c3, c4, c5);
 };
 
-/** @function handOfFiveEvalHiLow8
+export const handOfFiveEvalHiLow8Indexed: hiLowRankFiveCardHandEvalFn = (
+  c1: number,
+  c2: number,
+  c3: number,
+  c4: number,
+  c5: number
+): hiLowRank => {
+  return handOfFiveEvalHiLow8(
+    fullCardsDeckHash_5[c1],
+    fullCardsDeckHash_5[c2],
+    fullCardsDeckHash_5[c3],
+    fullCardsDeckHash_5[c4],
+    fullCardsDeckHash_5[c5]
+  );
+};
+
+/** @function handOfFiveEvalHiLow9
  *
  * @param {NumberMap} hash ranking for low hands
  * @param {Number} c1...c5 cards hash from CONSTANTS.fullCardsDeckHash_5
@@ -146,6 +162,22 @@ export const handOfFiveEvalHiLow9: hiLowRankFiveCardHandEvalFn = (
   c5: number
 ): hiLowRank => {
   return handOfFiveEvalHiLow(HASH_RANK_FIVE_LOW9, c1, c2, c3, c4, c5);
+};
+
+export const handOfFiveEvalHiLow9Indexed: hiLowRankFiveCardHandEvalFn = (
+  c1: number,
+  c2: number,
+  c3: number,
+  c4: number,
+  c5: number
+): hiLowRank => {
+  return handOfFiveEvalHiLow9(
+    fullCardsDeckHash_5[c1],
+    fullCardsDeckHash_5[c2],
+    fullCardsDeckHash_5[c3],
+    fullCardsDeckHash_5[c4],
+    fullCardsDeckHash_5[c5]
+  );
 };
 
 /** @function handOfFiveEvalLow_Ato5
@@ -165,6 +197,30 @@ export const handOfFiveEvalLow_Ato5: singleRankFiveCardHandEvalFn = (
   let rank = HASH_RANK_FIVE_LOW_Ato5[rankKey];
   return rank;
 };
+
+/** @function handOfFiveEvalLow_Ato5Indexed
+ *
+ * @param {Number} c1...c5 cards index in standard deck 52
+ * @returns {number} hand ranking for Ato5 rules
+ */
+export const handOfFiveEvalLow_Ato5Indexed: singleRankFiveCardHandEvalFn = (
+  c1: number,
+  c2: number,
+  c3: number,
+  c4: number,
+  c5: number
+): number => {
+  return handOfFiveEvalLow_Ato5(
+    fullCardsDeckHash_5[c1],
+    fullCardsDeckHash_5[c2],
+    fullCardsDeckHash_5[c3],
+    fullCardsDeckHash_5[c4],
+    fullCardsDeckHash_5[c5]
+  );
+};
+
+export const handOfFiveEvalLow_Ato6 = () => {};
+export const handOfFiveEvalLow_Ato6Indexed = () => {};
 
 /** @function handOfFiveEvalLowBall27
  *
@@ -286,6 +342,22 @@ export const bfBestOfFiveFromTwoSetsHiLow8 = (
 ): hiLowRank => {
   return bfBestOfFiveFromTwoSetsHiLow(handSetA, handSetB, nA, nB, handOfFiveEvalHiLow8);
 };
+
+export const bfBestOfFiveFromTwoSetsHiLow8Indexed = (
+  handSetA: number[],
+  handSetB: number[],
+  nA: number,
+  nB: number
+): hiLowRank => {
+  return bfBestOfFiveFromTwoSetsHiLow(
+    handSetA.map(c => fullCardsDeckHash_5[c]),
+    handSetB.map(c => fullCardsDeckHash_5[c]),
+    nA,
+    nB,
+    handOfFiveEvalHiLow8
+  );
+};
+
 export const bfBestOfFiveFromTwoSetsHiLow9 = (
   handSetA: number[],
   handSetB: number[],
@@ -294,6 +366,22 @@ export const bfBestOfFiveFromTwoSetsHiLow9 = (
 ): hiLowRank => {
   return bfBestOfFiveFromTwoSetsHiLow(handSetA, handSetB, nA, nB, handOfFiveEvalHiLow9);
 };
+
+export const bfBestOfFiveFromTwoSetsHiLow9Indexed = (
+  handSetA: number[],
+  handSetB: number[],
+  nA: number,
+  nB: number
+): hiLowRank => {
+  return bfBestOfFiveFromTwoSetsHiLow(
+    handSetA.map(c => fullCardsDeckHash_5[c]),
+    handSetB.map(c => fullCardsDeckHash_5[c]),
+    nA,
+    nB,
+    handOfFiveEvalHiLow9
+  );
+};
+
 export const bfBestOfFiveFromTwoSetsHiLow_Ato5 = (
   handSetA: number[],
   handSetB: number[],
@@ -302,6 +390,22 @@ export const bfBestOfFiveFromTwoSetsHiLow_Ato5 = (
 ): number => {
   return bfBestOfFiveFromTwoSets(handSetA, handSetB, nA, nB, handOfFiveEvalLow_Ato5);
 };
+
+export const bfBestOfFiveFromTwoSetsHiLow_Ato5Indexed = (
+  handSetA: number[],
+  handSetB: number[],
+  nA: number,
+  nB: number
+): number => {
+  return bfBestOfFiveFromTwoSets(
+    handSetA.map(c => fullCardsDeckHash_5[c]),
+    handSetB.map(c => fullCardsDeckHash_5[c]),
+    nA,
+    nB,
+    handOfFiveEvalLow_Ato5
+  );
+};
+
 export const bfBestOfFiveFromTwoSetsLowBall27 = (
   handSetA: number[],
   handSetB: number[],
@@ -309,6 +413,21 @@ export const bfBestOfFiveFromTwoSetsLowBall27 = (
   nB: number
 ): number => {
   return bfBestOfFiveFromTwoSets(handSetA, handSetB, nA, nB, handOfFiveEvalLowBall27);
+};
+
+export const bfBestOfFiveFromTwoSetsLowBall27Indexed = (
+  handSetA: number[],
+  handSetB: number[],
+  nA: number,
+  nB: number
+): number => {
+  return bfBestOfFiveFromTwoSets(
+    handSetA.map(c => fullCardsDeckHash_5[c]),
+    handSetB.map(c => fullCardsDeckHash_5[c]),
+    nA,
+    nB,
+    handOfFiveEvalLowBall27
+  );
 };
 
 /** @function handOfSevenEval

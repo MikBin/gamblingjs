@@ -113,8 +113,10 @@ export const sortedPairsToAdd = (startSet: number[]): number[][] => {
   return _toAdd;
 };
 
-export const doublePairsList = (startSet: number[]): number[][] => {
-  let toAdd = sortedPairsToAdd(startSet);
+export const doublePairsList = (startSet: number[], isLow: boolean = false): number[][] => {
+  let toAdd = isLow
+    ? kombinatoricsJs.multiCombinations(startSet, 2, 1)
+    : sortedPairsToAdd(startSet);
   let doublePairs = [];
 
   for (let j = 0; j < toAdd.length; ++j) {
@@ -127,8 +129,10 @@ export const doublePairsList = (startSet: number[]): number[][] => {
   return doublePairs;
 };
 
-export const trisList = (startSet: number[]): number[][] => {
-  let toAdd = sortedPairsToAdd(startSet);
+export const trisList = (startSet: number[], isLow: boolean = false): number[][] => {
+  let toAdd = isLow
+    ? kombinatoricsJs.multiCombinations(startSet, 2, 1)
+    : sortedPairsToAdd(startSet);
   let tris = [];
   for (let i = 0; i < startSet.length; ++i) {
     for (let j = 0; j < toAdd.length; ++j) {
@@ -159,8 +163,14 @@ export const checkStraight = (arr: number[]): boolean => {
   if (arr[4] === 12 && arr[0] === 0) {
     return arr[1] === 1 && arr[2] === 2 && arr[3] === 3;
   }
+  if (arr[4] === 12 && arr[0] === 3) {
+    return arr[1] === 2 && arr[2] === 1 && arr[3] === 0;
+  }
+  if (arr[4] === 12 && arr[0] === 11) {
+    return arr[1] === 10 && arr[2] === 9 && arr[3] === 8;
+  }
   for (let i = 1; i < arr.length; ++i) {
-    cond = cond && arr[i - 1] + 1 === arr[i];
+    cond = cond && Math.abs(arr[i - 1] - arr[i]) === 1;
   }
   return cond;
 };
