@@ -166,9 +166,9 @@ export const checkStraight = (arr: number[]): boolean => {
   if (arr[4] === 12 && arr[0] === 3) {
     return arr[1] === 2 && arr[2] === 1 && arr[3] === 0;
   }
-  if (arr[4] === 12 && arr[0] === 11) {
-    return arr[1] === 10 && arr[2] === 9 && arr[3] === 8;
-  }
+  /* if (arr[4] === 12 && arr[0] === 11) {
+     return arr[1] === 10 && arr[2] === 9 && arr[3] === 8;
+   }*/
   for (let i = 1; i < arr.length; ++i) {
     cond = cond && Math.abs(arr[i - 1] - arr[i]) === 1;
   }

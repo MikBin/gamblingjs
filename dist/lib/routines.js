@@ -112,8 +112,11 @@ exports.sortedPairsToAdd = function (startSet) {
     _toAdd.sort(exports.internalDoublePairsSort);
     return _toAdd;
 };
-exports.doublePairsList = function (startSet) {
-    var toAdd = exports.sortedPairsToAdd(startSet);
+exports.doublePairsList = function (startSet, isLow) {
+    if (isLow === void 0) { isLow = false; }
+    var toAdd = isLow
+        ? kombinatoricsJs.multiCombinations(startSet, 2, 1)
+        : exports.sortedPairsToAdd(startSet);
     var doublePairs = [];
     for (var j = 0; j < toAdd.length; ++j) {
         for (var i = 0; i < startSet.length; ++i) {
@@ -124,8 +127,11 @@ exports.doublePairsList = function (startSet) {
     }
     return doublePairs;
 };
-exports.trisList = function (startSet) {
-    var toAdd = exports.sortedPairsToAdd(startSet);
+exports.trisList = function (startSet, isLow) {
+    if (isLow === void 0) { isLow = false; }
+    var toAdd = isLow
+        ? kombinatoricsJs.multiCombinations(startSet, 2, 1)
+        : exports.sortedPairsToAdd(startSet);
     var tris = [];
     for (var i = 0; i < startSet.length; ++i) {
         for (var j = 0; j < toAdd.length; ++j) {
@@ -153,8 +159,14 @@ exports.checkStraight = function (arr) {
     if (arr[4] === 12 && arr[0] === 0) {
         return arr[1] === 1 && arr[2] === 2 && arr[3] === 3;
     }
+    if (arr[4] === 12 && arr[0] === 3) {
+        return arr[1] === 2 && arr[2] === 1 && arr[3] === 0;
+    }
+    /* if (arr[4] === 12 && arr[0] === 11) {
+       return arr[1] === 10 && arr[2] === 9 && arr[3] === 8;
+     }*/
     for (var i = 1; i < arr.length; ++i) {
-        cond = cond && arr[i - 1] + 1 === arr[i];
+        cond = cond && Math.abs(arr[i - 1] - arr[i]) === 1;
     }
     return cond;
 };

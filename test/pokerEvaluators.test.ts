@@ -9,6 +9,7 @@ import {
   handOfSevenEvalIndexed_Verbose,
   handOfSixEvalIndexed,
   handOfFiveEvalLowBall27,
+  handOfFiveEvalLowBall27Indexed,
   handOfFiveEvalHiLow8,
   handOfFiveEvalHiLow8Indexed,
   handOfFiveEvalHiLow9,
@@ -38,7 +39,11 @@ import {
   bfBestOfFiveFromTwoSetsLowBall27Indexed,
   handOfSevenEvalLow_Ato5Indexed,
   handOfSevenEvalHiLow8Indexed,
-  handOfSevenEvalHiLow9Indexed
+  handOfSevenEvalHiLow9Indexed,
+  handOfFiveEvalLow_Ato6,
+  handOfFiveEvalLow_Ato6Indexed,
+  handOfSevenEval_Ato6,
+  handOfSevenEval_Ato6Indexed
 } from '../src/pokerEvaluators';
 import { fullCardsDeckHash_5, fullCardsDeckHash_7 } from '../src/constants';
 
@@ -323,6 +328,58 @@ describe('ace to five lowball: ', () => {
   });
 });
 
+describe('testing ace to six lowball ', () => {
+  it('has lowest rank for straightflushes', () => {
+    expect(
+      handOfFiveEvalLow_Ato6(
+        fullCardsDeckHash_5[7],
+        fullCardsDeckHash_5[11],
+        fullCardsDeckHash_5[10],
+        fullCardsDeckHash_5[9],
+        fullCardsDeckHash_5[8]
+      )
+    ).toBe(0);
+  });
+  it('on seven cards the lowest is a full house, since straight flush is not possible', () => {
+    expect(
+      handOfSevenEval_Ato6(
+        fullCardsDeckHash_7[11],
+        fullCardsDeckHash_7[24],
+        fullCardsDeckHash_7[37],
+        fullCardsDeckHash_7[50],
+        fullCardsDeckHash_7[10],
+        fullCardsDeckHash_7[23],
+        fullCardsDeckHash_7[36]
+      )
+    ).toBe(177);
+  });
+
+  it('in seven eval straight flush is not possible', () => {
+    expect(handOfSevenEval_Ato6Indexed(11, 10, 9, 8, 7, 6, 5)).toBe(934);
+  });
+
+  it('top straight flush is not the lowest as the ace is low and doesnt makeup to a straight', () => {
+    expect(handOfFiveEvalLow_Ato6Indexed(12, 8, 9, 10, 11)).toBe(328);
+  });
+
+  it('the following of the above has a deuce instead of the ace', () => {
+    expect(handOfFiveEvalLow_Ato6Indexed(0, 8, 9, 10, 11)).toBe(327);
+  });
+
+  it('same holds for high cards equivalent of above flushes', () => {
+    expect(handOfFiveEvalLow_Ato6Indexed(25, 8, 9, 10, 11)).toBe(6191);
+    expect(handOfFiveEvalLow_Ato6Indexed(13, 8, 9, 10, 11)).toBe(6190);
+  });
+  it('has best hand a2346 not suited, while suited one is bad', () => {
+    expect(handOfFiveEvalLow_Ato6Indexed(25, 0, 1, 2, 4)).toBe(7461);
+    expect(handOfFiveEvalLow_Ato6Indexed(12, 0, 1, 2, 4)).toBe(1598);
+  });
+
+  it('a2345 is bad hand', () => {
+    expect(handOfFiveEvalLow_Ato6Indexed(25, 0, 1, 2, 3)).toBe(1607);
+  });
+});
+
 describe('testing LowBall27: ', () => {
   it('top straight flush is the lowest in five eval', () => {
     expect(
@@ -334,6 +391,8 @@ describe('testing LowBall27: ', () => {
         fullCardsDeckHash_5[8]
       )
     ).toBe(0);
+
+    expect(handOfFiveEvalLowBall27Indexed(12, 11, 10, 9, 8)).toBe(0);
   });
 
   it('top straight flush cannot exist in 7 eval as the minimum is QJT98 ', () => {
@@ -360,6 +419,7 @@ describe('testing LowBall27: ', () => {
         fullCardsDeckHash_5[18]
       )
     ).toBe(7461);
+    expect(handOfFiveEvalLowBall27Indexed(0, 1, 2, 3, 18)).toBe(7461);
   });
 });
 
