@@ -320,7 +320,8 @@ export const handOfFiveEvalIndexed: singleRankFiveCardHandEvalFn = (
 
 /** @function bfBestOfFiveOnX  @TODO move on routines or create helpersfunction.ts
  *
- * @param {Array:Number[]} array of 6 or more cards making up an hand
+ * @param {Array:Number[]} hand array of 6 or more cards making up an hand
+ * @param {Function} evalFn evaluator defaults to hand of 5 high only
  * @returns {Number} hand ranking ( the best one on all combinations of input card in group of 5)
  */
 export const bfBestOfFiveOnX = (hand: number[], evalFn: Function = handOfFiveEval) => {
@@ -330,7 +331,8 @@ export const bfBestOfFiveOnX = (hand: number[], evalFn: Function = handOfFiveEva
 
 /** @function bfBestOfFiveOnXindexed
  *
- * @param {Array:Number[]} array of 6 or more cards making up an hand
+ * @param {Array:Number[]} hand array of 6 or more cards making up an hand
+ * @param {Function} evalFn evaluator defaults to hand of 5 high only
  * @returns {Number} hand ranking ( the best one on all combinations of input card in group of 5)
  */
 export const bfBestOfFiveOnXindexed = (
@@ -452,6 +454,30 @@ export const bfBestOfFiveFromTwoSetsHiLow_Ato5 = (
   nB: number
 ): number => {
   return bfBestOfFiveFromTwoSets(handSetA, handSetB, nA, nB, handOfFiveEvalLow_Ato5);
+};
+
+export const bfBestOfFiveFromTwoSetsLow_Ato6 = (
+  handSetA: number[],
+  handSetB: number[],
+  nA: number,
+  nB: number
+): number => {
+  return bfBestOfFiveFromTwoSets(handSetA, handSetB, nA, nB, handOfFiveEvalLow_Ato6);
+};
+
+export const bfBestOfFiveFromTwoSetsLow_Ato6Indexed = (
+  handSetA: number[],
+  handSetB: number[],
+  nA: number,
+  nB: number
+): number => {
+  return bfBestOfFiveFromTwoSets(
+    handSetA.map(c => fullCardsDeckHash_5[c]),
+    handSetB.map(c => fullCardsDeckHash_5[c]),
+    nA,
+    nB,
+    handOfFiveEvalLow_Ato6
+  );
 };
 
 export const bfBestOfFiveFromTwoSetsHiLow_Ato5Indexed = (
@@ -884,7 +910,7 @@ export const handOfSevenEvalIndexed = (
   );
 };
 
-/** @function handOfSevenEval_Verbose
+/** @function handOfSevenEval_Verbose  @TODO try to reuse
  *
  * @param {Number} c1...c7 cards hash from CONSTANTS.fullCardsDeckHash_7
  * @returns {verboseHandInfo} verbose information about best hand of 5 cards on seven

@@ -62,6 +62,12 @@ export declare const handOfFiveEvalLow_Ato6Indexed: singleRankFiveCardHandEvalFn
  * @returns {number} hand ranking for lowBall 2to7 basically inverse of high rank
  */
 export declare const handOfFiveEvalLowBall27: singleRankFiveCardHandEvalFn;
+/** @function handOfFiveEvalLowBall27Indexed
+ *
+ * @param {Number} c1...c5 cards hash from 0-51
+ * @returns {number} hand ranking for lowBall 2to7 basically inverse of high rank
+ */
+export declare const handOfFiveEvalLowBall27Indexed: singleRankFiveCardHandEvalFn;
 /** @function handOfFiveEvalIndexed
  *
  * @param {Number} c1...c5 cards index from [0...51]
@@ -70,13 +76,15 @@ export declare const handOfFiveEvalLowBall27: singleRankFiveCardHandEvalFn;
 export declare const handOfFiveEvalIndexed: singleRankFiveCardHandEvalFn;
 /** @function bfBestOfFiveOnX  @TODO move on routines or create helpersfunction.ts
  *
- * @param {Array:Number[]} array of 6 or more cards making up an hand
+ * @param {Array:Number[]} hand array of 6 or more cards making up an hand
+ * @param {Function} evalFn evaluator defaults to hand of 5 high only
  * @returns {Number} hand ranking ( the best one on all combinations of input card in group of 5)
  */
 export declare const bfBestOfFiveOnX: (hand: number[], evalFn?: Function) => number;
 /** @function bfBestOfFiveOnXindexed
  *
- * @param {Array:Number[]} array of 6 or more cards making up an hand
+ * @param {Array:Number[]} hand array of 6 or more cards making up an hand
+ * @param {Function} evalFn evaluator defaults to hand of 5 high only
  * @returns {Number} hand ranking ( the best one on all combinations of input card in group of 5)
  */
 export declare const bfBestOfFiveOnXindexed: (hand: number[], evalFn?: Function) => number;
@@ -95,6 +103,8 @@ export declare const bfBestOfFiveFromTwoSetsHiLow8Indexed: (handSetA: number[], 
 export declare const bfBestOfFiveFromTwoSetsHiLow9: (handSetA: number[], handSetB: number[], nA: number, nB: number) => hiLowRank;
 export declare const bfBestOfFiveFromTwoSetsHiLow9Indexed: (handSetA: number[], handSetB: number[], nA: number, nB: number) => hiLowRank;
 export declare const bfBestOfFiveFromTwoSetsHiLow_Ato5: (handSetA: number[], handSetB: number[], nA: number, nB: number) => number;
+export declare const bfBestOfFiveFromTwoSetsLow_Ato6: (handSetA: number[], handSetB: number[], nA: number, nB: number) => number;
+export declare const bfBestOfFiveFromTwoSetsLow_Ato6Indexed: (handSetA: number[], handSetB: number[], nA: number, nB: number) => number;
 export declare const bfBestOfFiveFromTwoSetsHiLow_Ato5Indexed: (handSetA: number[], handSetB: number[], nA: number, nB: number) => number;
 export declare const bfBestOfFiveFromTwoSetsLowBall27: (handSetA: number[], handSetB: number[], nA: number, nB: number) => number;
 export declare const bfBestOfFiveFromTwoSetsLowBall27Indexed: (handSetA: number[], handSetB: number[], nA: number, nB: number) => number;

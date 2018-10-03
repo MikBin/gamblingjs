@@ -34,7 +34,7 @@ var HASH_RANK_SEVEN_LOW_Ato5 = exports.HASEHS_OF_SEVEN_LOW_Ato5.HASHES;
 var HASHES_OF_FIVE_Ato6 = hashesCreator_1.createRankOf5AceToSix_Full();
 var HASH_RANK_FIVE_ATO6 = HASHES_OF_FIVE_Ato6.HASHES;
 var FLUSH_RANK_FIVE_ATO6 = HASHES_OF_FIVE_Ato6.FLUSH_RANK_HASHES;
-exports.HASHES_OF_SEVEN_LOW_Ato6 = hashesCreator_1.createRankOf7AceToSix_Low(HASHES_OF_FIVE_Ato6, exports.HASHES_OF_FIVE_ON_SEVEN, constants_1.rankCards_low);
+exports.HASHES_OF_SEVEN_LOW_Ato6 = hashesCreator_1.createRankOf7AceToSix_Low(HASHES_OF_FIVE_Ato6, constants_1.rankCards_low);
 var FLUSH_CHECK_SEVEN_ATO6 = exports.HASHES_OF_SEVEN_LOW_Ato6.FLUSH_CHECK_KEYS;
 var HASH_RANK_SEVEN_ATO6 = exports.HASHES_OF_SEVEN_LOW_Ato6.HASHES;
 var FLUSH_RANK_SEVEN_ATO6 = exports.HASHES_OF_SEVEN_LOW_Ato6.FLUSH_RANK_HASHES;
@@ -138,6 +138,14 @@ exports.handOfFiveEvalLow_Ato6Indexed = function (c1, c2, c3, c4, c5) {
 exports.handOfFiveEvalLowBall27 = function (c1, c2, c3, c4, c5) {
     return constants_1.HIGH_MAX_RANK - exports.handOfFiveEval(c1, c2, c3, c4, c5);
 };
+/** @function handOfFiveEvalLowBall27Indexed
+ *
+ * @param {Number} c1...c5 cards hash from 0-51
+ * @returns {number} hand ranking for lowBall 2to7 basically inverse of high rank
+ */
+exports.handOfFiveEvalLowBall27Indexed = function (c1, c2, c3, c4, c5) {
+    return constants_1.HIGH_MAX_RANK - exports.handOfFiveEvalIndexed(c1, c2, c3, c4, c5);
+};
 /** @function handOfFiveEvalIndexed
  *
  * @param {Number} c1...c5 cards index from [0...51]
@@ -148,7 +156,8 @@ exports.handOfFiveEvalIndexed = function (c1, c2, c3, c4, c5) {
 };
 /** @function bfBestOfFiveOnX  @TODO move on routines or create helpersfunction.ts
  *
- * @param {Array:Number[]} array of 6 or more cards making up an hand
+ * @param {Array:Number[]} hand array of 6 or more cards making up an hand
+ * @param {Function} evalFn evaluator defaults to hand of 5 high only
  * @returns {Number} hand ranking ( the best one on all combinations of input card in group of 5)
  */
 exports.bfBestOfFiveOnX = function (hand, evalFn) {
@@ -158,7 +167,8 @@ exports.bfBestOfFiveOnX = function (hand, evalFn) {
 };
 /** @function bfBestOfFiveOnXindexed
  *
- * @param {Array:Number[]} array of 6 or more cards making up an hand
+ * @param {Array:Number[]} hand array of 6 or more cards making up an hand
+ * @param {Function} evalFn evaluator defaults to hand of 5 high only
  * @returns {Number} hand ranking ( the best one on all combinations of input card in group of 5)
  */
 exports.bfBestOfFiveOnXindexed = function (hand, evalFn) {
@@ -222,6 +232,12 @@ exports.bfBestOfFiveFromTwoSetsHiLow9Indexed = function (handSetA, handSetB, nA,
 };
 exports.bfBestOfFiveFromTwoSetsHiLow_Ato5 = function (handSetA, handSetB, nA, nB) {
     return exports.bfBestOfFiveFromTwoSets(handSetA, handSetB, nA, nB, exports.handOfFiveEvalLow_Ato5);
+};
+exports.bfBestOfFiveFromTwoSetsLow_Ato6 = function (handSetA, handSetB, nA, nB) {
+    return exports.bfBestOfFiveFromTwoSets(handSetA, handSetB, nA, nB, exports.handOfFiveEvalLow_Ato6);
+};
+exports.bfBestOfFiveFromTwoSetsLow_Ato6Indexed = function (handSetA, handSetB, nA, nB) {
+    return exports.bfBestOfFiveFromTwoSets(handSetA.map(function (c) { return constants_1.fullCardsDeckHash_5[c]; }), handSetB.map(function (c) { return constants_1.fullCardsDeckHash_5[c]; }), nA, nB, exports.handOfFiveEvalLow_Ato6);
 };
 exports.bfBestOfFiveFromTwoSetsHiLow_Ato5Indexed = function (handSetA, handSetB, nA, nB) {
     return exports.bfBestOfFiveFromTwoSets(handSetA.map(function (c) { return constants_1.fullCardsDeckHash_5[c]; }), handSetB.map(function (c) { return constants_1.fullCardsDeckHash_5[c]; }), nA, nB, exports.handOfFiveEvalLow_Ato5);

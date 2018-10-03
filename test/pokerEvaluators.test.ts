@@ -35,6 +35,8 @@ import {
   bfBestOfFiveFromTwoSetsHiLow9Indexed,
   bfBestOfFiveFromTwoSetsHiLow_Ato5,
   bfBestOfFiveFromTwoSetsHiLow_Ato5Indexed,
+  bfBestOfFiveFromTwoSetsLow_Ato6,
+  bfBestOfFiveFromTwoSetsLow_Ato6Indexed,
   bfBestOfFiveFromTwoSetsLowBall27,
   bfBestOfFiveFromTwoSetsLowBall27Indexed,
   handOfSevenEvalLow_Ato5Indexed,
@@ -423,6 +425,11 @@ describe('testing LowBall27: ', () => {
   });
 });
 
+/**
+ *
+ * SEVEN EVAL VERBOSE
+ *
+ */
 describe('testing handOfSevenEval_Verbose: ', () => {
   it('should get some infos: ', () => {
     expect(getHandInfo(2345)).toBeInstanceOf(Object);
@@ -502,6 +509,11 @@ describe('testing handOfSevenEval_Verbose: ', () => {
   });
 });
 
+/**
+ *
+ * FIVE FROM TWO SETS
+ *
+ */
 describe('bfBestOfFiveFromTwoSets', () => {
   it('gets fullhouse when flush exists on omaha like 4-5', () => {
     expect(
@@ -528,6 +540,28 @@ describe('bfBestOfFiveFromTwoSets', () => {
   it('throw range error', () => {
     expect(() => {
       bfBestOfFiveFromTwoSets(
+        [
+          fullCardsDeckHash_5[12],
+          fullCardsDeckHash_5[3],
+          fullCardsDeckHash_5[25],
+          fullCardsDeckHash_5[36]
+        ],
+        [
+          fullCardsDeckHash_5[35],
+          fullCardsDeckHash_5[22],
+          fullCardsDeckHash_5[9],
+          fullCardsDeckHash_5[4],
+          fullCardsDeckHash_5[7]
+        ],
+        3,
+        4
+      );
+    }).toThrowError('sum of nA+nB parameters MUST be 5');
+  });
+
+  it('throw range error', () => {
+    expect(() => {
+      bfBestOfFiveFromTwoSetsLow_Ato6(
         [
           fullCardsDeckHash_5[12],
           fullCardsDeckHash_5[3],
@@ -714,6 +748,34 @@ describe('bfBestOfFiveFromTwoSets', () => {
 
     expect(bfBestOfFiveFromTwoSetsHiLow_Ato5Indexed([12, 25, 36, 0], [1, 3, 2, 38, 51], 2, 3)).toBe(
       6174
+    );
+  });
+
+  it('bfBestOfFiveFromTwoSetsLow_Ato6 the only A to 6 available is a flush so its not the best hand', () => {
+    expect(
+      bfBestOfFiveFromTwoSetsLow_Ato6(
+        [
+          fullCardsDeckHash_5[12],
+          fullCardsDeckHash_5[0],
+          fullCardsDeckHash_5[50],
+          fullCardsDeckHash_5[36]
+        ],
+        [
+          fullCardsDeckHash_5[38],
+          fullCardsDeckHash_5[51],
+          fullCardsDeckHash_5[1],
+          fullCardsDeckHash_5[2],
+          fullCardsDeckHash_5[4]
+        ],
+        2,
+        3
+      )
+    ).toBe(7006);
+  });
+
+  it('bfBestOfFiveFromTwoSetsLow_Ato6 top hand is A 2 3 4 6', () => {
+    expect(bfBestOfFiveFromTwoSetsLow_Ato6Indexed([12, 0, 26, 36], [38, 51, 1, 2, 4], 2, 3)).toBe(
+      7461
     );
   });
 
