@@ -204,20 +204,50 @@ export const _rankOf5onX = (hand: number[], rankHash: NumberMap) => {
   return max;
 };
 
+/**
+ * @function handToCardsSymbols
+ * @param {Array} hand array of indexes in deck of cards 0..51
+ * @return {Array} char face symbols representation of the indexed hand
+ */
 export const handToCardsSymbols = (hand: number[]): string => {
   return hand.map(c => CONSTANTS.rankToFaceSymbol[c % 13]).join('');
 };
-export const handRankToGroup = (rank: number): string => {
-  let groupsRanking = CONSTANTS.handsRankingDelimiter_5cards;
+
+export const handRankToGroup = (
+  rank: number,
+  groupsRanking: number[] = CONSTANTS.handsRankingDelimiter_5cards,
+  groupNameMap: string[] = CONSTANTS.handRankingGroupNames
+): string => {
   let i: number = 0;
-  let groupName: string = CONSTANTS.handRankingGroupNames[i];
+
+  let groupName: string = groupNameMap[i];
   while (rank > groupsRanking[i]) {
     i++;
-    groupName = CONSTANTS.handRankingGroupNames[i];
+    groupName = groupNameMap[i];
   }
   return groupName;
 };
 
+export const fillRank5Ato5 = (
+  h: number[],
+  idx: number,
+  rankingObject: hashRanking
+): hashRanking => {
+  let hash = getVectorSum(h.map(card => rankingObject.baseRankValues[card]));
+  rankingObject.HASHES[hash] = idx;
+  rankingObject.rankingInfos[idx] = {
+    hand: h.slice(),
+    faces: handToCardsSymbols(h),
+    handGroup: handRankToGroup(
+      idx,
+      CONSTANTS.handsRankingDelimiter_Ato5_5cards,
+      CONSTANTS.handRankingGroupNames_Ato5
+    )
+  };
+  return rankingObject;
+};
+
+/**@TODO make fillRank5ATO5 handRankToGroupAto5 changes!!!!! */
 export const fillRank5 = (h: number[], idx: number, rankingObject: hashRanking): hashRanking => {
   let hash = getVectorSum(h.map(card => rankingObject.baseRankValues[card]));
   rankingObject.HASHES[hash] = idx;
@@ -229,6 +259,20 @@ export const fillRank5 = (h: number[], idx: number, rankingObject: hashRanking):
   return rankingObject;
 };
 
+export const fillRank5_ato5 = (
+  h: number[],
+  idx: number,
+  rankingObject: hashRanking
+): hashRanking => {
+  let hash = getVectorSum(h.map(card => rankingObject.baseRankValues[card]));
+  rankingObject.HASHES[hash] = idx;
+  rankingObject.rankingInfos[idx] = {
+    hand: h.slice(),
+    faces: handToCardsSymbols(h),
+    handGroup: handRankToGroup(idx)
+  };
+  return rankingObject;
+};
 export const fillRank5PlusFlushes = (
   h: number[],
   idx: number,

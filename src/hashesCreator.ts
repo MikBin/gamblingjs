@@ -5,7 +5,7 @@ import {
   fillRank5,
   fillRank5PlusFlushes,
   fillRankFlushes,
-  checkStraight5on7,
+  fillRank5Ato5,
   handToCardsSymbols,
   handRankToGroup
 } from './routines';
@@ -173,7 +173,7 @@ export const createRankOf5AceToFive_Full = (): Readonly<hashRanking> => {
 
   let all = QUADS.concat(FULLHOUSES, TRIPLES, DOUBLE_PAIRS, SINGLE_PAIRS, HIGH_CARDS);
   all.forEach((h, idx) => {
-    fillRank5(h, idx, hashRankingLow);
+    fillRank5Ato5(h, idx, hashRankingLow);
   });
 
   return hashRankingLow;
@@ -311,11 +311,12 @@ export const createRankOf7AceToFive_Low = (
   hashRankOfFive: hashRanking,
   baseLowRanking: number[],
   fullFlag: boolean = false
-): Readonly<hashRanking> => {
-  const hashRankingLow: hashRanking = {
+): Readonly<hashRankingSeven> => {
+  const hashRankingLow: hashRankingSeven = {
     HASHES: {},
     FLUSH_CHECK_KEYS: {},
     FLUSH_RANK_HASHES: {},
+    MULTI_FLUSH_RANK_HASHES: {},
     FLUSH_HASHES: {},
     baseRankValues: CONSTANTS.ranksHashOn7,
     baseSuitValues: CONSTANTS.suitsHash,

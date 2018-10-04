@@ -19,7 +19,8 @@ import {
   internalDoublePairsSort,
   fillRankFlushes,
   getDiffDeck5,
-  getDiffDeck7
+  getDiffDeck7,
+  fillRank5_ato5
 } from '../src/routines';
 import { NumberMap, hashRanking } from '../src/interfaces';
 import { fullCardsDeckHash_5, fullCardsDeckHash_7 } from '../src/constants';
@@ -167,9 +168,15 @@ describe('ranking calculators and hashes managers', () => {
     rankingInfos: []
   };
 
-  it('fills rank of 5', () => {
+  it('fills rank of 5 hi and hi low', () => {
     tempObj.rankingInfos[3] = 3;
+
     expect(fillRank5([1, 1, 1], 3, fakeRankingObj).HASHES).toEqual(tempObj.HASHES);
+  });
+
+  it('fills rank of 5 hilow: ', () => {
+    tempObj.HASHES[5] = 7;
+    expect(fillRank5_ato5([2, 1, 2], 7, fakeRankingObj).HASHES).toEqual(tempObj.HASHES);
   });
 
   it('fills with post flush values', () => {

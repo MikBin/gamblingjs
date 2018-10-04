@@ -176,6 +176,16 @@ export const handsRankingDelimiter_5cards: number[] = [
   7451,
   7461
 ];
+
+export const handsRankingDelimiter_Ato5_5cards: number[] = [155, 311, 1169, 2027, 4887, 6174];
+export const handRankingGroupNames_Ato5: string[] = [
+  'four of a kind',
+  'full house',
+  'three of a kind',
+  'two pair',
+  'one pair',
+  'high card'
+];
 export const handRankingGroupNames: string[] = [
   'high card',
   'one pair',

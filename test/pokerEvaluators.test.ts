@@ -45,7 +45,10 @@ import {
   handOfFiveEvalLow_Ato6,
   handOfFiveEvalLow_Ato6Indexed,
   handOfSevenEval_Ato6,
-  handOfSevenEval_Ato6Indexed
+  handOfSevenEval_Ato6Indexed,
+  handOfSevenEvalAto5Indexed_Verbose,
+  handOfSevenEvalLow8Indexed_Verbose,
+  handOfSevenEvalLow9Indexed_Verbose
 } from '../src/pokerEvaluators';
 import { fullCardsDeckHash_5, fullCardsDeckHash_7 } from '../src/constants';
 
@@ -507,6 +510,63 @@ describe('testing handOfSevenEval_Verbose: ', () => {
       winningCards: [2, 3, 18, 19, 20]
     });
   });
+
+  it('should evaluate verbose Ato5', () => {
+    expect(handOfSevenEvalAto5Indexed_Verbose(0, 1, 2, 3, 4, 23, 45)).toEqual({
+      faces: '65432',
+      flushSuit: 'no flush',
+      hand: [4, 3, 2, 1, 0],
+      handGroup: 'high card',
+      handRank: 6169,
+      winningCards: [0, 1, 2, 3, 4]
+    });
+  });
+
+  it('should evaluate verbose Ato5 low 8', () => {
+    expect(handOfSevenEvalLow8Indexed_Verbose(0, 1, 2, 3, 4, 23, 45)).toEqual({
+      faces: '65432',
+      flushSuit: 'no flush',
+      hand: [4, 3, 2, 1, 0],
+      handGroup: 'high card',
+      handRank: 50,
+      winningCards: [0, 1, 2, 3, 4]
+    });
+  });
+
+  it('should evaluate verbose Ato5 low 8-- hand doesnt qualify for low8', () => {
+    expect(handOfSevenEvalLow8Indexed_Verbose(0, 11, 23, 24, 4, 36, 45)).toEqual({
+      faces: '2KQK6Q8',
+      flushSuit: 'unqualified',
+      hand: [],
+      handGroup: 'unqualified',
+      handRank: -1,
+      winningCards: []
+    });
+  });
+
+  it('should evaluate verbose Ato5 low 9', () => {
+    expect(handOfSevenEvalLow9Indexed_Verbose(0, 1, 2, 3, 4, 23, 45)).toEqual({
+      faces: '65432',
+      flushSuit: 'no flush',
+      hand: [4, 3, 2, 1, 0],
+      handGroup: 'high card',
+      handRank: 120,
+      winningCards: [0, 1, 2, 3, 4]
+    });
+  });
+
+  it('should evaluate verbose Ato5 low 9-- hand doesnt qualify for low9', () => {
+    expect(handOfSevenEvalLow9Indexed_Verbose(0, 11, 23, 24, 4, 36, 45)).toEqual({
+      faces: '2KQK6Q8',
+      flushSuit: 'unqualified',
+      hand: [],
+      handGroup: 'unqualified',
+      handRank: -1,
+      winningCards: []
+    });
+  });
+
+  /**@TODO verbose from lowball Ato6 and from two sets */
 });
 
 /**
