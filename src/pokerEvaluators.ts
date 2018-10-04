@@ -49,6 +49,12 @@ const FLUSH_CHECK_SEVEN = HASHES_OF_FIVE_ON_SEVEN.FLUSH_CHECK_KEYS;
 const HASH_RANK_SEVEN = HASHES_OF_FIVE_ON_SEVEN.HASHES;
 const FLUSH_RANK_SEVEN = HASHES_OF_FIVE_ON_SEVEN.MULTI_FLUSH_RANK_HASHES;
 
+/**LOWBALL DEUCE TO SEVEN HASH ON 7 CARDS*/
+export const HASHES_OF_FIVE_ON_SEVEN_LOWBALL27 = createRankOf5On7Hashes(HASHES_OF_FIVE, true);
+const FLUSH_CHECK_SEVEN_LOWBALL27 = HASHES_OF_FIVE_ON_SEVEN_LOWBALL27.FLUSH_CHECK_KEYS;
+const HASH_RANK_SEVEN_LOWBALL27 = HASHES_OF_FIVE_ON_SEVEN_LOWBALL27.HASHES;
+const FLUSH_RANK_SEVEN_LOWBALL27 = HASHES_OF_FIVE_ON_SEVEN_LOWBALL27.MULTI_FLUSH_RANK_HASHES;
+
 /**LOW Ato5 HASHES */
 export const HASHES_OF_FIVE_LOW8 = createRankOf5AceToFive_Low8();
 const HASH_RANK_FIVE_LOW8 = HASHES_OF_FIVE_LOW8.HASHES;
@@ -582,6 +588,57 @@ export const handOfSevenEval = (
   return handRank;
 };
 
+/** @function handOfSevenEvalLowBall27
+ *
+ * @param {Number} c1...c7 cards hash from CONSTANTS.fullCardsDeckHash_7
+ * @returns {number} hand ranking for lowBall 2to7 basically inverse of high rank
+ */
+export const handOfSevenEvalLowBall27 = (
+  c1: number,
+  c2: number,
+  c3: number,
+  c4: number,
+  c5: number,
+  c6: number,
+  c7: number
+): number => {
+  let keySum: number = c1 + c2 + c3 + c4 + c5 + c6 + c7;
+  let handRank: number = 0;
+  let flush_check_key: number = FLUSH_CHECK_SEVEN_LOWBALL27[keySum & FLUSH_MASK];
+  if (flush_check_key >= 0) {
+    /**only seven card flush possible in lowball 2-7. in case of 6 or 5 flushy cards any high card or pair would be a better hand */
+    handRank = FLUSH_RANK_SEVEN_LOWBALL27[7][keySum >>> 9];
+  } else {
+    handRank = HASH_RANK_SEVEN_LOWBALL27[keySum >>> 9];
+  }
+  return handRank;
+};
+
+/** @function handOfSevenEvalLowBall27Indexed
+ *
+ * @param {Number} c1...c7 cards from 0-51
+ * @returns {Number} hand ranking for lowBall 2to7 basically inverse of high rank
+ */
+export const handOfSevenEvalLowBall27Indexed = (
+  c1: number,
+  c2: number,
+  c3: number,
+  c4: number,
+  c5: number,
+  c6: number,
+  c7: number
+): number => {
+  return handOfSevenEvalLowBall27(
+    fullCardsDeckHash_7[c1],
+    fullCardsDeckHash_7[c2],
+    fullCardsDeckHash_7[c3],
+    fullCardsDeckHash_7[c4],
+    fullCardsDeckHash_7[c5],
+    fullCardsDeckHash_7[c6],
+    fullCardsDeckHash_7[c7]
+  );
+};
+
 /** @function handOfSevenEval_Ato6
  *
  * @param {Number} c1...c7 cards hash from CONSTANTS.fullCardsDeckHash_7
@@ -647,23 +704,6 @@ export const handOfSevenEval_Ato6Indexed = (
     fullCardsDeckHash_7[c6],
     fullCardsDeckHash_7[c7]
   );
-};
-
-/** @function handOfSevenEvalLowBall27   @TODO indexed version
- *
- * @param {Number} c1...c7 cards hash from CONSTANTS.fullCardsDeckHash_7
- * @returns {number} hand ranking for lowBall 2to7 basically inverse of high rank
- */
-export const handOfSevenEvalLowBall27 = (
-  c1: number,
-  c2: number,
-  c3: number,
-  c4: number,
-  c5: number,
-  c6: number,
-  c7: number
-): number => {
-  return HIGH_MAX_RANK - handOfSevenEval(c1, c2, c3, c4, c5, c6, c7);
 };
 
 /** @function handOfSevenEvalHiLow
@@ -928,7 +968,8 @@ export const handOfSevenEval_Verbose = (
   c7: number,
   SEVEN_EVAL_HASH: hashRankingSeven = HASHES_OF_FIVE_ON_SEVEN,
   FIVE_EVAL_HASH: hashRanking = HASHES_OF_FIVE,
-  USE_MULTI_FLUSH_RANK: boolean = true
+  USE_MULTI_FLUSH_RANK: boolean = true,
+  INVERTED: boolean = false
 ): verboseHandInfo => {
   let _FLUSH_CHECK_SEVEN = SEVEN_EVAL_HASH.FLUSH_CHECK_KEYS;
   let _FLUSH_RANK_SEVEN = USE_MULTI_FLUSH_RANK
@@ -946,9 +987,10 @@ export const handOfSevenEval_Verbose = (
     });
 
     handVector.forEach(c => (flushRankKey += c));
-    //@ts-ignore
+
     handRank = USE_MULTI_FLUSH_RANK
-      ? _FLUSH_RANK_SEVEN[handVector.length][flushRankKey >>> 9]
+      ? //@ts-ignore
+        _FLUSH_RANK_SEVEN[handVector.length][flushRankKey >>> 9]
       : _FLUSH_RANK_SEVEN[flushRankKey >>> 9];
   } else {
     handRank = _HASH_RANK_SEVEN[keySum >>> 9];
@@ -967,19 +1009,44 @@ export const handOfSevenEval_Verbose = (
       flushSuit: 'unqualified'
     };
   }
-  let wHand = FIVE_EVAL_HASH.rankingInfos[handRank].hand;
+  let wHand = FIVE_EVAL_HASH.rankingInfos[INVERTED ? HIGH_MAX_RANK - handRank : handRank].hand;
 
   return {
     handRank: handRank,
     hand: wHand,
-    faces: FIVE_EVAL_HASH.rankingInfos[handRank].faces,
-    handGroup: FIVE_EVAL_HASH.rankingInfos[handRank].handGroup,
+    faces: FIVE_EVAL_HASH.rankingInfos[INVERTED ? HIGH_MAX_RANK - handRank : handRank].faces,
+    handGroup:
+      FIVE_EVAL_HASH.rankingInfos[INVERTED ? HIGH_MAX_RANK - handRank : handRank].handGroup,
     winningCards: handIndexes.filter(c => wHand.includes(<number>c % 13)),
     /**in low8 or 9 there could be more than 5 cards ex AAA2345--->apply procedure to remove duplicates when highliting cards
      * by taking the first of each rank encountered
      */
     flushSuit: flushRankKey > -1 ? flushHashToName[flush_check_key] : 'no flush'
   };
+};
+
+export const handOfSevenEvalLowBall27Indexed_Verbose = (
+  c1: number,
+  c2: number,
+  c3: number,
+  c4: number,
+  c5: number,
+  c6: number,
+  c7: number
+): verboseHandInfo => {
+  return handOfSevenEval_Verbose(
+    fullCardsDeckHash_7[c1],
+    fullCardsDeckHash_7[c2],
+    fullCardsDeckHash_7[c3],
+    fullCardsDeckHash_7[c4],
+    fullCardsDeckHash_7[c5],
+    fullCardsDeckHash_7[c6],
+    fullCardsDeckHash_7[c7],
+    HASHES_OF_FIVE_ON_SEVEN_LOWBALL27,
+    HASHES_OF_FIVE,
+    true,
+    true
+  );
 };
 
 /** @function handOfSevenEvalIndexed_Verbose

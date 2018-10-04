@@ -27,6 +27,7 @@ import {
   handOfSevenEvalHiLow9,
   handOfSevenEvalLow_Ato5,
   handOfSevenEvalLowBall27,
+  handOfSevenEvalLowBall27Indexed,
   bfBestOfFiveFromTwoSets,
   bfBestOfFiveFromTwoSetsHiLow,
   bfBestOfFiveFromTwoSetsHiLow8,
@@ -48,7 +49,8 @@ import {
   handOfSevenEval_Ato6Indexed,
   handOfSevenEvalAto5Indexed_Verbose,
   handOfSevenEvalLow8Indexed_Verbose,
-  handOfSevenEvalLow9Indexed_Verbose
+  handOfSevenEvalLow9Indexed_Verbose,
+  handOfSevenEvalLowBall27Indexed_Verbose
 } from '../src/pokerEvaluators';
 import { fullCardsDeckHash_5, fullCardsDeckHash_7 } from '../src/constants';
 
@@ -400,7 +402,7 @@ describe('testing LowBall27: ', () => {
     expect(handOfFiveEvalLowBall27Indexed(12, 11, 10, 9, 8)).toBe(0);
   });
 
-  it('top straight flush cannot exist in 7 eval as the minimum is QJT98 ', () => {
+  it('top straight flush cannot exist in 7 eval as the minimum is KJT98 ', () => {
     expect(
       handOfSevenEvalLowBall27(
         fullCardsDeckHash_7[12],
@@ -411,7 +413,12 @@ describe('testing LowBall27: ', () => {
         fullCardsDeckHash_7[7],
         fullCardsDeckHash_7[6]
       )
-    ).toBe(0);
+    ).toBe(339);
+
+    expect(handOfSevenEvalLowBall27Indexed(12, 11, 10, 9, 8, 7, 6)).toBe(339);
+
+    expect(handOfSevenEvalLowBall27Indexed(0, 1, 2, 3, 4, 23, 45)).toBe(7460);
+    expect(handOfSevenEvalLowBall27Indexed(0, 1, 2, 3, 4, 23, 44)).toBe(7461);
   });
 
   it('2 to 7 is the highest', () => {
@@ -566,6 +573,16 @@ describe('testing handOfSevenEval_Verbose: ', () => {
     });
   });
 
+  it('should evaluate verbose lowball 2-7 on seven cards', () => {
+    expect(handOfSevenEvalLowBall27Indexed_Verbose(0, 1, 2, 3, 4, 23, 45)).toEqual({
+      faces: '23458',
+      flushSuit: 'no flush',
+      hand: [0, 1, 2, 3, 6],
+      handGroup: 'high card',
+      handRank: 7460,
+      winningCards: [0, 1, 2, 3, 45]
+    });
+  });
   /**@TODO verbose from lowball Ato6 and from two sets */
 });
 

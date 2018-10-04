@@ -193,12 +193,13 @@ export const removeStraights = (list: number[][]): number[][] => {
 export const _rankOfHand = (hand: number[], rankHash: NumberMap) => {
   return rankHash[getVectorSum(hand)];
 };
-export const _rankOf5onX = (hand: number[], rankHash: NumberMap) => {
+export const _rankOf5onX = (hand: number[], rankHash: NumberMap, INVERTED: boolean = false) => {
   let comb = kombinatoricsJs.combinations(hand, 5);
   let max = 0;
   comb.forEach(h => {
     let s = getVectorSum(h);
     let r = rankHash[s];
+    INVERTED ? (r = CONSTANTS.HIGH_MAX_RANK - r) : null;
     max = max < r ? r : max;
   });
   return max;

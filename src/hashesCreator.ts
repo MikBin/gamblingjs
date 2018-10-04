@@ -65,9 +65,12 @@ export const createRankOfFiveHashes = (): Readonly<hashRanking> => {
   return hashRankingOfFive;
 };
 
-//export const createRankOf5On6Hashes = () => { };
+// @TODO export const createRankOf5On6Hashes = () => { };
 
-export const createRankOf5On7Hashes = (hashRankOfFive: hashRanking) => {
+export const createRankOf5On7Hashes = (
+  hashRankOfFive: hashRanking,
+  INVERTED: boolean = false
+): Readonly<hashRankingSeven> => {
   const hashRankingOfFiveOnSeven: hashRankingSeven = {
     HASHES: {},
     FLUSH_CHECK_KEYS: {},
@@ -79,17 +82,15 @@ export const createRankOf5On7Hashes = (hashRankOfFive: hashRanking) => {
     rankingInfos: hashRankOfFive.rankingInfos
   };
 
-  let counter: number = 0;
   const rankCards = CONSTANTS.rankCards;
   const ranksHashOn7 = hashRankingOfFiveOnSeven.baseRankValues;
-  const suit7Hash = hashRankingOfFiveOnSeven.baseSuitValues;
 
   kombinatoricsJs.multiCombinations(rankCards, 7, 4).forEach((hand: number[], i: number) => {
     let h7 = hand.map(card => ranksHashOn7[card]);
     let h5 = hand.map(card => hashRankOfFive.baseRankValues[card]);
     let hash7: number = getVectorSum(h7);
 
-    hashRankingOfFiveOnSeven.HASHES[hash7] = _rankOf5onX(h5, hashRankOfFive.HASHES);
+    hashRankingOfFiveOnSeven.HASHES[hash7] = _rankOf5onX(h5, hashRankOfFive.HASHES, INVERTED);
   });
 
   let FLUSH_RANK_HASHES = hashRankingOfFiveOnSeven.MULTI_FLUSH_RANK_HASHES;
@@ -103,7 +104,7 @@ export const createRankOf5On7Hashes = (hashRankOfFive: hashRanking) => {
     let h7: number[] = h.map(c => hashRankingOfFiveOnSeven.baseRankValues[c]);
     let hash7 = getVectorSum(h7);
 
-    let rank = _rankOf5onX(h5, hashRankOfFive.FLUSH_RANK_HASHES);
+    let rank = _rankOf5onX(h5, hashRankOfFive.FLUSH_RANK_HASHES, INVERTED);
 
     FLUSH_RANK_HASHES[h.length][hash7] = rank;
   });
@@ -121,13 +122,17 @@ export const createRankOf5On7Hashes = (hashRankOfFive: hashRanking) => {
 
   const FLUSH_CHECK_KEYS = hashRankingOfFiveOnSeven.FLUSH_CHECK_KEYS;
 
-  fiveFlushHashes.concat(sixFlushHashes, sevenFlushHashes).forEach(h => {
+  if (INVERTED) {
+    sevenFlushHashes = [
+      [0, 0, 0, 0, 0, 0, 0],
+      [1, 1, 1, 1, 1, 1, 1],
+      [8, 8, 8, 8, 8, 8, 8],
+      [57, 57, 57, 57, 57, 57, 57]
+    ];
+  }
+  sevenFlushHashes.forEach(h => {
     FLUSH_CHECK_KEYS[getVectorSum(h)] = h[0];
   });
-
-  /*console.log(counter, sixFlushes, sevenFlushes, fiveFlushes);
-    console.log(cc, fiveFlushHashes, sixFlushHashes, sevenFlushHashes, hashRankingOfFiveOnSeven.FLUSH_CHECK_KEYS);
-    console.log("--------", hashRankingOfFiveOnSeven);*/
 
   return hashRankingOfFiveOnSeven;
 };
