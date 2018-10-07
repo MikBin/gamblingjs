@@ -184,30 +184,80 @@ exports.removeStraights = function (list) {
 exports._rankOfHand = function (hand, rankHash) {
     return rankHash[exports.getVectorSum(hand)];
 };
-exports._rankOf5onX = function (hand, rankHash) {
+exports._rankOf5onX = function (hand, rankHash, INVERTED) {
+    if (INVERTED === void 0) { INVERTED = false; }
     var comb = kombinatoricsJs.combinations(hand, 5);
     var max = 0;
     comb.forEach(function (h) {
         var s = exports.getVectorSum(h);
         var r = rankHash[s];
+        INVERTED ? (r = CONSTANTS.HIGH_MAX_RANK - r) : null;
         max = max < r ? r : max;
     });
     return max;
 };
+/**
+ * @function filterWinningCards
+ * @param {Array} fullHand array of indexes in deck of cards 0..51
+ * @param {Array} winningRanks array of 5 cards indexes
+ * @return {Array} only cards of winning hand
+ */
+exports.filterWinningCards = function (fullHand, winningRanks) {
+    var winning = {};
+    winningRanks.forEach(function (c) {
+        !winning[c] ? winning[c] = 1 : winning[c]++;
+    });
+    var full = [];
+    fullHand.forEach(function (card) {
+        if (winning[card % 13] > 0) {
+            winning[card % 13]--;
+            full.push(card);
+        }
+    });
+    return full;
+};
+/**
+ * @function handToCardsSymbols
+ * @param {Array} hand array of indexes in deck of cards 0..51
+ * @return {Array} char face symbols representation of the indexed hand
+ */
 exports.handToCardsSymbols = function (hand) {
     return hand.map(function (c) { return CONSTANTS.rankToFaceSymbol[c % 13]; }).join('');
 };
-exports.handRankToGroup = function (rank) {
-    var groupsRanking = CONSTANTS.handsRankingDelimiter_5cards;
+exports.handRankToGroup = function (rank, groupsRanking, groupNameMap) {
+    if (groupsRanking === void 0) { groupsRanking = CONSTANTS.handsRankingDelimiter_5cards; }
+    if (groupNameMap === void 0) { groupNameMap = CONSTANTS.handRankingGroupNames; }
     var i = 0;
-    var groupName = CONSTANTS.handRankingGroupNames[i];
+    var groupName = groupNameMap[i];
     while (rank > groupsRanking[i]) {
         i++;
-        groupName = CONSTANTS.handRankingGroupNames[i];
+        groupName = groupNameMap[i];
     }
     return groupName;
 };
-exports.fillRank5 = function (h, idx, rankingObject) {
+exports.fillRank5Ato5 = function (h, idx, rankingObject) {
+    var hash = exports.getVectorSum(h.map(function (card) { return rankingObject.baseRankValues[card]; }));
+    rankingObject.HASHES[hash] = idx;
+    rankingObject.rankingInfos[idx] = {
+        hand: h.slice(),
+        faces: exports.handToCardsSymbols(h),
+        handGroup: exports.handRankToGroup(idx, CONSTANTS.handsRankingDelimiter_Ato5_5cards, CONSTANTS.handRankingGroupNames_Ato5)
+    };
+    return rankingObject;
+};
+exports.fillRank5 = function (h, idx, rankingObject, groupsRanking, groupNameMap) {
+    if (groupsRanking === void 0) { groupsRanking = CONSTANTS.handsRankingDelimiter_5cards; }
+    if (groupNameMap === void 0) { groupNameMap = CONSTANTS.handRankingGroupNames; }
+    var hash = exports.getVectorSum(h.map(function (card) { return rankingObject.baseRankValues[card]; }));
+    rankingObject.HASHES[hash] = idx;
+    rankingObject.rankingInfos[idx] = {
+        hand: h.slice(),
+        faces: exports.handToCardsSymbols(h),
+        handGroup: exports.handRankToGroup(idx, groupsRanking, groupNameMap)
+    };
+    return rankingObject;
+};
+exports.fillRank5_ato5 = function (h, idx, rankingObject) {
     var hash = exports.getVectorSum(h.map(function (card) { return rankingObject.baseRankValues[card]; }));
     rankingObject.HASHES[hash] = idx;
     rankingObject.rankingInfos[idx] = {

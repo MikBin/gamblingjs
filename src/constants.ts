@@ -178,6 +178,12 @@ export const handsRankingDelimiter_5cards: number[] = [
 ];
 
 export const handsRankingDelimiter_Ato5_5cards: number[] = [155, 311, 1169, 2027, 4887, 6174];
+export const handsRankingDelimiter_Ato6_5cards: number[] = handsRankingDelimiter_5cards.map(
+  r => 7461 - r
+);
+handsRankingDelimiter_Ato6_5cards.pop();
+handsRankingDelimiter_Ato6_5cards.reverse().push(7461);
+//console.log(handsRankingDelimiter_Ato6_5cards);
 export const handRankingGroupNames_Ato5: string[] = [
   'four of a kind',
   'full house',
@@ -186,6 +192,7 @@ export const handRankingGroupNames_Ato5: string[] = [
   'one pair',
   'high card'
 ];
+
 export const handRankingGroupNames: string[] = [
   'high card',
   'one pair',
@@ -197,6 +204,9 @@ export const handRankingGroupNames: string[] = [
   'four of a kind',
   'straight flush'
 ];
+
+export const handRankingGroupNames_Ato6: string[] = handRankingGroupNames.slice().reverse();
+
 /**
  * fill with these:
  * https://en.wikipedia.org/wiki/Poker_probability

@@ -33,7 +33,7 @@ import {
   hashRankingSeven,
   hashRanking
 } from './interfaces';
-import { handToCardsSymbols } from './routines';
+import { handToCardsSymbols, filterWinningCards } from './routines';
 
 /**low hands ato5 as well as hand on 6 and omaha optimization are not created at boot,
  * they have to be instantiated explicitly
@@ -657,23 +657,7 @@ export const handOfSevenEval_Ato6 = (
   let handRank: number = 0;
   let flush_check_key: number = FLUSH_CHECK_SEVEN_ATO6[keySum & FLUSH_MASK];
   if (flush_check_key >= 0) {
-    let flushRankKey: number =
-      //@ts-ignore
-      ((c1 & FLUSH_MASK) == flush_check_key) * c1 +
-      //@ts-ignore
-      ((c2 & FLUSH_MASK) == flush_check_key) * c2 +
-      //@ts-ignore
-      ((c3 & FLUSH_MASK) == flush_check_key) * c3 +
-      //@ts-ignore
-      ((c4 & FLUSH_MASK) == flush_check_key) * c4 +
-      //@ts-ignore
-      ((c5 & FLUSH_MASK) == flush_check_key) * c5 +
-      //@ts-ignore
-      ((c6 & FLUSH_MASK) == flush_check_key) * c6 +
-      //@ts-ignore
-      ((c7 & FLUSH_MASK) == flush_check_key) * c7;
-
-    handRank = FLUSH_RANK_SEVEN_ATO6[flushRankKey >>> 9];
+    handRank = FLUSH_RANK_SEVEN_ATO6[keySum >>> 9];
   } else {
     handRank = HASH_RANK_SEVEN_ATO6[keySum >>> 9];
   }
@@ -907,7 +891,7 @@ export const handOfSevenEvalHiLow9Indexed = (
 
 /** @function handOfSixEvalIndexed
  *
- * @param {Array:Number[]} array of 7 cards making up an hand
+ * @param {Array:Number[]} array of 6 cards making up an hand
  * @returns {Number} hand ranking ( the best one on all combinations of input card in group of 5)
  */
 export const handOfSixEvalIndexed = (
@@ -918,14 +902,106 @@ export const handOfSixEvalIndexed = (
   c5: number,
   c6: number
 ): number => {
-  return bfBestOfFiveOnX([
-    fullCardsDeckHash_5[c1],
-    fullCardsDeckHash_5[c2],
-    fullCardsDeckHash_5[c3],
-    fullCardsDeckHash_5[c4],
-    fullCardsDeckHash_5[c5],
-    fullCardsDeckHash_5[c6]
-  ]);
+  return bfBestOfFiveOnXindexed([c1, c2, c3, c4, c5, c6]);
+};
+
+/** @function handOfSixEvalLowBall27Indexed
+ *
+ * @param {Array:Number[]} array of 6 cards making up an hand
+ * @returns {Number} hand ranking ( the best one on all combinations of input card in group of 5)
+ */
+export const handOfSixEvalLowBall27Indexed = (
+  c1: number,
+  c2: number,
+  c3: number,
+  c4: number,
+  c5: number,
+  c6: number
+): number => {
+  return bfBestOfFiveOnXindexed([c1, c2, c3, c4, c5, c6], handOfFiveEvalLowBall27Indexed);
+};
+
+/** @function handOfSixEvalato5Indexed
+ *
+ * @param {Array:Number[]} array of 6 cards making up an hand
+ * @returns {Number} hand ranking ( the best one on all combinations of input card in group of 5)
+ */
+export const handOfSixEvalAto5Indexed = (
+  c1: number,
+  c2: number,
+  c3: number,
+  c4: number,
+  c5: number,
+  c6: number
+): number => {
+  return bfBestOfFiveOnXindexed([c1, c2, c3, c4, c5, c6], handOfFiveEvalLow_Ato5Indexed);
+};
+
+/** @function handOfSixEvalato5Indexed
+ *
+ * @param {Array:Number[]} array of 6 cards making up an hand
+ * @returns {Number} hand ranking ( the best one on all combinations of input card in group of 5)
+ */
+export const handOfSixEvalAto6Indexed = (
+  c1: number,
+  c2: number,
+  c3: number,
+  c4: number,
+  c5: number,
+  c6: number
+): number => {
+  return bfBestOfFiveOnXindexed([c1, c2, c3, c4, c5, c6], handOfFiveEvalLow_Ato6Indexed);
+};
+
+/** @function handOfSixEvalHiLow8Indexed
+ *
+ * @param {Array:Number[]} array of 6 cards making up an hand
+ * @returns {hiLowRank} hand ranking ( the best one on all combinations of input card in group of 5)
+ */
+export const handOfSixEvalHiLow8Indexed = (
+  c1: number,
+  c2: number,
+  c3: number,
+  c4: number,
+  c5: number,
+  c6: number
+): hiLowRank => {
+  let res = { hi: -1, low: -1 };
+  //@ts-ignore
+  let all = kombinatoricsJs
+    .combinations([c1, c2, c3, c4, c5, c6], 5)
+    .map(hand => handOfFiveEvalHiLow8Indexed(...hand));
+  all.forEach((R, i) => {
+    R.hi > res.hi ? (res.hi = R.hi) : null;
+    R.low > res.low ? (res.low = R.low) : null;
+  });
+
+  return res;
+};
+
+/** @function handOfSixEvalHiLow9Indexed
+ *
+ * @param {Array:Number[]} array of 6 cards making up an hand
+ * @returns {hiLowRank} hand ranking ( the best one on all combinations of input card in group of 5)
+ */
+export const handOfSixEvalHiLow9Indexed = (
+  c1: number,
+  c2: number,
+  c3: number,
+  c4: number,
+  c5: number,
+  c6: number
+): hiLowRank => {
+  let res = { hi: -1, low: -1 };
+  //@ts-ignore
+  let all = kombinatoricsJs
+    .combinations([c1, c2, c3, c4, c5, c6], 5)
+    .map(hand => handOfFiveEvalHiLow9Indexed(...hand));
+  all.forEach((R, i) => {
+    R.hi > res.hi ? (res.hi = R.hi) : null;
+    R.low > res.low ? (res.low = R.low) : null;
+  });
+  return res;
 };
 
 /** @function handOfSevenEvalIndexed
@@ -1017,9 +1093,9 @@ export const handOfSevenEval_Verbose = (
     faces: FIVE_EVAL_HASH.rankingInfos[INVERTED ? HIGH_MAX_RANK - handRank : handRank].faces,
     handGroup:
       FIVE_EVAL_HASH.rankingInfos[INVERTED ? HIGH_MAX_RANK - handRank : handRank].handGroup,
-    winningCards: handIndexes.filter(c => wHand.includes(<number>c % 13)),
+    winningCards: filterWinningCards(<number[]>handIndexes, wHand),
     /**in low8 or 9 there could be more than 5 cards ex AAA2345--->apply procedure to remove duplicates when highliting cards
-     * by taking the first of each rank encountered
+     * by taking the first of each rank encountered (starting from communitaire cards)
      */
     flushSuit: flushRankKey > -1 ? flushHashToName[flush_check_key] : 'no flush'
   };
@@ -1046,6 +1122,29 @@ export const handOfSevenEvalLowBall27Indexed_Verbose = (
     HASHES_OF_FIVE,
     true,
     true
+  );
+};
+
+export const handOfSevenEvalAto6Indexed_Verbose = (
+  c1: number,
+  c2: number,
+  c3: number,
+  c4: number,
+  c5: number,
+  c6: number,
+  c7: number
+): verboseHandInfo => {
+  return handOfSevenEval_Verbose(
+    fullCardsDeckHash_7[c1],
+    fullCardsDeckHash_7[c2],
+    fullCardsDeckHash_7[c3],
+    fullCardsDeckHash_7[c4],
+    fullCardsDeckHash_7[c5],
+    fullCardsDeckHash_7[c6],
+    fullCardsDeckHash_7[c7],
+    HASHES_OF_SEVEN_LOW_Ato6,
+    HASHES_OF_FIVE_Ato6,
+    false
   );
 };
 
@@ -1154,6 +1253,37 @@ export const handOfSevenEvalLow9Indexed_Verbose = (
  * @param {Number} hand rank
  * @returns {handInfo} object containing hand info
  */
-export const getHandInfo = (rank: number): handInfo => {
-  return HASHES_OF_FIVE.rankingInfos[rank];
+export const getHandInfo = (
+  rank: number,
+  HASHES: hashRanking = HASHES_OF_FIVE,
+  INVERTED: boolean = false
+): handInfo => {
+  return HASHES.rankingInfos[INVERTED ? HIGH_MAX_RANK - rank : rank];
+};
+
+/** @function getHandInfo27
+ *
+ * @param {Number} hand rank
+ * @returns {handInfo} object containing hand info
+ */
+export const getHandInfo27 = (rank: number): handInfo => {
+  return getHandInfo(rank, HASHES_OF_FIVE, true);
+};
+
+/** @function getHandInfoAto5
+ *
+ * @param {Number} hand rank
+ * @returns {handInfo} object containing hand info
+ */
+export const getHandInfoAto5 = (rank: number): handInfo => {
+  return getHandInfo(rank, HASEHS_OF_FIVE_LOW_Ato5);
+};
+
+/** @function getHandInfoAto6
+ *
+ * @param {Number} hand rank
+ * @returns {handInfo} object containing hand info
+ */
+export const getHandInfoAto6 = (rank: number): handInfo => {
+  return getHandInfo(rank, HASHES_OF_FIVE_Ato6);
 };

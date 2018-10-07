@@ -20,7 +20,8 @@ import {
   fillRankFlushes,
   getDiffDeck5,
   getDiffDeck7,
-  fillRank5_ato5
+  fillRank5_ato5,
+  filterWinningCards
 } from '../src/routines';
 import { NumberMap, hashRanking } from '../src/interfaces';
 import { fullCardsDeckHash_5, fullCardsDeckHash_7 } from '../src/constants';
@@ -131,6 +132,16 @@ describe('testing basic routines', () => {
     expect(internalDoublePairsSort([1, 1], [1, 1])).toBe(0);
     expect(internalDoublePairsSort([1, 1], [1, 0])).toBe(1);
     expect(internalDoublePairsSort([1, 1], [2, 0])).toBe(-1);
+  });
+
+  it('filters 5 winning cards from a set of >5 ', () => {
+    expect(filterWinningCards([11, 24, 37, 50, 10, 23, 36], [10, 10, 10, 11, 11])).toEqual([
+      11,
+      24,
+      10,
+      23,
+      36
+    ]);
   });
 });
 

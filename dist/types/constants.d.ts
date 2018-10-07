@@ -35,7 +35,11 @@ export declare const HIGH_MAX_RANK: number;
 export declare const FLUSH_MASK: number;
 export declare const STRAIGHT_FLUSH_OFFSET: number;
 export declare const handsRankingDelimiter_5cards: number[];
+export declare const handsRankingDelimiter_Ato5_5cards: number[];
+export declare const handsRankingDelimiter_Ato6_5cards: number[];
+export declare const handRankingGroupNames_Ato5: string[];
 export declare const handRankingGroupNames: string[];
+export declare const handRankingGroupNames_Ato6: string[];
 /**
  * fill with these:
  * https://en.wikipedia.org/wiki/Poker_probability

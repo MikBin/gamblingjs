@@ -49,8 +49,9 @@ exports.createRankOfFiveHashes = function () {
     });
     return hashRankingOfFive;
 };
-//export const createRankOf5On6Hashes = () => { };
-exports.createRankOf5On7Hashes = function (hashRankOfFive) {
+// @TODO export const createRankOf5On6Hashes = () => { };
+exports.createRankOf5On7Hashes = function (hashRankOfFive, INVERTED) {
+    if (INVERTED === void 0) { INVERTED = false; }
     var hashRankingOfFiveOnSeven = {
         HASHES: {},
         FLUSH_CHECK_KEYS: {},
@@ -61,15 +62,13 @@ exports.createRankOf5On7Hashes = function (hashRankOfFive) {
         baseSuitValues: CONSTANTS.suitsHash,
         rankingInfos: hashRankOfFive.rankingInfos
     };
-    var counter = 0;
     var rankCards = CONSTANTS.rankCards;
     var ranksHashOn7 = hashRankingOfFiveOnSeven.baseRankValues;
-    var suit7Hash = hashRankingOfFiveOnSeven.baseSuitValues;
     kombinatoricsJs.multiCombinations(rankCards, 7, 4).forEach(function (hand, i) {
         var h7 = hand.map(function (card) { return ranksHashOn7[card]; });
         var h5 = hand.map(function (card) { return hashRankOfFive.baseRankValues[card]; });
         var hash7 = routines_1.getVectorSum(h7);
-        hashRankingOfFiveOnSeven.HASHES[hash7] = routines_1._rankOf5onX(h5, hashRankOfFive.HASHES);
+        hashRankingOfFiveOnSeven.HASHES[hash7] = routines_1._rankOf5onX(h5, hashRankOfFive.HASHES, INVERTED);
     });
     var FLUSH_RANK_HASHES = hashRankingOfFiveOnSeven.MULTI_FLUSH_RANK_HASHES;
     var fiveFlushes = kombinatoricsJs.combinations(rankCards, 5);
@@ -79,7 +78,7 @@ exports.createRankOf5On7Hashes = function (hashRankOfFive) {
         var h5 = h.map(function (c) { return hashRankOfFive.baseRankValues[c]; });
         var h7 = h.map(function (c) { return hashRankingOfFiveOnSeven.baseRankValues[c]; });
         var hash7 = routines_1.getVectorSum(h7);
-        var rank = routines_1._rankOf5onX(h5, hashRankOfFive.FLUSH_RANK_HASHES);
+        var rank = routines_1._rankOf5onX(h5, hashRankOfFive.FLUSH_RANK_HASHES, INVERTED);
         FLUSH_RANK_HASHES[h.length][hash7] = rank;
     });
     var fiveFlushHashes = [[0, 0, 0, 0, 0], [1, 1, 1, 1, 1], [8, 8, 8, 8, 8], [57, 57, 57, 57, 57]];
@@ -92,12 +91,17 @@ exports.createRankOf5On7Hashes = function (hashRankOfFive) {
         sevenFlushHashes.push(v.concat([0]), v.concat([1]), v.concat([8]), v.concat([57]));
     });
     var FLUSH_CHECK_KEYS = hashRankingOfFiveOnSeven.FLUSH_CHECK_KEYS;
-    fiveFlushHashes.concat(sixFlushHashes, sevenFlushHashes).forEach(function (h) {
+    if (INVERTED) {
+        sevenFlushHashes = [
+            [0, 0, 0, 0, 0, 0, 0],
+            [1, 1, 1, 1, 1, 1, 1],
+            [8, 8, 8, 8, 8, 8, 8],
+            [57, 57, 57, 57, 57, 57, 57]
+        ];
+    }
+    sevenFlushHashes.forEach(function (h) {
         FLUSH_CHECK_KEYS[routines_1.getVectorSum(h)] = h[0];
     });
-    /*console.log(counter, sixFlushes, sevenFlushes, fiveFlushes);
-      console.log(cc, fiveFlushHashes, sixFlushHashes, sevenFlushHashes, hashRankingOfFiveOnSeven.FLUSH_CHECK_KEYS);
-      console.log("--------", hashRankingOfFiveOnSeven);*/
     return hashRankingOfFiveOnSeven;
 };
 exports.createRankOf5AceToFive_Low8 = function () {
@@ -136,7 +140,7 @@ exports.createRankOf5AceToFive_Full = function () {
     var HIGH_CARDS = kombinatoricsJs.multiCombinations(rankCards, 5, 1);
     var all = QUADS.concat(FULLHOUSES, TRIPLES, DOUBLE_PAIRS, SINGLE_PAIRS, HIGH_CARDS);
     all.forEach(function (h, idx) {
-        routines_1.fillRank5(h, idx, hashRankingLow);
+        routines_1.fillRank5Ato5(h, idx, hashRankingLow);
     });
     return hashRankingLow;
 };
@@ -168,7 +172,7 @@ exports.createRankOf5AceToSix_Full = function () {
         hashRankingLow.rankingInfos[rank] = {
             hand: h.slice(),
             faces: routines_1.handToCardsSymbols(h),
-            handGroup: routines_1.handRankToGroup(rank)
+            handGroup: routines_1.handRankToGroup(rank, CONSTANTS.handsRankingDelimiter_Ato6_5cards, CONSTANTS.handRankingGroupNames_Ato6)
         };
     });
     var FLUSH_GAP = STRAIGHTS.length;
@@ -185,12 +189,12 @@ exports.createRankOf5AceToSix_Full = function () {
         hashRankingLow.rankingInfos[rank] = {
             hand: h.slice(),
             faces: routines_1.handToCardsSymbols(h),
-            handGroup: routines_1.handRankToGroup(rank)
+            handGroup: routines_1.handRankToGroup(rank, CONSTANTS.handsRankingDelimiter_Ato6_5cards, CONSTANTS.handRankingGroupNames_Ato6)
         };
     });
     FLUSH_GAP += HIGH_CARDS.length;
     STRAIGHTS.concat(TRIPLES, DOUBLE_PAIRS, SINGLE_PAIRS, HIGH_CARDS).forEach(function (h, idx) {
-        routines_1.fillRank5(h, idx + FLUSH_GAP, hashRankingLow);
+        routines_1.fillRank5(h, idx + FLUSH_GAP, hashRankingLow, CONSTANTS.handsRankingDelimiter_Ato6_5cards, CONSTANTS.handRankingGroupNames_Ato6);
     });
     return hashRankingLow;
 };
@@ -213,26 +217,34 @@ exports.createRankOf7AceToSix_Low = function (hashRankOfFive, baseLowRanking) {
         var hash7 = routines_1.getVectorSum(h7);
         hashRankingLow.HASHES[hash7] = routines_1._rankOf5onX(h5, hashRankOfFive.HASHES);
     });
-    var FLUSH_RANK_HASHES = hashRankingLow.MULTI_FLUSH_RANK_HASHES;
-    var fiveFlushes = kombinatoricsJs.combinations(baseLowRanking, 5);
-    var sixFlushes = kombinatoricsJs.combinations(baseLowRanking, 6);
+    /*let fiveFlushes = kombinatoricsJs.combinations(baseLowRanking, 5);
+    let sixFlushes = kombinatoricsJs.combinations(baseLowRanking, 6);*/
     var sevenFlushes = kombinatoricsJs.combinations(baseLowRanking, 7);
-    fiveFlushes.concat(sixFlushes, sevenFlushes).forEach(function (h) {
-        var h5 = h.map(function (c) { return hashRankOfFive.baseRankValues[c]; });
-        var h7 = h.map(function (c) { return hashRankingLow.baseRankValues[c]; });
-        var hash7 = routines_1.getVectorSum(h7);
-        var rank = routines_1._rankOf5onX(h5, hashRankOfFive.FLUSH_RANK_HASHES);
-        FLUSH_RANK_HASHES[h.length][hash7] = rank;
+    /*
+    fiveFlushes.concat(sixFlushes, sevenFlushes).forEach((h: number[]) => {
+      let h5: number[] = h.map(c => hashRankOfFive.baseRankValues[c]);
+      let h7: number[] = h.map(c => hashRankingLow.baseRankValues[c]);
+      let hash7 = getVectorSum(h7);
+  
+      let rank = _rankOf5onX(h5, hashRankOfFive.FLUSH_RANK_HASHES);
+  
+      FLUSH_RANK_HASHES[h.length][hash7] = rank;
     });
-    var fiveFlushHashes = [[0, 0, 0, 0, 0], [1, 1, 1, 1, 1], [8, 8, 8, 8, 8], [57, 57, 57, 57, 57]];
-    var sixFlushHashes = [];
-    fiveFlushHashes.forEach(function (v, i) {
-        sixFlushHashes.push(v.concat([0]), v.concat([1]), v.concat([8]), v.concat([57]));
+  
+    let fiveFlushHashes = [[0, 0, 0, 0, 0], [1, 1, 1, 1, 1], [8, 8, 8, 8, 8], [57, 57, 57, 57, 57]];
+    let sixFlushHashes: number[][] = [];
+    fiveFlushHashes.forEach((v, i) => {
+      sixFlushHashes.push(v.concat([0]), v.concat([1]), v.concat([8]), v.concat([57]));
     });
-    var sevenFlushHashes = [];
-    sixFlushHashes.forEach(function (v) {
-        sevenFlushHashes.push(v.concat([0]), v.concat([1]), v.concat([8]), v.concat([57]));
-    });
+    let sevenFlushHashes: number[][] = [];
+  
+    sixFlushHashes.forEach(v => {
+      sevenFlushHashes.push(v.concat([0]), v.concat([1]), v.concat([8]), v.concat([57]));
+    });*/
+    var sevenFlushHashes = [[0, 0, 0, 0, 0, 0, 0],
+        [1, 1, 1, 1, 1, 1, 1],
+        [8, 8, 8, 8, 8, 8, 8],
+        [57, 57, 57, 57, 57, 57, 57]];
     /**filling only seven flushes as for 5 and 6 the best hand would never be a flush but another combos */
     sevenFlushHashes.forEach(function (h) {
         hashRankingLow.FLUSH_CHECK_KEYS[routines_1.getVectorSum(h)] = h[0];
@@ -252,6 +264,7 @@ exports.createRankOf7AceToFive_Low = function (hashRankOfFive, baseLowRanking, f
         HASHES: {},
         FLUSH_CHECK_KEYS: {},
         FLUSH_RANK_HASHES: {},
+        MULTI_FLUSH_RANK_HASHES: {},
         FLUSH_HASHES: {},
         baseRankValues: CONSTANTS.ranksHashOn7,
         baseSuitValues: CONSTANTS.suitsHash,

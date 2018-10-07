@@ -213,7 +213,11 @@ export const createRankOf5AceToSix_Full = (): Readonly<hashRanking> => {
     hashRankingLow.rankingInfos[rank] = {
       hand: h.slice(),
       faces: handToCardsSymbols(h),
-      handGroup: handRankToGroup(rank)
+      handGroup: handRankToGroup(
+        rank,
+        CONSTANTS.handsRankingDelimiter_Ato6_5cards,
+        CONSTANTS.handRankingGroupNames_Ato6
+      )
     };
   });
   let FLUSH_GAP: number = STRAIGHTS.length;
@@ -230,12 +234,22 @@ export const createRankOf5AceToSix_Full = (): Readonly<hashRanking> => {
     hashRankingLow.rankingInfos[rank] = {
       hand: h.slice(),
       faces: handToCardsSymbols(h),
-      handGroup: handRankToGroup(rank)
+      handGroup: handRankToGroup(
+        rank,
+        CONSTANTS.handsRankingDelimiter_Ato6_5cards,
+        CONSTANTS.handRankingGroupNames_Ato6
+      )
     };
   });
   FLUSH_GAP += HIGH_CARDS.length;
   STRAIGHTS.concat(TRIPLES, DOUBLE_PAIRS, SINGLE_PAIRS, HIGH_CARDS).forEach((h, idx) => {
-    fillRank5(h, idx + FLUSH_GAP, hashRankingLow);
+    fillRank5(
+      h,
+      idx + FLUSH_GAP,
+      hashRankingLow,
+      CONSTANTS.handsRankingDelimiter_Ato6_5cards,
+      CONSTANTS.handRankingGroupNames_Ato6
+    );
   });
 
   return hashRankingLow;
@@ -244,7 +258,7 @@ export const createRankOf5AceToSix_Full = (): Readonly<hashRanking> => {
 export const createRankOf7AceToSix_Low = (
   hashRankOfFive: hashRanking,
   baseLowRanking: number[]
-): Readonly<hashRanking> => {
+): Readonly<hashRankingSeven> => {
   const hashRankingLow: hashRankingSeven = {
     HASHES: {},
     FLUSH_CHECK_KEYS: {}, //hashRankingOfFiveOnSeven.FLUSH_CHECK_KEYS,
@@ -267,12 +281,11 @@ export const createRankOf7AceToSix_Low = (
     hashRankingLow.HASHES[hash7] = _rankOf5onX(h5, hashRankOfFive.HASHES);
   });
 
-  let FLUSH_RANK_HASHES = hashRankingLow.MULTI_FLUSH_RANK_HASHES;
-
-  let fiveFlushes = kombinatoricsJs.combinations(baseLowRanking, 5);
-  let sixFlushes = kombinatoricsJs.combinations(baseLowRanking, 6);
+  /*let fiveFlushes = kombinatoricsJs.combinations(baseLowRanking, 5);
+  let sixFlushes = kombinatoricsJs.combinations(baseLowRanking, 6);*/
   let sevenFlushes = kombinatoricsJs.combinations(baseLowRanking, 7);
 
+  /*
   fiveFlushes.concat(sixFlushes, sevenFlushes).forEach((h: number[]) => {
     let h5: number[] = h.map(c => hashRankOfFive.baseRankValues[c]);
     let h7: number[] = h.map(c => hashRankingLow.baseRankValues[c]);
@@ -292,8 +305,13 @@ export const createRankOf7AceToSix_Low = (
 
   sixFlushHashes.forEach(v => {
     sevenFlushHashes.push(v.concat([0]), v.concat([1]), v.concat([8]), v.concat([57]));
-  });
-
+  });*/
+  let sevenFlushHashes: number[][] = [
+    [0, 0, 0, 0, 0, 0, 0],
+    [1, 1, 1, 1, 1, 1, 1],
+    [8, 8, 8, 8, 8, 8, 8],
+    [57, 57, 57, 57, 57, 57, 57]
+  ];
   /**filling only seven flushes as for 5 and 6 the best hand would never be a flush but another combos */
   sevenFlushHashes.forEach(h => {
     hashRankingLow.FLUSH_CHECK_KEYS[getVectorSum(h)] = h[0];

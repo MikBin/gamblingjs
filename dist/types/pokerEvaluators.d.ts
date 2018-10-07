@@ -1,18 +1,20 @@
-import { handInfo, verboseHandInfo, hiLowRank, NumberMap, singleRankFiveCardHandEvalFn, hiLowRankFiveCardHandEvalFn } from './interfaces';
+import { handInfo, verboseHandInfo, hiLowRank, NumberMap, singleRankFiveCardHandEvalFn, hiLowRankFiveCardHandEvalFn, hashRankingSeven, hashRanking } from './interfaces';
 /**low hands ato5 as well as hand on 6 and omaha optimization are not created at boot,
  * they have to be instantiated explicitly
  */
-export declare const HASHES_OF_FIVE: Readonly<import("./interfaces").hashRanking>;
-export declare const HASHES_OF_FIVE_ON_SEVEN: import("./interfaces").hashRankingSeven;
+export declare const HASHES_OF_FIVE: Readonly<hashRanking>;
+export declare const HASHES_OF_FIVE_ON_SEVEN: Readonly<hashRankingSeven>;
+/**LOWBALL DEUCE TO SEVEN HASH ON 7 CARDS*/
+export declare const HASHES_OF_FIVE_ON_SEVEN_LOWBALL27: Readonly<hashRankingSeven>;
 /**LOW Ato5 HASHES */
-export declare const HASHES_OF_FIVE_LOW8: Readonly<import("./interfaces").hashRanking>;
-export declare const HASHES_OF_FIVE_LOW9: import("./interfaces").hashRanking;
-export declare const HASEHS_OF_FIVE_LOW_Ato5: Readonly<import("./interfaces").hashRanking>;
+export declare const HASHES_OF_FIVE_LOW8: Readonly<hashRanking>;
+export declare const HASHES_OF_FIVE_LOW9: hashRanking;
+export declare const HASEHS_OF_FIVE_LOW_Ato5: Readonly<hashRanking>;
 /**LOW Ato5 on 7 cards HASHES */
-export declare const HASHES_OF_SEVEN_LOW8: Readonly<import("./interfaces").hashRanking>;
-export declare const HASHES_OF_SEVEN_LOW9: Readonly<import("./interfaces").hashRanking>;
-export declare const HASEHS_OF_SEVEN_LOW_Ato5: Readonly<import("./interfaces").hashRanking>;
-export declare const HASHES_OF_SEVEN_LOW_Ato6: Readonly<import("./interfaces").hashRanking>;
+export declare const HASHES_OF_SEVEN_LOW8: Readonly<hashRankingSeven>;
+export declare const HASHES_OF_SEVEN_LOW9: Readonly<hashRankingSeven>;
+export declare const HASEHS_OF_SEVEN_LOW_Ato5: Readonly<hashRankingSeven>;
+export declare const HASHES_OF_SEVEN_LOW_Ato6: Readonly<hashRankingSeven>;
 /** @function handOfFiveEval
  *
  * @param {Number} c1...c5 cards hash from CONSTANTS.fullCardsDeckHash_5
@@ -114,6 +116,18 @@ export declare const bfBestOfFiveFromTwoSetsLowBall27Indexed: (handSetA: number[
  * @returns {Number} hand ranking
  */
 export declare const handOfSevenEval: (c1: number, c2: number, c3: number, c4: number, c5: number, c6: number, c7: number) => number;
+/** @function handOfSevenEvalLowBall27
+ *
+ * @param {Number} c1...c7 cards hash from CONSTANTS.fullCardsDeckHash_7
+ * @returns {number} hand ranking for lowBall 2to7 basically inverse of high rank
+ */
+export declare const handOfSevenEvalLowBall27: (c1: number, c2: number, c3: number, c4: number, c5: number, c6: number, c7: number) => number;
+/** @function handOfSevenEvalLowBall27Indexed
+ *
+ * @param {Number} c1...c7 cards from 0-51
+ * @returns {Number} hand ranking for lowBall 2to7 basically inverse of high rank
+ */
+export declare const handOfSevenEvalLowBall27Indexed: (c1: number, c2: number, c3: number, c4: number, c5: number, c6: number, c7: number) => number;
 /** @function handOfSevenEval_Ato6
  *
  * @param {Number} c1...c7 cards hash from CONSTANTS.fullCardsDeckHash_7
@@ -126,12 +140,6 @@ export declare const handOfSevenEval_Ato6: (c1: number, c2: number, c3: number, 
  * @returns {Number} hand ranking for lowball Ato6
  */
 export declare const handOfSevenEval_Ato6Indexed: (c1: number, c2: number, c3: number, c4: number, c5: number, c6: number, c7: number) => number;
-/** @function handOfSevenEvalLowBall27   @TODO indexed version
- *
- * @param {Number} c1...c7 cards hash from CONSTANTS.fullCardsDeckHash_7
- * @returns {number} hand ranking for lowBall 2to7 basically inverse of high rank
- */
-export declare const handOfSevenEvalLowBall27: (c1: number, c2: number, c3: number, c4: number, c5: number, c6: number, c7: number) => number;
 /** @function handOfSevenEvalHiLow
  *
  * @param {NumberMap} hash rannking for low hands, depending on which ato5 low is used: can be low8 low9 or lowAll
@@ -182,31 +190,84 @@ export declare const handOfSevenEvalHiLow9: (c1: number, c2: number, c3: number,
 export declare const handOfSevenEvalHiLow9Indexed: (c1: number, c2: number, c3: number, c4: number, c5: number, c6: number, c7: number) => hiLowRank;
 /** @function handOfSixEvalIndexed
  *
- * @param {Array:Number[]} array of 7 cards making up an hand
+ * @param {Array:Number[]} array of 6 cards making up an hand
  * @returns {Number} hand ranking ( the best one on all combinations of input card in group of 5)
  */
 export declare const handOfSixEvalIndexed: (c1: number, c2: number, c3: number, c4: number, c5: number, c6: number) => number;
+/** @function handOfSixEvalLowBall27Indexed
+ *
+ * @param {Array:Number[]} array of 6 cards making up an hand
+ * @returns {Number} hand ranking ( the best one on all combinations of input card in group of 5)
+ */
+export declare const handOfSixEvalLowBall27Indexed: (c1: number, c2: number, c3: number, c4: number, c5: number, c6: number) => number;
+/** @function handOfSixEvalato5Indexed
+ *
+ * @param {Array:Number[]} array of 6 cards making up an hand
+ * @returns {Number} hand ranking ( the best one on all combinations of input card in group of 5)
+ */
+export declare const handOfSixEvalAto5Indexed: (c1: number, c2: number, c3: number, c4: number, c5: number, c6: number) => number;
+/** @function handOfSixEvalato5Indexed
+ *
+ * @param {Array:Number[]} array of 6 cards making up an hand
+ * @returns {Number} hand ranking ( the best one on all combinations of input card in group of 5)
+ */
+export declare const handOfSixEvalAto6Indexed: (c1: number, c2: number, c3: number, c4: number, c5: number, c6: number) => number;
+/** @function handOfSixEvalHiLow8Indexed
+ *
+ * @param {Array:Number[]} array of 6 cards making up an hand
+ * @returns {hiLowRank} hand ranking ( the best one on all combinations of input card in group of 5)
+ */
+export declare const handOfSixEvalHiLow8Indexed: (c1: number, c2: number, c3: number, c4: number, c5: number, c6: number) => hiLowRank;
+/** @function handOfSixEvalHiLow9Indexed
+ *
+ * @param {Array:Number[]} array of 6 cards making up an hand
+ * @returns {hiLowRank} hand ranking ( the best one on all combinations of input card in group of 5)
+ */
+export declare const handOfSixEvalHiLow9Indexed: (c1: number, c2: number, c3: number, c4: number, c5: number, c6: number) => hiLowRank;
 /** @function handOfSevenEvalIndexed
  *
  * @param {Array:Number[]} array of 7 cards making up an hand
  * @returns {Number} hand ranking ( the best one on all combinations of input card in group of 5)
  */
 export declare const handOfSevenEvalIndexed: (c1: number, c2: number, c3: number, c4: number, c5: number, c6: number, c7: number) => number;
-/** @function handOfSevenEval_Verbose
+/** @function handOfSevenEval_Verbose  @TODO try to reuse
  *
  * @param {Number} c1...c7 cards hash from CONSTANTS.fullCardsDeckHash_7
  * @returns {verboseHandInfo} verbose information about best hand of 5 cards on seven
  */
-export declare const handOfSevenEval_Verbose: (c1: number, c2: number, c3: number, c4: number, c5: number, c6: number, c7: number) => verboseHandInfo;
+export declare const handOfSevenEval_Verbose: (c1: number, c2: number, c3: number, c4: number, c5: number, c6: number, c7: number, SEVEN_EVAL_HASH?: hashRankingSeven, FIVE_EVAL_HASH?: hashRanking, USE_MULTI_FLUSH_RANK?: boolean, INVERTED?: boolean) => verboseHandInfo;
+export declare const handOfSevenEvalLowBall27Indexed_Verbose: (c1: number, c2: number, c3: number, c4: number, c5: number, c6: number, c7: number) => verboseHandInfo;
+export declare const handOfSevenEvalAto6Indexed_Verbose: (c1: number, c2: number, c3: number, c4: number, c5: number, c6: number, c7: number) => verboseHandInfo;
 /** @function handOfSevenEvalIndexed_Verbose
  *
  * @param {Array:Number[]} array of 7 cards making up an hand
  * @returns {verboseHandInfo} hand ranking ( the best one on all combinations of input card in group of 5) + ranking info including flush suit and winning cards
  */
-export declare const handOfSevenEvalIndexed_Verbose: (c1: number, c2: number, c3: number, c4: number, c5: number, c6: number, c7: number) => verboseHandInfo;
+export declare const handOfSevenEvalIndexed_Verbose: (c1: number, c2: number, c3: number, c4: number, c5: number, c6: number, c7: number, SEVEN_EVAL_HASH?: hashRankingSeven, FIVE_EVAL_HASH?: hashRanking, USE_MULTI_FLUSH_RANK?: boolean) => verboseHandInfo;
+export declare const handOfSevenEvalAto5Indexed_Verbose: (c1: number, c2: number, c3: number, c4: number, c5: number, c6: number, c7: number) => verboseHandInfo;
+export declare const handOfSevenEvalLow8Indexed_Verbose: (c1: number, c2: number, c3: number, c4: number, c5: number, c6: number, c7: number) => verboseHandInfo;
+export declare const handOfSevenEvalLow9Indexed_Verbose: (c1: number, c2: number, c3: number, c4: number, c5: number, c6: number, c7: number) => verboseHandInfo;
 /** @function getHandInfo
  *
  * @param {Number} hand rank
  * @returns {handInfo} object containing hand info
  */
-export declare const getHandInfo: (rank: number) => handInfo;
+export declare const getHandInfo: (rank: number, HASHES?: hashRanking, INVERTED?: boolean) => handInfo;
+/** @function getHandInfo27
+ *
+ * @param {Number} hand rank
+ * @returns {handInfo} object containing hand info
+ */
+export declare const getHandInfo27: (rank: number) => handInfo;
+/** @function getHandInfoAto5
+ *
+ * @param {Number} hand rank
+ * @returns {handInfo} object containing hand info
+ */
+export declare const getHandInfoAto5: (rank: number) => handInfo;
+/** @function getHandInfoAto6
+ *
+ * @param {Number} hand rank
+ * @returns {handInfo} object containing hand info
+ */
+export declare const getHandInfoAto6: (rank: number) => handInfo;

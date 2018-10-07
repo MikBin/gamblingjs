@@ -8,6 +8,11 @@ import {
   handOfSevenEval_Verbose,
   handOfSevenEvalIndexed_Verbose,
   handOfSixEvalIndexed,
+  handOfSixEvalLowBall27Indexed,
+  handOfSixEvalAto5Indexed,
+  handOfSixEvalAto6Indexed,
+  handOfSixEvalHiLow9Indexed,
+  handOfSixEvalHiLow8Indexed,
   handOfFiveEvalLowBall27,
   handOfFiveEvalLowBall27Indexed,
   handOfFiveEvalHiLow8,
@@ -19,6 +24,9 @@ import {
   handOfFiveEvalHiLow,
   handOfSevenEvalHiLow,
   getHandInfo,
+  getHandInfo27,
+  getHandInfoAto5,
+  getHandInfoAto6,
   HASHES_OF_SEVEN_LOW8,
   HASHES_OF_SEVEN_LOW9,
   HASHES_OF_FIVE_LOW8,
@@ -47,6 +55,7 @@ import {
   handOfFiveEvalLow_Ato6Indexed,
   handOfSevenEval_Ato6,
   handOfSevenEval_Ato6Indexed,
+  handOfSevenEvalAto6Indexed_Verbose,
   handOfSevenEvalAto5Indexed_Verbose,
   handOfSevenEvalLow8Indexed_Verbose,
   handOfSevenEvalLow9Indexed_Verbose,
@@ -440,9 +449,43 @@ describe('testing LowBall27: ', () => {
  * SEVEN EVAL VERBOSE
  *
  */
-describe('testing handOfSevenEval_Verbose: ', () => {
+describe('testing handOfSevenEval_Verbose and hand infos: ', () => {
   it('should get some infos: ', () => {
     expect(getHandInfo(2345)).toBeInstanceOf(Object);
+    expect(getHandInfo(2345)).toEqual({
+      hand: [4, 4, 6, 7, 11],
+      faces: '6689K',
+      handGroup: 'one pair'
+    });
+    expect(getHandInfo27(7461)).toEqual({
+      hand: [0, 1, 2, 3, 5],
+      faces: '23457',
+      handGroup: 'high card'
+    });
+
+    expect(getHandInfoAto5(0)).toEqual({
+      hand: [11, 11, 11, 11, 10],
+      faces: 'KKKKQ',
+      handGroup: 'four of a kind'
+    });
+
+    expect(getHandInfoAto5(6174)).toEqual({
+      hand: [3, 2, 1, 0, 12],
+      faces: '5432A',
+      handGroup: 'high card'
+    });
+
+    expect(getHandInfoAto6(6174)).toEqual({
+      faces: 'AA654',
+      hand: [12, 12, 4, 3, 2],
+      handGroup: 'one pair'
+    });
+
+    expect(getHandInfoAto6(7461)).toEqual({
+      hand: [4, 2, 1, 0, 12],
+      faces: '6432A',
+      handGroup: 'high card'
+    });
   });
 
   it('should get one pair category: ', () => {
@@ -581,6 +624,17 @@ describe('testing handOfSevenEval_Verbose: ', () => {
       handGroup: 'high card',
       handRank: 7460,
       winningCards: [0, 1, 2, 3, 45]
+    });
+  });
+
+  it('should evaluate Ato6 verbose on seven: ', () => {
+    expect(handOfSevenEvalAto6Indexed_Verbose(11, 24, 37, 50, 10, 23, 36)).toEqual({
+      faces: 'QQQKK',
+      flushSuit: 'no flush',
+      hand: [10, 10, 10, 11, 11],
+      handGroup: 'high card',
+      handRank: 177,
+      winningCards: [11, 24, 10, 23, 36]
     });
   });
   /**@TODO verbose from lowball Ato6 and from two sets */
@@ -971,5 +1025,33 @@ describe('testing hand of seven eval', () => {
   it('checks hand of six eval: ', () => {
     expect(handOfSixEvalIndexed(3, 23, 4, 45, 27, 7)).toBe(1053);
     expect(handOfSixEvalIndexed(0, 1, 2, 3, 18, 19)).toBe(500);
+  });
+
+  it('checks hand of six eval indexed lowball 2-7', () => {
+    expect(handOfSixEvalLowBall27Indexed(13, 1, 2, 3, 4, 5)).toBe(7461);
+  });
+  it('checks hand of six eval indexed Ato5 ', () => {
+    expect(handOfSixEvalAto5Indexed(12, 1, 2, 3, 4, 5)).toBe(6170);
+    expect(handOfSixEvalAto5Indexed(12, 0, 1, 2, 3, 4)).toBe(6174);
+  });
+
+  it('checks hand of six eval indexed Ato6 ', () => {
+    expect(handOfSixEvalAto6Indexed(12, 1, 2, 3, 4, 5)).toBe(1595);
+    expect(handOfSixEvalAto6Indexed(25, 1, 2, 3, 4, 5)).toBe(7458);
+    expect(handOfSixEvalAto6Indexed(12, 0, 1, 2, 3, 4)).toBe(1598);
+  });
+
+  it('check handOfSixEvalHiLow8Indexed: ', () => {
+    expect(handOfSixEvalHiLow8Indexed(12, 1, 2, 3, 4, 5)).toEqual({
+      hi: 7454,
+      low: 51
+    });
+  });
+
+  it('check handOfSixEvalHiLow9Indexed: ', () => {
+    expect(handOfSixEvalHiLow9Indexed(9, 1, 2, 3, 4, 7)).toEqual({
+      hi: 6698,
+      low: 55
+    });
   });
 });

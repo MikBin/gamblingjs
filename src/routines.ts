@@ -206,6 +206,30 @@ export const _rankOf5onX = (hand: number[], rankHash: NumberMap, INVERTED: boole
 };
 
 /**
+ * @function filterWinningCards
+ * @param {Array} fullHand array of indexes in deck of cards 0..51
+ * @param {Array} winningRanks array of 5 cards indexes
+ * @return {Array} only cards of winning hand
+ */
+export const filterWinningCards = (fullHand: number[], winningRanks: number[]): number[] => {
+  let winning: NumberMap = {};
+  winningRanks.forEach(c => {
+    !winning[c] ? (winning[c] = 1) : winning[c]++;
+  });
+
+  let full: number[] = [];
+
+  fullHand.forEach(card => {
+    if (winning[card % 13] > 0) {
+      winning[card % 13]--;
+      full.push(card);
+    }
+  });
+
+  return full;
+};
+
+/**
  * @function handToCardsSymbols
  * @param {Array} hand array of indexes in deck of cards 0..51
  * @return {Array} char face symbols representation of the indexed hand
@@ -248,14 +272,19 @@ export const fillRank5Ato5 = (
   return rankingObject;
 };
 
-/**@TODO make fillRank5ATO5 handRankToGroupAto5 changes!!!!! */
-export const fillRank5 = (h: number[], idx: number, rankingObject: hashRanking): hashRanking => {
+export const fillRank5 = (
+  h: number[],
+  idx: number,
+  rankingObject: hashRanking,
+  groupsRanking: number[] = CONSTANTS.handsRankingDelimiter_5cards,
+  groupNameMap: string[] = CONSTANTS.handRankingGroupNames
+): hashRanking => {
   let hash = getVectorSum(h.map(card => rankingObject.baseRankValues[card]));
   rankingObject.HASHES[hash] = idx;
   rankingObject.rankingInfos[idx] = {
     hand: h.slice(),
     faces: handToCardsSymbols(h),
-    handGroup: handRankToGroup(idx)
+    handGroup: handRankToGroup(idx, groupsRanking, groupNameMap)
   };
   return rankingObject;
 };
