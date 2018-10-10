@@ -967,9 +967,10 @@ export const handOfSixEvalHiLow8Indexed = (
   c6: number
 ): hiLowRank => {
   let res = { hi: -1, low: -1 };
-  //@ts-ignore
+
   let all = kombinatoricsJs
     .combinations([c1, c2, c3, c4, c5, c6], 5)
+    //@ts-ignore
     .map(hand => handOfFiveEvalHiLow8Indexed(...hand));
   all.forEach((R, i) => {
     R.hi > res.hi ? (res.hi = R.hi) : null;
@@ -996,6 +997,7 @@ export const handOfSixEvalHiLow9Indexed = (
   //@ts-ignore
   let all = kombinatoricsJs
     .combinations([c1, c2, c3, c4, c5, c6], 5)
+    //@ts-ignore
     .map(hand => handOfFiveEvalHiLow9Indexed(...hand));
   all.forEach((R, i) => {
     R.hi > res.hi ? (res.hi = R.hi) : null;
@@ -1065,9 +1067,8 @@ export const handOfSevenEval_Verbose = (
     handVector.forEach(c => (flushRankKey += c));
 
     handRank = USE_MULTI_FLUSH_RANK
-      ? //@ts-ignore
-        _FLUSH_RANK_SEVEN[handVector.length][flushRankKey >>> 9]
-      : _FLUSH_RANK_SEVEN[flushRankKey >>> 9];
+      //@ts-ignore
+      ? _FLUSH_RANK_SEVEN[handVector.length][flushRankKey >>> 9] : _FLUSH_RANK_SEVEN[flushRankKey >>> 9];
   } else {
     handRank = _HASH_RANK_SEVEN[keySum >>> 9];
     flushRankKey = -1;

@@ -205,7 +205,7 @@ exports._rankOf5onX = function (hand, rankHash, INVERTED) {
 exports.filterWinningCards = function (fullHand, winningRanks) {
     var winning = {};
     winningRanks.forEach(function (c) {
-        !winning[c] ? winning[c] = 1 : winning[c]++;
+        !winning[c] ? (winning[c] = 1) : winning[c]++;
     });
     var full = [];
     fullHand.forEach(function (card) {

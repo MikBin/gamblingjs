@@ -227,7 +227,4 @@ export const distinctHandsQuantityByGroup = {
  *
  * */
 
-/**
- * @TODO prepare similar stuff for dice suited poker
- *
- * */
+

@@ -275,6 +275,8 @@
     ];
     var handsRankingDelimiter_Ato5_5cards = [155, 311, 1169, 2027, 4887, 6174];
     var handsRankingDelimiter_Ato6_5cards = handsRankingDelimiter_5cards.map(function (r) { return 7461 - r; });
+    handsRankingDelimiter_Ato6_5cards.pop();
+    handsRankingDelimiter_Ato6_5cards.reverse().push(7461);
     //console.log(handsRankingDelimiter_Ato6_5cards);
     var handRankingGroupNames_Ato5 = [
         'four of a kind',
@@ -436,7 +438,7 @@
     var filterWinningCards = function (fullHand, winningRanks) {
         var winning = {};
         winningRanks.forEach(function (c) {
-            !winning[c] ? winning[c] = 1 : winning[c]++;
+            !winning[c] ? (winning[c] = 1) : winning[c]++;
         });
         var full = [];
         fullHand.forEach(function (card) {
@@ -748,10 +750,12 @@
         sixFlushHashes.forEach(v => {
           sevenFlushHashes.push(v.concat([0]), v.concat([1]), v.concat([8]), v.concat([57]));
         });*/
-        var sevenFlushHashes = [[0, 0, 0, 0, 0, 0, 0],
+        var sevenFlushHashes = [
+            [0, 0, 0, 0, 0, 0, 0],
             [1, 1, 1, 1, 1, 1, 1],
             [8, 8, 8, 8, 8, 8, 8],
-            [57, 57, 57, 57, 57, 57, 57]];
+            [57, 57, 57, 57, 57, 57, 57]
+        ];
         /**filling only seven flushes as for 5 and 6 the best hand would never be a flush but another combos */
         sevenFlushHashes.forEach(function (h) {
             hashRankingLow.FLUSH_CHECK_KEYS[getVectorSum(h)] = h[0];
@@ -1314,11 +1318,12 @@
      */
     var handOfSixEvalHiLow8Indexed = function (c1, c2, c3, c4, c5, c6) {
         var res = { hi: -1, low: -1 };
-        //@ts-ignore
-        var all = combinations([c1, c2, c3, c4, c5, c6], 5).map(function (hand) { return handOfFiveEvalHiLow8Indexed.apply(void 0, hand); });
+        var all = combinations([c1, c2, c3, c4, c5, c6], 5)
+            //@ts-ignore
+            .map(function (hand) { return handOfFiveEvalHiLow8Indexed.apply(void 0, hand); });
         all.forEach(function (R, i) {
-            R.hi > res.hi ? res.hi = R.hi : null;
-            R.low > res.low ? res.low = R.low : null;
+            R.hi > res.hi ? (res.hi = R.hi) : null;
+            R.low > res.low ? (res.low = R.low) : null;
         });
         return res;
     };
@@ -1330,10 +1335,12 @@
     var handOfSixEvalHiLow9Indexed = function (c1, c2, c3, c4, c5, c6) {
         var res = { hi: -1, low: -1 };
         //@ts-ignore
-        var all = combinations([c1, c2, c3, c4, c5, c6], 5).map(function (hand) { return handOfFiveEvalHiLow9Indexed.apply(void 0, hand); });
+        var all = combinations([c1, c2, c3, c4, c5, c6], 5)
+            //@ts-ignore
+            .map(function (hand) { return handOfFiveEvalHiLow9Indexed.apply(void 0, hand); });
         all.forEach(function (R, i) {
-            R.hi > res.hi ? res.hi = R.hi : null;
-            R.low > res.low ? res.low = R.low : null;
+            R.hi > res.hi ? (res.hi = R.hi) : null;
+            R.low > res.low ? (res.low = R.low) : null;
         });
         return res;
     };
@@ -1370,10 +1377,9 @@
                 return (c & FLUSH_MASK) == flush_check_key;
             });
             handVector.forEach(function (c) { return (flushRankKey += c); });
-            handRank = USE_MULTI_FLUSH_RANK ?
+            handRank = USE_MULTI_FLUSH_RANK
                 //@ts-ignore
-                _FLUSH_RANK_SEVEN[handVector.length][flushRankKey >>> 9]
-                : _FLUSH_RANK_SEVEN[flushRankKey >>> 9];
+                ? _FLUSH_RANK_SEVEN[handVector.length][flushRankKey >>> 9] : _FLUSH_RANK_SEVEN[flushRankKey >>> 9];
         }
         else {
             handRank = _HASH_RANK_SEVEN[keySum >>> 9];

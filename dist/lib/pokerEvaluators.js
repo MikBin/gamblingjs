@@ -501,11 +501,13 @@ exports.handOfSixEvalAto6Indexed = function (c1, c2, c3, c4, c5, c6) {
  */
 exports.handOfSixEvalHiLow8Indexed = function (c1, c2, c3, c4, c5, c6) {
     var res = { hi: -1, low: -1 };
-    //@ts-ignore
-    var all = kombinatoricsJs.combinations([c1, c2, c3, c4, c5, c6], 5).map(function (hand) { return exports.handOfFiveEvalHiLow8Indexed.apply(void 0, hand); });
+    var all = kombinatoricsJs
+        .combinations([c1, c2, c3, c4, c5, c6], 5)
+        //@ts-ignore
+        .map(function (hand) { return exports.handOfFiveEvalHiLow8Indexed.apply(void 0, hand); });
     all.forEach(function (R, i) {
-        R.hi > res.hi ? res.hi = R.hi : null;
-        R.low > res.low ? res.low = R.low : null;
+        R.hi > res.hi ? (res.hi = R.hi) : null;
+        R.low > res.low ? (res.low = R.low) : null;
     });
     return res;
 };
@@ -517,10 +519,13 @@ exports.handOfSixEvalHiLow8Indexed = function (c1, c2, c3, c4, c5, c6) {
 exports.handOfSixEvalHiLow9Indexed = function (c1, c2, c3, c4, c5, c6) {
     var res = { hi: -1, low: -1 };
     //@ts-ignore
-    var all = kombinatoricsJs.combinations([c1, c2, c3, c4, c5, c6], 5).map(function (hand) { return exports.handOfFiveEvalHiLow9Indexed.apply(void 0, hand); });
+    var all = kombinatoricsJs
+        .combinations([c1, c2, c3, c4, c5, c6], 5)
+        //@ts-ignore
+        .map(function (hand) { return exports.handOfFiveEvalHiLow9Indexed.apply(void 0, hand); });
     all.forEach(function (R, i) {
-        R.hi > res.hi ? res.hi = R.hi : null;
-        R.low > res.low ? res.low = R.low : null;
+        R.hi > res.hi ? (res.hi = R.hi) : null;
+        R.low > res.low ? (res.low = R.low) : null;
     });
     return res;
 };
@@ -557,10 +562,9 @@ exports.handOfSevenEval_Verbose = function (c1, c2, c3, c4, c5, c6, c7, SEVEN_EV
             return (c & constants_1.FLUSH_MASK) == flush_check_key;
         });
         handVector.forEach(function (c) { return (flushRankKey += c); });
-        handRank = USE_MULTI_FLUSH_RANK ?
+        handRank = USE_MULTI_FLUSH_RANK
             //@ts-ignore
-            _FLUSH_RANK_SEVEN[handVector.length][flushRankKey >>> 9]
-            : _FLUSH_RANK_SEVEN[flushRankKey >>> 9];
+            ? _FLUSH_RANK_SEVEN[handVector.length][flushRankKey >>> 9] : _FLUSH_RANK_SEVEN[flushRankKey >>> 9];
     }
     else {
         handRank = _HASH_RANK_SEVEN[keySum >>> 9];

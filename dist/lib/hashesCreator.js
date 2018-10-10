@@ -241,10 +241,12 @@ exports.createRankOf7AceToSix_Low = function (hashRankOfFive, baseLowRanking) {
     sixFlushHashes.forEach(v => {
       sevenFlushHashes.push(v.concat([0]), v.concat([1]), v.concat([8]), v.concat([57]));
     });*/
-    var sevenFlushHashes = [[0, 0, 0, 0, 0, 0, 0],
+    var sevenFlushHashes = [
+        [0, 0, 0, 0, 0, 0, 0],
         [1, 1, 1, 1, 1, 1, 1],
         [8, 8, 8, 8, 8, 8, 8],
-        [57, 57, 57, 57, 57, 57, 57]];
+        [57, 57, 57, 57, 57, 57, 57]
+    ];
     /**filling only seven flushes as for 5 and 6 the best hand would never be a flush but another combos */
     sevenFlushHashes.forEach(function (h) {
         hashRankingLow.FLUSH_CHECK_KEYS[routines_1.getVectorSum(h)] = h[0];

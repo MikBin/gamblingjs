@@ -43,7 +43,7 @@
     "precommit": "lint-staged"
   },
   "lint-staged": {
-    "{src,test}/**/*.ts": [
+    "{src,test}/**/*.js": [
       "prettier --write",
       "git add"
     ]
