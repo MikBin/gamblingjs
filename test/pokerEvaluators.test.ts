@@ -178,6 +178,48 @@ describe('testing hilo 8 and 9 routines: ', () => {
   ).toEqual({ hi: 6903, low: 38 });
 });
 
+describe('ace to five lowball: ', () => {
+  it('on five cards have max on 6174 and min on 0', () => {
+    expect(
+      handOfFiveEvalLow_Ato5(
+        fullCardsDeckHash_5[11],
+        fullCardsDeckHash_5[11],
+        fullCardsDeckHash_5[11],
+        fullCardsDeckHash_5[11],
+        fullCardsDeckHash_5[10]
+      )
+    ).toBe(0);
+
+    expect(
+      handOfFiveEvalLow_Ato5(
+        fullCardsDeckHash_5[7],
+        fullCardsDeckHash_5[11],
+        fullCardsDeckHash_5[10],
+        fullCardsDeckHash_5[9],
+        fullCardsDeckHash_5[8]
+      )
+    ).toBe(4888);
+
+    expect(
+      handOfFiveEvalLow_Ato5(
+        fullCardsDeckHash_5[12],
+        fullCardsDeckHash_5[0],
+        fullCardsDeckHash_5[1],
+        fullCardsDeckHash_5[2],
+        fullCardsDeckHash_5[3]
+      )
+    ).toBe(6174);
+  });
+
+  it('ace to five lowball full have ranks inverted', () => {
+    expect(handOfFiveEvalLow_Ato5Indexed(10, 10, 9, 9, 0)).toBe(1311);
+    expect(handOfFiveEvalLow_Ato5Indexed(10, 10, 9, 9, 12)).toBe(1312);
+
+    expect(handOfFiveEvalLow_Ato5Indexed(10, 10, 9, 8, 0)).toBe(2310);
+    expect(handOfFiveEvalLow_Ato5Indexed(10, 10, 9, 8, 12)).toBe(2311);
+  });
+});
+
 describe('testing hilo 8 and 9 on SEVEN cards', () => {
   expect(
     handOfSevenEvalHiLow8(
@@ -302,60 +344,7 @@ describe('testing hilo 8 and 9 on SEVEN cards', () => {
   });
 });
 
-describe('ace to five lowball: ', () => {
-  it('on five cards have max on 6174 and min on 0', () => {
-    expect(
-      handOfFiveEvalLow_Ato5(
-        fullCardsDeckHash_5[11],
-        fullCardsDeckHash_5[11],
-        fullCardsDeckHash_5[11],
-        fullCardsDeckHash_5[11],
-        fullCardsDeckHash_5[10]
-      )
-    ).toBe(0);
-
-    expect(
-      handOfFiveEvalLow_Ato5(
-        fullCardsDeckHash_5[7],
-        fullCardsDeckHash_5[11],
-        fullCardsDeckHash_5[10],
-        fullCardsDeckHash_5[9],
-        fullCardsDeckHash_5[8]
-      )
-    ).toBe(4888);
-
-    expect(
-      handOfFiveEvalLow_Ato5(
-        fullCardsDeckHash_5[12],
-        fullCardsDeckHash_5[0],
-        fullCardsDeckHash_5[1],
-        fullCardsDeckHash_5[2],
-        fullCardsDeckHash_5[3]
-      )
-    ).toBe(6174);
-  });
-
-  it('ace to five lowball full have ranks inverted', () => {
-    expect(handOfFiveEvalLow_Ato5Indexed(10, 10, 9, 9, 0)).toBe(1311);
-    expect(handOfFiveEvalLow_Ato5Indexed(10, 10, 9, 9, 12)).toBe(1312);
-
-    expect(handOfFiveEvalLow_Ato5Indexed(10, 10, 9, 8, 0)).toBe(2310);
-    expect(handOfFiveEvalLow_Ato5Indexed(10, 10, 9, 8, 12)).toBe(2311);
-  });
-});
-
-describe('testing ace to six lowball ', () => {
-  it('has lowest rank for straightflushes', () => {
-    expect(
-      handOfFiveEvalLow_Ato6(
-        fullCardsDeckHash_5[7],
-        fullCardsDeckHash_5[11],
-        fullCardsDeckHash_5[10],
-        fullCardsDeckHash_5[9],
-        fullCardsDeckHash_5[8]
-      )
-    ).toBe(0);
-  });
+describe('Ato6  on SEVEN', () => {
   it('on seven cards the lowest is a full house, since straight flush is not possible', () => {
     expect(
       handOfSevenEval_Ato6(
@@ -372,6 +361,46 @@ describe('testing ace to six lowball ', () => {
 
   it('in seven eval straight flush is not possible', () => {
     expect(handOfSevenEval_Ato6Indexed(11, 10, 9, 8, 7, 6, 5)).toBe(934);
+  });
+
+});
+
+describe('Ato5  on SEVEN', () => {
+
+});
+
+describe('2to7  on SEVEN', () => {
+  it('top straight flush cannot exist in 7 eval as the minimum is KJT98 ', () => {
+    expect(
+      handOfSevenEvalLowBall27(
+        fullCardsDeckHash_7[12],
+        fullCardsDeckHash_7[11],
+        fullCardsDeckHash_7[10],
+        fullCardsDeckHash_7[9],
+        fullCardsDeckHash_7[8],
+        fullCardsDeckHash_7[7],
+        fullCardsDeckHash_7[6]
+      )
+    ).toBe(339);
+
+    expect(handOfSevenEvalLowBall27Indexed(12, 11, 10, 9, 8, 7, 6)).toBe(339);
+
+    expect(handOfSevenEvalLowBall27Indexed(0, 1, 2, 3, 4, 23, 45)).toBe(7460);
+    expect(handOfSevenEvalLowBall27Indexed(0, 1, 2, 3, 4, 23, 44)).toBe(7461);
+  });
+});
+
+describe('testing ace to six lowball ', () => {
+  it('has lowest rank for straightflushes', () => {
+    expect(
+      handOfFiveEvalLow_Ato6(
+        fullCardsDeckHash_5[7],
+        fullCardsDeckHash_5[11],
+        fullCardsDeckHash_5[10],
+        fullCardsDeckHash_5[9],
+        fullCardsDeckHash_5[8]
+      )
+    ).toBe(0);
   });
 
   it('top straight flush is not the lowest as the ace is low and doesnt makeup to a straight', () => {
@@ -396,7 +425,7 @@ describe('testing ace to six lowball ', () => {
   });
 });
 
-describe('testing LowBall27: ', () => {
+describe('testing LowBall27 on 5 ', () => {
   it('top straight flush is the lowest in five eval', () => {
     expect(
       handOfFiveEvalLowBall27(
@@ -409,25 +438,6 @@ describe('testing LowBall27: ', () => {
     ).toBe(0);
 
     expect(handOfFiveEvalLowBall27Indexed(12, 11, 10, 9, 8)).toBe(0);
-  });
-
-  it('top straight flush cannot exist in 7 eval as the minimum is KJT98 ', () => {
-    expect(
-      handOfSevenEvalLowBall27(
-        fullCardsDeckHash_7[12],
-        fullCardsDeckHash_7[11],
-        fullCardsDeckHash_7[10],
-        fullCardsDeckHash_7[9],
-        fullCardsDeckHash_7[8],
-        fullCardsDeckHash_7[7],
-        fullCardsDeckHash_7[6]
-      )
-    ).toBe(339);
-
-    expect(handOfSevenEvalLowBall27Indexed(12, 11, 10, 9, 8, 7, 6)).toBe(339);
-
-    expect(handOfSevenEvalLowBall27Indexed(0, 1, 2, 3, 4, 23, 45)).toBe(7460);
-    expect(handOfSevenEvalLowBall27Indexed(0, 1, 2, 3, 4, 23, 44)).toBe(7461);
   });
 
   it('2 to 7 is the highest', () => {
@@ -444,12 +454,7 @@ describe('testing LowBall27: ', () => {
   });
 });
 
-/**
- *
- * SEVEN EVAL VERBOSE
- *
- */
-describe('testing handOfSevenEval_Verbose and hand infos: ', () => {
+describe("test hand info: ", () => {
   it('should get some infos: ', () => {
     expect(getHandInfo(2345)).toBeInstanceOf(Object);
     expect(getHandInfo(2345)).toEqual({
@@ -487,6 +492,13 @@ describe('testing handOfSevenEval_Verbose and hand infos: ', () => {
       handGroup: 'high card'
     });
   });
+});
+/**
+ *
+ * SEVEN EVAL VERBOSE
+ *
+ */
+describe('testing handOfSevenEval_Verbose and hand infos: ', () => {
 
   it('should get one pair category: ', () => {
     expect(
@@ -979,9 +991,7 @@ describe('bfBestOfFiveFromTwoSets', () => {
       )
     ).toBe(7461);
   });
-});
 
-describe('testing hand of seven eval', () => {
   it('get best hand of 5 card on 7 (brute force version)', () => {
     expect(
       bfBestOfFiveOnX([
@@ -1012,6 +1022,10 @@ describe('testing hand of seven eval', () => {
     ).toBe(7452);
   });
 
+});
+
+describe('testing hand of seven eval', () => {
+
   it('A2345+J7 suited rank should be 7452 in indexed eval too', () => {
     expect(handOfSevenEvalIndexed(17, 3, 1, 2, 0, 21, 12)).toBe(7452);
   });
@@ -1022,6 +1036,9 @@ describe('testing hand of seven eval', () => {
     expect(handOfSevenEvalIndexed(31, 50, 14, 15, 29, 44, 30)).toBe(5855);
   });
 
+});
+
+describe("hand of six eval", () => {
   it('checks hand of six eval: ', () => {
     expect(handOfSixEvalIndexed(3, 23, 4, 45, 27, 7)).toBe(1053);
     expect(handOfSixEvalIndexed(0, 1, 2, 3, 18, 19)).toBe(500);

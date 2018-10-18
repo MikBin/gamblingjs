@@ -1,6 +1,10 @@
 "use strict";
+/**
+ * think of using typed array for performance reasons as these data is accessed very often
+ * 8bit or 16bits arrays can be used
+ */
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.flushHash = [1, 2, 4, 8, 16, 32, 64, 128, 255, 508, 1012, 2016, 4016]; // 13 one for each rank
+exports.flushHash = [1, 2, 4, 8, 16, 32, 64, 128, 256, 512, 1024, 2048, 4096]; // to be implemented to speed up flushcheck on 7
 exports.suitsHash = [0, 57, 1, 8]; // 4 one for each suit
 /**check for !==undefined */
 exports.flush5hHashCheck = {
@@ -13,7 +17,7 @@ exports.flushHashToName = {
     0: 'spades',
     1: 'diamonds',
     8: 'hearts',
-    9: 'clubs'
+    57: 'clubs'
 };
 exports.flush7HashCheck = {
     '0': 0,
@@ -198,10 +202,6 @@ exports.distinctHandsQuantityByGroup = {
 };
 /**
  * @TODO make function to work with non full decks. ex. deck of 40 cards
- *
- * */
-/**
- * @TODO prepare similar stuff for dice suited poker
  *
  * */
 //# sourceMappingURL=constants.js.map

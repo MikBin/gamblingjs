@@ -163,7 +163,11 @@
         return crossProdList;
     };
 
-    var flushHash = [1, 2, 4, 8, 16, 32, 64, 128, 255, 508, 1012, 2016, 4016]; // 13 one for each rank
+    /**
+     * think of using typed array for performance reasons as these data is accessed very often
+     * 8bit or 16bits arrays can be used
+     */
+    var flushHash = [1, 2, 4, 8, 16, 32, 64, 128, 256, 512, 1024, 2048, 4096]; // to be implemented to speed up flushcheck on 7
     var suitsHash = [0, 57, 1, 8]; // 4 one for each suit
     /**check for !==undefined */
     var flush5hHashCheck = {
@@ -176,7 +180,7 @@
         0: 'spades',
         1: 'diamonds',
         8: 'hearts',
-        9: 'clubs'
+        57: 'clubs'
     };
     var ranksHashOn7 = []; // 13 one for each rank
     ranksHashOn7[0] = 0;
@@ -300,10 +304,6 @@
     var handRankingGroupNames_Ato6 = handRankingGroupNames.slice().reverse();
     /**
      * @TODO make function to work with non full decks. ex. deck of 40 cards
-     *
-     * */
-    /**
-     * @TODO prepare similar stuff for dice suited poker
      *
      * */
 
@@ -434,6 +434,7 @@
      * @param {Array} fullHand array of indexes in deck of cards 0..51
      * @param {Array} winningRanks array of 5 cards indexes
      * @return {Array} only cards of winning hand
+     * @TODO add flushKey ... in case a flush filtering is necessary
      */
     var filterWinningCards = function (fullHand, winningRanks) {
         var winning = {};
@@ -826,41 +827,37 @@
     /**low hands ato5 as well as hand on 6 and omaha optimization are not created at boot,
      * they have to be instantiated explicitly
      */
+    console.time("h5");
     var HASHES_OF_FIVE = createRankOfFiveHashes();
+    console.timeEnd("h5");
     var FLUSH_CHECK_FIVE = HASHES_OF_FIVE.FLUSH_CHECK_KEYS;
     var HASH_RANK_FIVE = HASHES_OF_FIVE.HASHES;
     var FLUSH_RANK_FIVE = HASHES_OF_FIVE.FLUSH_RANK_HASHES;
+    console.time("h7");
     var HASHES_OF_FIVE_ON_SEVEN = createRankOf5On7Hashes(HASHES_OF_FIVE);
+    console.timeEnd("h7");
     var FLUSH_CHECK_SEVEN = HASHES_OF_FIVE_ON_SEVEN.FLUSH_CHECK_KEYS;
     var HASH_RANK_SEVEN = HASHES_OF_FIVE_ON_SEVEN.HASHES;
     var FLUSH_RANK_SEVEN = HASHES_OF_FIVE_ON_SEVEN.MULTI_FLUSH_RANK_HASHES;
     /**LOWBALL DEUCE TO SEVEN HASH ON 7 CARDS*/
+    console.time("h7low");
     var HASHES_OF_FIVE_ON_SEVEN_LOWBALL27 = createRankOf5On7Hashes(HASHES_OF_FIVE, true);
-    var FLUSH_CHECK_SEVEN_LOWBALL27 = HASHES_OF_FIVE_ON_SEVEN_LOWBALL27.FLUSH_CHECK_KEYS;
-    var HASH_RANK_SEVEN_LOWBALL27 = HASHES_OF_FIVE_ON_SEVEN_LOWBALL27.HASHES;
-    var FLUSH_RANK_SEVEN_LOWBALL27 = HASHES_OF_FIVE_ON_SEVEN_LOWBALL27.MULTI_FLUSH_RANK_HASHES;
+    console.timeEnd("h7low");
     /**LOW Ato5 HASHES */
+    console.time("low5");
     var HASHES_OF_FIVE_LOW8 = createRankOf5AceToFive_Low8();
-    var HASH_RANK_FIVE_LOW8 = HASHES_OF_FIVE_LOW8.HASHES;
     var HASHES_OF_FIVE_LOW9 = createRankOf5AceToFive_Low9();
-    var HASH_RANK_FIVE_LOW9 = HASHES_OF_FIVE_LOW9.HASHES;
     var HASEHS_OF_FIVE_LOW_Ato5 = createRankOf5AceToFive_Full();
-    var HASH_RANK_FIVE_LOW_Ato5 = HASEHS_OF_FIVE_LOW_Ato5.HASHES;
+    console.timeEnd("low5");
     /**LOW Ato5 on 7 cards HASHES */
+    console.time("low7");
     var HASHES_OF_SEVEN_LOW8 = createRankOf7AceToFive_Low(HASHES_OF_FIVE_LOW8, rankCards_low8);
-    var HASH_RANK_SEVEN_LOW8 = HASHES_OF_SEVEN_LOW8.HASHES;
     var HASHES_OF_SEVEN_LOW9 = createRankOf7AceToFive_Low(HASHES_OF_FIVE_LOW9, rankCards_low9);
-    var HASH_RANK_SEVEN_LOW9 = HASHES_OF_SEVEN_LOW9.HASHES;
     var HASEHS_OF_SEVEN_LOW_Ato5 = createRankOf7AceToFive_Low(HASEHS_OF_FIVE_LOW_Ato5, rankCards_low, true);
-    var HASH_RANK_SEVEN_LOW_Ato5 = HASEHS_OF_SEVEN_LOW_Ato5.HASHES;
     /**LOW Ato6 HASHES */
     var HASHES_OF_FIVE_Ato6 = createRankOf5AceToSix_Full();
-    var HASH_RANK_FIVE_ATO6 = HASHES_OF_FIVE_Ato6.HASHES;
-    var FLUSH_RANK_FIVE_ATO6 = HASHES_OF_FIVE_Ato6.FLUSH_RANK_HASHES;
     var HASHES_OF_SEVEN_LOW_Ato6 = createRankOf7AceToSix_Low(HASHES_OF_FIVE_Ato6, rankCards_low);
-    var FLUSH_CHECK_SEVEN_ATO6 = HASHES_OF_SEVEN_LOW_Ato6.FLUSH_CHECK_KEYS;
-    var HASH_RANK_SEVEN_ATO6 = HASHES_OF_SEVEN_LOW_Ato6.HASHES;
-    var FLUSH_RANK_SEVEN_ATO6 = HASHES_OF_SEVEN_LOW_Ato6.FLUSH_RANK_HASHES;
+    console.timeEnd("low7");
     /** @function handOfFiveEval
      *
      * @param {Number} c1...c5 cards hash from CONSTANTS.fullCardsDeckHash_5
@@ -875,100 +872,6 @@
         }
         return HASH_RANK_FIVE[rankKey];
     };
-    /** @function handOfFiveEvalHiLow
-     *
-     * @param {NumberMap} hash rannking for low hands, depending on which ato5 low is used: can be low8 low9 or lowAll
-     * @param {Number} c1...c5 cards hash from CONSTANTS.fullCardsDeckHash_5
-     * @returns {hiLowRank} hand ranking object for both low and high ( if doesnt qualify for low it returns -1)
-     */
-    var handOfFiveEvalHiLow = function (LOW_RANK_HASH, c1, c2, c3, c4, c5) {
-        var keySum = c1 + c2 + c3 + c4 + c5;
-        var rankKey = keySum >>> 9;
-        var low = LOW_RANK_HASH[rankKey];
-        var bothRank = {
-            hi: 0,
-            low: isNaN(low) ? -1 : low
-        };
-        var flush_check_key = FLUSH_CHECK_FIVE[keySum & FLUSH_MASK];
-        if (flush_check_key >= 0) {
-            bothRank.hi = FLUSH_RANK_FIVE[rankKey];
-        }
-        else {
-            bothRank.hi = HASH_RANK_FIVE[rankKey];
-        }
-        return bothRank;
-    };
-    /** @function handOfFiveEvalHiLow8
-     *
-     * @param {NumberMap} hash ranking for low hands
-     * @param {Number} c1...c5 cards hash from CONSTANTS.fullCardsDeckHash_5
-     * @returns {hiLowRank} hand ranking object for both low 8 or better, and high ( if doesnt qualify for low it returns -1)
-     */
-    var handOfFiveEvalHiLow8 = function (c1, c2, c3, c4, c5) {
-        return handOfFiveEvalHiLow(HASH_RANK_FIVE_LOW8, c1, c2, c3, c4, c5);
-    };
-    var handOfFiveEvalHiLow8Indexed = function (c1, c2, c3, c4, c5) {
-        return handOfFiveEvalHiLow8(fullCardsDeckHash_5[c1], fullCardsDeckHash_5[c2], fullCardsDeckHash_5[c3], fullCardsDeckHash_5[c4], fullCardsDeckHash_5[c5]);
-    };
-    /** @function handOfFiveEvalHiLow9
-     *
-     * @param {NumberMap} hash ranking for low hands
-     * @param {Number} c1...c5 cards hash from CONSTANTS.fullCardsDeckHash_5
-     * @returns {hiLowRank} hand ranking object for both low 8 or better, and high ( if doesnt qualify for low it returns -1)
-     */
-    var handOfFiveEvalHiLow9 = function (c1, c2, c3, c4, c5) {
-        return handOfFiveEvalHiLow(HASH_RANK_FIVE_LOW9, c1, c2, c3, c4, c5);
-    };
-    var handOfFiveEvalHiLow9Indexed = function (c1, c2, c3, c4, c5) {
-        return handOfFiveEvalHiLow9(fullCardsDeckHash_5[c1], fullCardsDeckHash_5[c2], fullCardsDeckHash_5[c3], fullCardsDeckHash_5[c4], fullCardsDeckHash_5[c5]);
-    };
-    /** @function handOfFiveEvalLow_Ato5
-     *
-     * @param {Number} c1...c5 cards hash from CONSTANTS.fullCardsDeckHash_5
-     * @returns {number} hand ranking for Ato5 rules
-     */
-    var handOfFiveEvalLow_Ato5 = function (c1, c2, c3, c4, c5) {
-        var keySum = c1 + c2 + c3 + c4 + c5;
-        var rankKey = keySum >>> 9;
-        var rank = HASH_RANK_FIVE_LOW_Ato5[rankKey];
-        return rank;
-    };
-    /** @function handOfFiveEvalLow_Ato5Indexed
-     *
-     * @param {Number} c1...c5 cards index in standard deck 52
-     * @returns {number} hand ranking for Ato5 rules
-     */
-    var handOfFiveEvalLow_Ato5Indexed = function (c1, c2, c3, c4, c5) {
-        return handOfFiveEvalLow_Ato5(fullCardsDeckHash_5[c1], fullCardsDeckHash_5[c2], fullCardsDeckHash_5[c3], fullCardsDeckHash_5[c4], fullCardsDeckHash_5[c5]);
-    };
-    var handOfFiveEvalLow_Ato6 = function (c1, c2, c3, c4, c5) {
-        var keySum = c1 + c2 + c3 + c4 + c5;
-        var rankKey = keySum >>> 9;
-        var flush_check_key = FLUSH_CHECK_FIVE[keySum & FLUSH_MASK];
-        if (flush_check_key >= 0) {
-            return FLUSH_RANK_FIVE_ATO6[rankKey];
-        }
-        return HASH_RANK_FIVE_ATO6[rankKey];
-    };
-    var handOfFiveEvalLow_Ato6Indexed = function (c1, c2, c3, c4, c5) {
-        return handOfFiveEvalLow_Ato6(fullCardsDeckHash_5[c1], fullCardsDeckHash_5[c2], fullCardsDeckHash_5[c3], fullCardsDeckHash_5[c4], fullCardsDeckHash_5[c5]);
-    };
-    /** @function handOfFiveEvalLowBall27
-     *
-     * @param {Number} c1...c5 cards hash from CONSTANTS.fullCardsDeckHash_5
-     * @returns {number} hand ranking for lowBall 2to7 basically inverse of high rank
-     */
-    var handOfFiveEvalLowBall27 = function (c1, c2, c3, c4, c5) {
-        return HIGH_MAX_RANK - handOfFiveEval(c1, c2, c3, c4, c5);
-    };
-    /** @function handOfFiveEvalLowBall27Indexed
-     *
-     * @param {Number} c1...c5 cards hash from 0-51
-     * @returns {number} hand ranking for lowBall 2to7 basically inverse of high rank
-     */
-    var handOfFiveEvalLowBall27Indexed = function (c1, c2, c3, c4, c5) {
-        return HIGH_MAX_RANK - handOfFiveEvalIndexed(c1, c2, c3, c4, c5);
-    };
     /** @function handOfFiveEvalIndexed
      *
      * @param {Number} c1...c5 cards index from [0...51]
@@ -977,16 +880,15 @@
     var handOfFiveEvalIndexed = function (c1, c2, c3, c4, c5) {
         return handOfFiveEval(fullCardsDeckHash_5[c1], fullCardsDeckHash_5[c2], fullCardsDeckHash_5[c3], fullCardsDeckHash_5[c4], fullCardsDeckHash_5[c5]);
     };
-    /** @function bfBestOfFiveOnX  @TODO move on routines or create helpersfunction.ts
+    /** @function getHandInfo
      *
-     * @param {Array:Number[]} hand array of 6 or more cards making up an hand
-     * @param {Function} evalFn evaluator defaults to hand of 5 high only
-     * @returns {Number} hand ranking ( the best one on all combinations of input card in group of 5)
+     * @param {Number} hand rank
+     * @returns {handInfo} object containing hand info
      */
-    var bfBestOfFiveOnX = function (hand, evalFn) {
-        if (evalFn === void 0) { evalFn = handOfFiveEval; }
-        //@ts-ignore
-        return Math.max.apply(Math, combinations(hand, 5).map(function (h) { return evalFn.apply(void 0, h); }));
+    var getHandInfo = function (rank, HASHES, INVERTED) {
+        if (HASHES === void 0) { HASHES = HASHES_OF_FIVE; }
+        if (INVERTED === void 0) { INVERTED = false; }
+        return HASHES.rankingInfos[INVERTED ? HIGH_MAX_RANK - rank : rank];
     };
     /** @function bfBestOfFiveOnXindexed
      *
@@ -998,78 +900,6 @@
         if (evalFn === void 0) { evalFn = handOfFiveEvalIndexed; }
         //@ts-ignore
         return Math.max.apply(Math, combinations(hand, 5).map(function (h) { return evalFn.apply(void 0, h); }));
-    };
-    /** @function bfBestOfFiveFromTwoSets
-     *
-     * @param {Array:Number[]} handSetA array of sizeA cards representing hole cards
-     * @param {Array:Number[]} handSetB array of sizeB cards representing board cards
-     * @param {Number} nA fixed number of cards to draw from handSetA to make up the final 5 cards hand
-     * @param {Number} nB fixed number of cards to draw from handSetB to make up the final 5 cards hand
-     * @returns {Number} hand ranking ( the best one on all combinations of input card in group of 5)
-     */
-    var bfBestOfFiveFromTwoSets = function (handSetA, handSetB, nA, nB, evalFn) {
-        if (evalFn === void 0) { evalFn = handOfFiveEval; }
-        if (nA + nB !== 5) {
-            throw new RangeError('sum of nA+nB parameters MUST be 5');
-        }
-        var setACombinations = combinations(handSetA, nA);
-        var setBCombinations = combinations(handSetB, nB);
-        var maxRank = 0;
-        setACombinations.forEach(function (handA, idxA) {
-            setBCombinations.forEach(function (handB, idxB) {
-                //@ts-ignore
-                var rank = evalFn.apply(void 0, handA.concat(handB));
-                rank > maxRank ? (maxRank = rank) : null;
-            });
-        });
-        return maxRank;
-    };
-    var bfBestOfFiveFromTwoSetsHiLow = function (handSetA, handSetB, nA, nB, evalFn) {
-        if (nA + nB !== 5) {
-            throw new RangeError('sum of nA+nB parameters MUST be 5');
-        }
-        var setACombinations = combinations(handSetA, nA);
-        var setBCombinations = combinations(handSetB, nB);
-        var maxRank = { hi: 0, low: -1 };
-        setACombinations.forEach(function (handA, idxA) {
-            setBCombinations.forEach(function (handB, idxB) {
-                //@ts-ignore
-                var hlRank = evalFn.apply(void 0, handA.concat(handB));
-                hlRank.hi > maxRank.hi ? (maxRank.hi = hlRank.hi) : null;
-                hlRank.low > maxRank.low ? (maxRank.low = hlRank.low) : null;
-            });
-        });
-        return maxRank;
-    };
-    var bfBestOfFiveFromTwoSetsHiLow8 = function (handSetA, handSetB, nA, nB) {
-        return bfBestOfFiveFromTwoSetsHiLow(handSetA, handSetB, nA, nB, handOfFiveEvalHiLow8);
-    };
-    var bfBestOfFiveFromTwoSetsHiLow8Indexed = function (handSetA, handSetB, nA, nB) {
-        return bfBestOfFiveFromTwoSetsHiLow(handSetA.map(function (c) { return fullCardsDeckHash_5[c]; }), handSetB.map(function (c) { return fullCardsDeckHash_5[c]; }), nA, nB, handOfFiveEvalHiLow8);
-    };
-    var bfBestOfFiveFromTwoSetsHiLow9 = function (handSetA, handSetB, nA, nB) {
-        return bfBestOfFiveFromTwoSetsHiLow(handSetA, handSetB, nA, nB, handOfFiveEvalHiLow9);
-    };
-    var bfBestOfFiveFromTwoSetsHiLow9Indexed = function (handSetA, handSetB, nA, nB) {
-        return bfBestOfFiveFromTwoSetsHiLow(handSetA.map(function (c) { return fullCardsDeckHash_5[c]; }), handSetB.map(function (c) { return fullCardsDeckHash_5[c]; }), nA, nB, handOfFiveEvalHiLow9);
-    };
-    var bfBestOfFiveFromTwoSetsHiLow_Ato5 = function (handSetA, handSetB, nA, nB) {
-        return bfBestOfFiveFromTwoSets(handSetA, handSetB, nA, nB, handOfFiveEvalLow_Ato5);
-    };
-    var bfBestOfFiveFromTwoSetsLow_Ato6 = function (handSetA, handSetB, nA, nB) {
-        return bfBestOfFiveFromTwoSets(handSetA, handSetB, nA, nB, handOfFiveEvalLow_Ato6);
-    };
-    var bfBestOfFiveFromTwoSetsLow_Ato6Indexed = function (handSetA, handSetB, nA, nB) {
-        return bfBestOfFiveFromTwoSets(handSetA.map(function (c) { return fullCardsDeckHash_5[c]; }), handSetB.map(function (c) { return fullCardsDeckHash_5[c]; }), nA, nB, handOfFiveEvalLow_Ato6);
-    };
-    var bfBestOfFiveFromTwoSetsHiLow_Ato5Indexed = function (handSetA, handSetB, nA, nB) {
-        return bfBestOfFiveFromTwoSets(handSetA.map(function (c) { return fullCardsDeckHash_5[c]; }), handSetB.map(function (c) { return fullCardsDeckHash_5[c]; }), nA, nB, handOfFiveEvalLow_Ato5);
-    };
-    var bfBestOfFiveFromTwoSetsLowBall27 = function (handSetA, handSetB, nA, nB) {
-        return bfBestOfFiveFromTwoSets(handSetA, handSetB, nA, nB, handOfFiveEvalLowBall27);
-    };
-    var bfBestOfFiveFromTwoSetsLowBall27Indexed = function (handSetA, handSetB, nA, nB) {
-        return bfBestOfFiveFromTwoSets(handSetA.map(function (c) { return fullCardsDeckHash_5[c]; }), handSetB.map(function (c) { return fullCardsDeckHash_5[c]; }), nA, nB, handOfFiveEvalLowBall27);
     };
     /** @function handOfSevenEval
      *
@@ -1119,231 +949,6 @@
         }
         return handRank;
     };
-    /** @function handOfSevenEvalLowBall27
-     *
-     * @param {Number} c1...c7 cards hash from CONSTANTS.fullCardsDeckHash_7
-     * @returns {number} hand ranking for lowBall 2to7 basically inverse of high rank
-     */
-    var handOfSevenEvalLowBall27 = function (c1, c2, c3, c4, c5, c6, c7) {
-        var keySum = c1 + c2 + c3 + c4 + c5 + c6 + c7;
-        var handRank = 0;
-        var flush_check_key = FLUSH_CHECK_SEVEN_LOWBALL27[keySum & FLUSH_MASK];
-        if (flush_check_key >= 0) {
-            /**only seven card flush possible in lowball 2-7. in case of 6 or 5 flushy cards any high card or pair would be a better hand */
-            handRank = FLUSH_RANK_SEVEN_LOWBALL27[7][keySum >>> 9];
-        }
-        else {
-            handRank = HASH_RANK_SEVEN_LOWBALL27[keySum >>> 9];
-        }
-        return handRank;
-    };
-    /** @function handOfSevenEvalLowBall27Indexed
-     *
-     * @param {Number} c1...c7 cards from 0-51
-     * @returns {Number} hand ranking for lowBall 2to7 basically inverse of high rank
-     */
-    var handOfSevenEvalLowBall27Indexed = function (c1, c2, c3, c4, c5, c6, c7) {
-        return handOfSevenEvalLowBall27(fullCardsDeckHash_7[c1], fullCardsDeckHash_7[c2], fullCardsDeckHash_7[c3], fullCardsDeckHash_7[c4], fullCardsDeckHash_7[c5], fullCardsDeckHash_7[c6], fullCardsDeckHash_7[c7]);
-    };
-    /** @function handOfSevenEval_Ato6
-     *
-     * @param {Number} c1...c7 cards hash from CONSTANTS.fullCardsDeckHash_7
-     * @returns {Number} hand ranking for lowball Ato6
-     */
-    var handOfSevenEval_Ato6 = function (c1, c2, c3, c4, c5, c6, c7) {
-        var keySum = c1 + c2 + c3 + c4 + c5 + c6 + c7;
-        var handRank = 0;
-        var flush_check_key = FLUSH_CHECK_SEVEN_ATO6[keySum & FLUSH_MASK];
-        if (flush_check_key >= 0) {
-            handRank = FLUSH_RANK_SEVEN_ATO6[keySum >>> 9];
-        }
-        else {
-            handRank = HASH_RANK_SEVEN_ATO6[keySum >>> 9];
-        }
-        return handRank;
-    };
-    /** @function handOfSevenEval_Ato6Indexed
-     *
-     * @param {Number} c1...c7 cards from deck 0-51
-     * @returns {Number} hand ranking for lowball Ato6
-     */
-    var handOfSevenEval_Ato6Indexed = function (c1, c2, c3, c4, c5, c6, c7) {
-        return handOfSevenEval_Ato6(fullCardsDeckHash_7[c1], fullCardsDeckHash_7[c2], fullCardsDeckHash_7[c3], fullCardsDeckHash_7[c4], fullCardsDeckHash_7[c5], fullCardsDeckHash_7[c6], fullCardsDeckHash_7[c7]);
-    };
-    /** @function handOfSevenEvalHiLow
-     *
-     * @param {NumberMap} hash rannking for low hands, depending on which ato5 low is used: can be low8 low9 or lowAll
-     * @param {Number} c1...c5 cards hash from CONSTANTS.fullCardsDeckHash_5
-     * @returns {hiLowRank} hand ranking object for both low and high ( if doesnt qualify for low it returns -1)
-     */
-    var handOfSevenEvalHiLow = function (LOW_RANK_HASH, c1, c2, c3, c4, c5, c6, c7) {
-        var keySum = c1 + c2 + c3 + c4 + c5 + c6 + c7;
-        var rankKey = keySum >>> 9;
-        var low = LOW_RANK_HASH[rankKey];
-        var bothRank = {
-            hi: 0,
-            low: isNaN(low) ? -1 : low
-        };
-        var flush_check_key = FLUSH_CHECK_SEVEN[keySum & FLUSH_MASK];
-        if (flush_check_key >= 0) {
-            var flushyCardsCounter = 0;
-            var flushRankKey = 0;
-            if ((c1 & FLUSH_MASK) == flush_check_key) {
-                flushyCardsCounter++;
-                flushRankKey += c1;
-            }
-            if ((c2 & FLUSH_MASK) == flush_check_key) {
-                flushyCardsCounter++;
-                flushRankKey += c2;
-            }
-            if ((c3 & FLUSH_MASK) == flush_check_key) {
-                flushyCardsCounter++;
-                flushRankKey += c3;
-            }
-            if ((c4 & FLUSH_MASK) == flush_check_key) {
-                flushyCardsCounter++;
-                flushRankKey += c4;
-            }
-            if ((c5 & FLUSH_MASK) == flush_check_key) {
-                flushyCardsCounter++;
-                flushRankKey += c5;
-            }
-            if ((c6 & FLUSH_MASK) == flush_check_key) {
-                flushyCardsCounter++;
-                flushRankKey += c6;
-            }
-            if ((c7 & FLUSH_MASK) == flush_check_key) {
-                flushyCardsCounter++;
-                flushRankKey += c7;
-            }
-            bothRank.hi = FLUSH_RANK_SEVEN[flushyCardsCounter][flushRankKey >>> 9];
-        }
-        else {
-            bothRank.hi = HASH_RANK_SEVEN[rankKey];
-        }
-        return bothRank;
-    };
-    /** @function handOfSevenEvalLow_Ato5
-     *
-     * @param {Number} c1...c7 cards hash from CONSTANTS.fullCardsDeckHash_7
-     * @returns {number} hand ranking for Ato5 rules
-     */
-    var handOfSevenEvalLow_Ato5 = function (c1, c2, c3, c4, c5, c6, c7) {
-        var keySum = c1 + c2 + c3 + c4 + c5 + c6 + c7;
-        var rankKey = keySum >>> 9;
-        var rank = HASH_RANK_SEVEN_LOW_Ato5[rankKey];
-        return rank;
-    };
-    /** @function handOfSevenEvalLow_Ato5Indexed
-     *
-     * @param {NumberMap} hash ranking for low hands
-     * @param {Number} c1...c7 cards index from 0 to 12
-     * @returns {hiLowRank} hand ranking object for both low 9 or better, and high ( if doesnt qualify for low it returns -1)
-     */
-    var handOfSevenEvalLow_Ato5Indexed = function (c1, c2, c3, c4, c5, c6, c7) {
-        return handOfSevenEvalLow_Ato5(fullCardsDeckHash_7[c1], fullCardsDeckHash_7[c2], fullCardsDeckHash_7[c3], fullCardsDeckHash_7[c4], fullCardsDeckHash_7[c5], fullCardsDeckHash_7[c6], fullCardsDeckHash_7[c7]);
-    };
-    /** @function handOfSevenEvalHiLow8
-     *
-     * @param {NumberMap} hash ranking for low hands
-     * @param {Number} c1...c7 cards hash from CONSTANTS.fullCardsDeckHash_7
-     * @returns {hiLowRank} hand ranking object for both low 8 or better, and high ( if doesnt qualify for low it returns -1)
-     */
-    var handOfSevenEvalHiLow8 = function (c1, c2, c3, c4, c5, c6, c7) {
-        return handOfSevenEvalHiLow(HASH_RANK_SEVEN_LOW8, c1, c2, c3, c4, c5, c6, c7);
-    };
-    /** @function handOfSevenEvalHiLow8Indexed
-     *
-     * @param {NumberMap} hash ranking for low hands
-     * @param {Number} c1...c7 cards index from 0 to 12
-     * @returns {hiLowRank} hand ranking object for both low 8 or better, and high ( if doesnt qualify for low it returns -1)
-     */
-    var handOfSevenEvalHiLow8Indexed = function (c1, c2, c3, c4, c5, c6, c7) {
-        return handOfSevenEvalHiLow8(fullCardsDeckHash_7[c1], fullCardsDeckHash_7[c2], fullCardsDeckHash_7[c3], fullCardsDeckHash_7[c4], fullCardsDeckHash_7[c5], fullCardsDeckHash_7[c6], fullCardsDeckHash_7[c7]);
-    };
-    /** @function handOfSevenEvalHiLow9
-     *
-     * @param {NumberMap} hash ranking for low hands
-     * @param {Number} c1...c7 cards hash from CONSTANTS.fullCardsDeckHash_7
-     * @returns {hiLowRank} hand ranking object for both low 9 or better, and high ( if doesnt qualify for low it returns -1)
-     */
-    var handOfSevenEvalHiLow9 = function (c1, c2, c3, c4, c5, c6, c7) {
-        return handOfSevenEvalHiLow(HASH_RANK_SEVEN_LOW9, c1, c2, c3, c4, c5, c6, c7);
-    };
-    /** @function handOfSevenEvalHiLow9Indexed
-     *
-     * @param {NumberMap} hash ranking for low hands
-     * @param {Number} c1...c7 cards index from 0 to 12
-     * @returns {hiLowRank} hand ranking object for both low 9 or better, and high ( if doesnt qualify for low it returns -1)
-     */
-    var handOfSevenEvalHiLow9Indexed = function (c1, c2, c3, c4, c5, c6, c7) {
-        return handOfSevenEvalHiLow9(fullCardsDeckHash_7[c1], fullCardsDeckHash_7[c2], fullCardsDeckHash_7[c3], fullCardsDeckHash_7[c4], fullCardsDeckHash_7[c5], fullCardsDeckHash_7[c6], fullCardsDeckHash_7[c7]);
-    };
-    /** @function handOfSixEvalIndexed
-     *
-     * @param {Array:Number[]} array of 6 cards making up an hand
-     * @returns {Number} hand ranking ( the best one on all combinations of input card in group of 5)
-     */
-    var handOfSixEvalIndexed = function (c1, c2, c3, c4, c5, c6) {
-        return bfBestOfFiveOnXindexed([c1, c2, c3, c4, c5, c6]);
-    };
-    /** @function handOfSixEvalLowBall27Indexed
-     *
-     * @param {Array:Number[]} array of 6 cards making up an hand
-     * @returns {Number} hand ranking ( the best one on all combinations of input card in group of 5)
-     */
-    var handOfSixEvalLowBall27Indexed = function (c1, c2, c3, c4, c5, c6) {
-        return bfBestOfFiveOnXindexed([c1, c2, c3, c4, c5, c6], handOfFiveEvalLowBall27Indexed);
-    };
-    /** @function handOfSixEvalato5Indexed
-     *
-     * @param {Array:Number[]} array of 6 cards making up an hand
-     * @returns {Number} hand ranking ( the best one on all combinations of input card in group of 5)
-     */
-    var handOfSixEvalAto5Indexed = function (c1, c2, c3, c4, c5, c6) {
-        return bfBestOfFiveOnXindexed([c1, c2, c3, c4, c5, c6], handOfFiveEvalLow_Ato5Indexed);
-    };
-    /** @function handOfSixEvalato5Indexed
-     *
-     * @param {Array:Number[]} array of 6 cards making up an hand
-     * @returns {Number} hand ranking ( the best one on all combinations of input card in group of 5)
-     */
-    var handOfSixEvalAto6Indexed = function (c1, c2, c3, c4, c5, c6) {
-        return bfBestOfFiveOnXindexed([c1, c2, c3, c4, c5, c6], handOfFiveEvalLow_Ato6Indexed);
-    };
-    /** @function handOfSixEvalHiLow8Indexed
-     *
-     * @param {Array:Number[]} array of 6 cards making up an hand
-     * @returns {hiLowRank} hand ranking ( the best one on all combinations of input card in group of 5)
-     */
-    var handOfSixEvalHiLow8Indexed = function (c1, c2, c3, c4, c5, c6) {
-        var res = { hi: -1, low: -1 };
-        var all = combinations([c1, c2, c3, c4, c5, c6], 5)
-            //@ts-ignore
-            .map(function (hand) { return handOfFiveEvalHiLow8Indexed.apply(void 0, hand); });
-        all.forEach(function (R, i) {
-            R.hi > res.hi ? (res.hi = R.hi) : null;
-            R.low > res.low ? (res.low = R.low) : null;
-        });
-        return res;
-    };
-    /** @function handOfSixEvalHiLow9Indexed
-     *
-     * @param {Array:Number[]} array of 6 cards making up an hand
-     * @returns {hiLowRank} hand ranking ( the best one on all combinations of input card in group of 5)
-     */
-    var handOfSixEvalHiLow9Indexed = function (c1, c2, c3, c4, c5, c6) {
-        var res = { hi: -1, low: -1 };
-        //@ts-ignore
-        var all = combinations([c1, c2, c3, c4, c5, c6], 5)
-            //@ts-ignore
-            .map(function (hand) { return handOfFiveEvalHiLow9Indexed.apply(void 0, hand); });
-        all.forEach(function (R, i) {
-            R.hi > res.hi ? (res.hi = R.hi) : null;
-            R.low > res.low ? (res.low = R.low) : null;
-        });
-        return res;
-    };
     /** @function handOfSevenEvalIndexed
      *
      * @param {Array:Number[]} array of 7 cards making up an hand
@@ -1352,6 +957,25 @@
     var handOfSevenEvalIndexed = function (c1, c2, c3, c4, c5, c6, c7) {
         return handOfSevenEval(fullCardsDeckHash_7[c1], fullCardsDeckHash_7[c2], fullCardsDeckHash_7[c3], fullCardsDeckHash_7[c4], fullCardsDeckHash_7[c5], fullCardsDeckHash_7[c6], fullCardsDeckHash_7[c7]);
     };
+    /**
+     *
+     *
+     * END OF SEVEN EVAL
+     *
+     */
+    /** @function handOfSixEvalIndexed
+     *
+     * @param {Array:Number[]} array of 6 cards making up an hand
+     * @returns {Number} hand ranking ( the best one on all combinations of input card in group of 5)
+     */
+    var handOfSixEvalIndexed = function (c1, c2, c3, c4, c5, c6) {
+        return bfBestOfFiveOnXindexed([c1, c2, c3, c4, c5, c6]);
+    };
+    /**
+     *
+     * END OF SIX EVAL INDEXED
+     *
+     */
     /** @function handOfSevenEval_Verbose  @TODO try to reuse
      *
      * @param {Number} c1...c7 cards hash from CONSTANTS.fullCardsDeckHash_7
@@ -1410,12 +1034,6 @@
             flushSuit: flushRankKey > -1 ? flushHashToName[flush_check_key] : 'no flush'
         };
     };
-    var handOfSevenEvalLowBall27Indexed_Verbose = function (c1, c2, c3, c4, c5, c6, c7) {
-        return handOfSevenEval_Verbose(fullCardsDeckHash_7[c1], fullCardsDeckHash_7[c2], fullCardsDeckHash_7[c3], fullCardsDeckHash_7[c4], fullCardsDeckHash_7[c5], fullCardsDeckHash_7[c6], fullCardsDeckHash_7[c7], HASHES_OF_FIVE_ON_SEVEN_LOWBALL27, HASHES_OF_FIVE, true, true);
-    };
-    var handOfSevenEvalAto6Indexed_Verbose = function (c1, c2, c3, c4, c5, c6, c7) {
-        return handOfSevenEval_Verbose(fullCardsDeckHash_7[c1], fullCardsDeckHash_7[c2], fullCardsDeckHash_7[c3], fullCardsDeckHash_7[c4], fullCardsDeckHash_7[c5], fullCardsDeckHash_7[c6], fullCardsDeckHash_7[c7], HASHES_OF_SEVEN_LOW_Ato6, HASHES_OF_FIVE_Ato6, false);
-    };
     /** @function handOfSevenEvalIndexed_Verbose
      *
      * @param {Array:Number[]} array of 7 cards making up an hand
@@ -1427,119 +1045,6 @@
         if (USE_MULTI_FLUSH_RANK === void 0) { USE_MULTI_FLUSH_RANK = true; }
         return handOfSevenEval_Verbose(fullCardsDeckHash_7[c1], fullCardsDeckHash_7[c2], fullCardsDeckHash_7[c3], fullCardsDeckHash_7[c4], fullCardsDeckHash_7[c5], fullCardsDeckHash_7[c6], fullCardsDeckHash_7[c7], SEVEN_EVAL_HASH, FIVE_EVAL_HASH, USE_MULTI_FLUSH_RANK);
     };
-    var handOfSevenEvalAto5Indexed_Verbose = function (c1, c2, c3, c4, c5, c6, c7) {
-        return handOfSevenEval_Verbose(fullCardsDeckHash_7[c1], fullCardsDeckHash_7[c2], fullCardsDeckHash_7[c3], fullCardsDeckHash_7[c4], fullCardsDeckHash_7[c5], fullCardsDeckHash_7[c6], fullCardsDeckHash_7[c7], HASEHS_OF_SEVEN_LOW_Ato5, HASEHS_OF_FIVE_LOW_Ato5, false);
-    };
-    var handOfSevenEvalLow8Indexed_Verbose = function (c1, c2, c3, c4, c5, c6, c7) {
-        return handOfSevenEval_Verbose(fullCardsDeckHash_7[c1], fullCardsDeckHash_7[c2], fullCardsDeckHash_7[c3], fullCardsDeckHash_7[c4], fullCardsDeckHash_7[c5], fullCardsDeckHash_7[c6], fullCardsDeckHash_7[c7], HASHES_OF_SEVEN_LOW8, HASHES_OF_FIVE_LOW8, false);
-    };
-    var handOfSevenEvalLow9Indexed_Verbose = function (c1, c2, c3, c4, c5, c6, c7) {
-        return handOfSevenEval_Verbose(fullCardsDeckHash_7[c1], fullCardsDeckHash_7[c2], fullCardsDeckHash_7[c3], fullCardsDeckHash_7[c4], fullCardsDeckHash_7[c5], fullCardsDeckHash_7[c6], fullCardsDeckHash_7[c7], HASHES_OF_SEVEN_LOW9, HASHES_OF_FIVE_LOW9, false);
-    };
-    /** @function getHandInfo
-     *
-     * @param {Number} hand rank
-     * @returns {handInfo} object containing hand info
-     */
-    var getHandInfo = function (rank, HASHES, INVERTED) {
-        if (HASHES === void 0) { HASHES = HASHES_OF_FIVE; }
-        if (INVERTED === void 0) { INVERTED = false; }
-        return HASHES.rankingInfos[INVERTED ? HIGH_MAX_RANK - rank : rank];
-    };
-    /** @function getHandInfo27
-     *
-     * @param {Number} hand rank
-     * @returns {handInfo} object containing hand info
-     */
-    var getHandInfo27 = function (rank) {
-        return getHandInfo(rank, HASHES_OF_FIVE, true);
-    };
-    /** @function getHandInfoAto5
-     *
-     * @param {Number} hand rank
-     * @returns {handInfo} object containing hand info
-     */
-    var getHandInfoAto5 = function (rank) {
-        return getHandInfo(rank, HASEHS_OF_FIVE_LOW_Ato5);
-    };
-    /** @function getHandInfoAto6
-     *
-     * @param {Number} hand rank
-     * @returns {handInfo} object containing hand info
-     */
-    var getHandInfoAto6 = function (rank) {
-        return getHandInfo(rank, HASHES_OF_FIVE_Ato6);
-    };
-
-    var pokerEvaluators = /*#__PURE__*/Object.freeze({
-        HASHES_OF_FIVE: HASHES_OF_FIVE,
-        HASHES_OF_FIVE_ON_SEVEN: HASHES_OF_FIVE_ON_SEVEN,
-        HASHES_OF_FIVE_ON_SEVEN_LOWBALL27: HASHES_OF_FIVE_ON_SEVEN_LOWBALL27,
-        HASHES_OF_FIVE_LOW8: HASHES_OF_FIVE_LOW8,
-        HASHES_OF_FIVE_LOW9: HASHES_OF_FIVE_LOW9,
-        HASEHS_OF_FIVE_LOW_Ato5: HASEHS_OF_FIVE_LOW_Ato5,
-        HASHES_OF_SEVEN_LOW8: HASHES_OF_SEVEN_LOW8,
-        HASHES_OF_SEVEN_LOW9: HASHES_OF_SEVEN_LOW9,
-        HASEHS_OF_SEVEN_LOW_Ato5: HASEHS_OF_SEVEN_LOW_Ato5,
-        HASHES_OF_SEVEN_LOW_Ato6: HASHES_OF_SEVEN_LOW_Ato6,
-        handOfFiveEval: handOfFiveEval,
-        handOfFiveEvalHiLow: handOfFiveEvalHiLow,
-        handOfFiveEvalHiLow8: handOfFiveEvalHiLow8,
-        handOfFiveEvalHiLow8Indexed: handOfFiveEvalHiLow8Indexed,
-        handOfFiveEvalHiLow9: handOfFiveEvalHiLow9,
-        handOfFiveEvalHiLow9Indexed: handOfFiveEvalHiLow9Indexed,
-        handOfFiveEvalLow_Ato5: handOfFiveEvalLow_Ato5,
-        handOfFiveEvalLow_Ato5Indexed: handOfFiveEvalLow_Ato5Indexed,
-        handOfFiveEvalLow_Ato6: handOfFiveEvalLow_Ato6,
-        handOfFiveEvalLow_Ato6Indexed: handOfFiveEvalLow_Ato6Indexed,
-        handOfFiveEvalLowBall27: handOfFiveEvalLowBall27,
-        handOfFiveEvalLowBall27Indexed: handOfFiveEvalLowBall27Indexed,
-        handOfFiveEvalIndexed: handOfFiveEvalIndexed,
-        bfBestOfFiveOnX: bfBestOfFiveOnX,
-        bfBestOfFiveOnXindexed: bfBestOfFiveOnXindexed,
-        bfBestOfFiveFromTwoSets: bfBestOfFiveFromTwoSets,
-        bfBestOfFiveFromTwoSetsHiLow: bfBestOfFiveFromTwoSetsHiLow,
-        bfBestOfFiveFromTwoSetsHiLow8: bfBestOfFiveFromTwoSetsHiLow8,
-        bfBestOfFiveFromTwoSetsHiLow8Indexed: bfBestOfFiveFromTwoSetsHiLow8Indexed,
-        bfBestOfFiveFromTwoSetsHiLow9: bfBestOfFiveFromTwoSetsHiLow9,
-        bfBestOfFiveFromTwoSetsHiLow9Indexed: bfBestOfFiveFromTwoSetsHiLow9Indexed,
-        bfBestOfFiveFromTwoSetsHiLow_Ato5: bfBestOfFiveFromTwoSetsHiLow_Ato5,
-        bfBestOfFiveFromTwoSetsLow_Ato6: bfBestOfFiveFromTwoSetsLow_Ato6,
-        bfBestOfFiveFromTwoSetsLow_Ato6Indexed: bfBestOfFiveFromTwoSetsLow_Ato6Indexed,
-        bfBestOfFiveFromTwoSetsHiLow_Ato5Indexed: bfBestOfFiveFromTwoSetsHiLow_Ato5Indexed,
-        bfBestOfFiveFromTwoSetsLowBall27: bfBestOfFiveFromTwoSetsLowBall27,
-        bfBestOfFiveFromTwoSetsLowBall27Indexed: bfBestOfFiveFromTwoSetsLowBall27Indexed,
-        handOfSevenEval: handOfSevenEval,
-        handOfSevenEvalLowBall27: handOfSevenEvalLowBall27,
-        handOfSevenEvalLowBall27Indexed: handOfSevenEvalLowBall27Indexed,
-        handOfSevenEval_Ato6: handOfSevenEval_Ato6,
-        handOfSevenEval_Ato6Indexed: handOfSevenEval_Ato6Indexed,
-        handOfSevenEvalHiLow: handOfSevenEvalHiLow,
-        handOfSevenEvalLow_Ato5: handOfSevenEvalLow_Ato5,
-        handOfSevenEvalLow_Ato5Indexed: handOfSevenEvalLow_Ato5Indexed,
-        handOfSevenEvalHiLow8: handOfSevenEvalHiLow8,
-        handOfSevenEvalHiLow8Indexed: handOfSevenEvalHiLow8Indexed,
-        handOfSevenEvalHiLow9: handOfSevenEvalHiLow9,
-        handOfSevenEvalHiLow9Indexed: handOfSevenEvalHiLow9Indexed,
-        handOfSixEvalIndexed: handOfSixEvalIndexed,
-        handOfSixEvalLowBall27Indexed: handOfSixEvalLowBall27Indexed,
-        handOfSixEvalAto5Indexed: handOfSixEvalAto5Indexed,
-        handOfSixEvalAto6Indexed: handOfSixEvalAto6Indexed,
-        handOfSixEvalHiLow8Indexed: handOfSixEvalHiLow8Indexed,
-        handOfSixEvalHiLow9Indexed: handOfSixEvalHiLow9Indexed,
-        handOfSevenEvalIndexed: handOfSevenEvalIndexed,
-        handOfSevenEval_Verbose: handOfSevenEval_Verbose,
-        handOfSevenEvalLowBall27Indexed_Verbose: handOfSevenEvalLowBall27Indexed_Verbose,
-        handOfSevenEvalAto6Indexed_Verbose: handOfSevenEvalAto6Indexed_Verbose,
-        handOfSevenEvalIndexed_Verbose: handOfSevenEvalIndexed_Verbose,
-        handOfSevenEvalAto5Indexed_Verbose: handOfSevenEvalAto5Indexed_Verbose,
-        handOfSevenEvalLow8Indexed_Verbose: handOfSevenEvalLow8Indexed_Verbose,
-        handOfSevenEvalLow9Indexed_Verbose: handOfSevenEvalLow9Indexed_Verbose,
-        getHandInfo: getHandInfo,
-        getHandInfo27: getHandInfo27,
-        getHandInfoAto5: getHandInfoAto5,
-        getHandInfoAto6: getHandInfoAto6
-    });
 
     var DEFAULT_N_RUNS = 10000;
     var categoryByRankingValue = function (rank) {
@@ -1594,15 +1099,109 @@
         return stats;
     };
 
-    /**@TODO yahtzee ,poker dice,yacht,generala ,cheerio*/
+    /**hashes to be created at boot by default!!!! */
+    /**HIGH*/
+    var HASHES_OF_FIVE$1 = createRankOfFiveHashes();
+    var HASH_RANK_FIVE$1 = HASHES_OF_FIVE$1.HASHES;
+    /**LOW Ato5*/
+    var HASHES_OF_FIVE_LOW8$1 = createRankOf5AceToFive_Low8();
+    var HASHES_OF_FIVE_LOW9$1 = createRankOf5AceToFive_Low9();
+    var HASHES_OF_FIVE_LOW_Ato5 = createRankOf5AceToFive_Full();
+    /**LOW Ato6*/
+    var HASHES_OF_FIVE_Ato6$1 = createRankOf5AceToSix_Full();
 
-    exports.PKEval = pokerEvaluators;
+    /**@TODO create a config module, if development build all hashes? or used to preconfigure the library? */
+    var FIVE_CARD_POKER_EVAL = {
+        HandRank: {
+            5: {
+                high: function () { },
+                low8: function () { },
+                low9: function () { },
+                Ato5: function () { },
+                Ato6: function () { },
+                _2to7: function () { }
+            },
+            6: {
+                high: function () { },
+                low8: function () { },
+                low9: function () { },
+                Ato5: function () { },
+                Ato6: function () { },
+                _2to7: function () { }
+            },
+            7: {
+                high: function () { },
+                low8: function () { },
+                low9: function () { },
+                Ato5: function () { },
+                Ato6: function () { },
+                _2To7: function () { }
+            }
+        },
+        /**generate hashesofSeven and set  FIVE_CARD_POKER_EVAL.HandRank.7.high = fastEvalfunction
+         * @TODO create verbose to work starting from numericRank and fullHand array, drawing flushy cards always in the same way
+         * whther faster hashes are generated or not
+        */
+        hashLoaders: {
+            6: {},
+            7: {
+                high: function () { },
+                low8: function () { },
+                low9: function () { },
+                Ato5: function () { },
+                Ato6: function () { },
+                _2to7: function () { }
+            }
+        }
+    };
+    var getTableSlice = function (startIdx, keys, gapSize) {
+        if (gapSize === void 0) { gapSize = 1; }
+        var i = startIdx + 1;
+        var slice = {
+            start: startIdx,
+            end: startIdx,
+            values: [keys[startIdx]]
+        };
+        var nogap = true;
+        while (i < keys.length && nogap) {
+            if (keys[i] - keys[i - 1] > gapSize) {
+                nogap = false;
+            }
+            else {
+                slice.end = i;
+                slice.values.push(keys[i]);
+                i++;
+            }
+        }
+        return slice;
+    };
+    var splitHashTable = function (hashTable, gapSize) {
+        if (gapSize === void 0) { gapSize = 1; }
+        var splitted = [];
+        var keys = Object.keys(hashTable).map(function (v) { return parseInt(v); });
+        keys.sort(function (a, b) { return a - b; });
+        console.log(keys);
+        var aSlice = getTableSlice(0, keys, gapSize);
+        while (aSlice.end < keys.length - 1) {
+            splitted.push(aSlice);
+            aSlice = getTableSlice(aSlice.end + 1, keys, gapSize);
+        }
+        console.log(splitted);
+    };
+    console.log(splitHashTable(HASHES_OF_FIVE_ON_SEVEN.HASHES, 1000));
+    /**@TODO yahtzee ,poker dice,yacht,generala ,cheerio and the various caisino video poker*/
+
+    exports.HASH_RANK_FIVE = HASH_RANK_FIVE$1;
+    exports.HASHES_OF_FIVE_ON_SEVEN = HASHES_OF_FIVE_ON_SEVEN;
     exports.handOfSevenEvalIndexed = handOfSevenEvalIndexed;
     exports.handOfFiveEvalIndexed = handOfFiveEvalIndexed;
     exports.getHandInfo = getHandInfo;
     exports.handOfSevenEvalIndexed_Verbose = handOfSevenEvalIndexed_Verbose;
     exports.handOfSixEvalIndexed = handOfSixEvalIndexed;
     exports.getPartialHandStatsIndexed_7 = getPartialHandStatsIndexed_7;
+    exports.FIVE_CARD_POKER_EVAL = FIVE_CARD_POKER_EVAL;
+    exports.getTableSlice = getTableSlice;
+    exports.splitHashTable = splitHashTable;
 
     Object.defineProperty(exports, '__esModule', { value: true });
 

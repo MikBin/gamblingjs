@@ -2,10 +2,15 @@
  * think of using typed array for performance reasons as these data is accessed very often
  * 8bit or 16bits arrays can be used
  */
+
+/**OpenDyslexicMono
+ * Go Mono
+ * http://app.programmingfonts.org/#go-mono
+ */
 import { NumberMap } from './interfaces';
 import { NumberToStringMap } from './interfaces';
 
-export const flushHash: number[] = [1, 2, 4, 8, 16, 32, 64, 128, 255, 508, 1012, 2016, 4016]; // 13 one for each rank
+export const flushHash: number[] = [1, 2, 4, 8, 16, 32, 64, 128, 256, 512, 1024, 2048, 4096]; // to be implemented to speed up flushcheck on 7
 
 export const suitsHash: number[] = [0, 57, 1, 8]; // 4 one for each suit
 
@@ -20,7 +25,7 @@ export const flushHashToName: Readonly<NumberToStringMap> = {
   0: 'spades',
   1: 'diamonds',
   8: 'hearts',
-  9: 'clubs'
+  57: 'clubs'
 };
 
 export const flush7HashCheck: Readonly<NumberMap> = {
@@ -222,9 +227,11 @@ export const distinctHandsQuantityByGroup = {
   FOUR_OF_A_KIND: 156,
   STRAIGHT_FLUSH: 10
 };
+
+export const enum gameType {
+  HIGH, Ato5, Ato6, _2to7, LOW8, LOW9
+}
 /**
- * @TODO make function to work with non full decks. ex. deck of 40 cards
+ * @TODO make function to work with non full decks. ex. deck of 40 cards, just invert ranking of flush and fulls...
  *
  * */
-
-

@@ -22,6 +22,7 @@ export declare const _rankOf5onX: (hand: number[], rankHash: NumberMap, INVERTED
  * @param {Array} fullHand array of indexes in deck of cards 0..51
  * @param {Array} winningRanks array of 5 cards indexes
  * @return {Array} only cards of winning hand
+ * @TODO add flushKey ... in case a flush filtering is necessary
  */
 export declare const filterWinningCards: (fullHand: number[], winningRanks: number[]) => number[];
 /**

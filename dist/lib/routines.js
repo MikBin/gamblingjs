@@ -201,6 +201,7 @@ exports._rankOf5onX = function (hand, rankHash, INVERTED) {
  * @param {Array} fullHand array of indexes in deck of cards 0..51
  * @param {Array} winningRanks array of 5 cards indexes
  * @return {Array} only cards of winning hand
+ * @TODO add flushKey ... in case a flush filtering is necessary
  */
 exports.filterWinningCards = function (fullHand, winningRanks) {
     var winning = {};

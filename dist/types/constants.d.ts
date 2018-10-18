@@ -2,6 +2,10 @@
  * think of using typed array for performance reasons as these data is accessed very often
  * 8bit or 16bits arrays can be used
  */
+/**OpenDyslexicMono
+ * Go Mono
+ * http://app.programmingfonts.org/#go-mono
+ */
 import { NumberMap } from './interfaces';
 import { NumberToStringMap } from './interfaces';
 export declare const flushHash: number[];
@@ -57,9 +61,5 @@ export declare const distinctHandsQuantityByGroup: {
 };
 /**
  * @TODO make function to work with non full decks. ex. deck of 40 cards
- *
- * */
-/**
- * @TODO prepare similar stuff for dice suited poker
  *
  * */

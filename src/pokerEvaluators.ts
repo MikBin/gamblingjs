@@ -39,31 +39,40 @@ import { handToCardsSymbols, filterWinningCards } from './routines';
  * they have to be instantiated explicitly
  */
 
+console.time("h5");
 export const HASHES_OF_FIVE = createRankOfFiveHashes();
+console.timeEnd("h5");
 const FLUSH_CHECK_FIVE = HASHES_OF_FIVE.FLUSH_CHECK_KEYS;
 const HASH_RANK_FIVE = HASHES_OF_FIVE.HASHES;
 const FLUSH_RANK_FIVE = HASHES_OF_FIVE.FLUSH_RANK_HASHES;
 
+console.time("h7");
 export const HASHES_OF_FIVE_ON_SEVEN = createRankOf5On7Hashes(HASHES_OF_FIVE);
+console.timeEnd("h7");
 const FLUSH_CHECK_SEVEN = HASHES_OF_FIVE_ON_SEVEN.FLUSH_CHECK_KEYS;
 const HASH_RANK_SEVEN = HASHES_OF_FIVE_ON_SEVEN.HASHES;
 const FLUSH_RANK_SEVEN = HASHES_OF_FIVE_ON_SEVEN.MULTI_FLUSH_RANK_HASHES;
 
 /**LOWBALL DEUCE TO SEVEN HASH ON 7 CARDS*/
+console.time("h7low");
 export const HASHES_OF_FIVE_ON_SEVEN_LOWBALL27 = createRankOf5On7Hashes(HASHES_OF_FIVE, true);
+console.timeEnd("h7low");
 const FLUSH_CHECK_SEVEN_LOWBALL27 = HASHES_OF_FIVE_ON_SEVEN_LOWBALL27.FLUSH_CHECK_KEYS;
 const HASH_RANK_SEVEN_LOWBALL27 = HASHES_OF_FIVE_ON_SEVEN_LOWBALL27.HASHES;
 const FLUSH_RANK_SEVEN_LOWBALL27 = HASHES_OF_FIVE_ON_SEVEN_LOWBALL27.MULTI_FLUSH_RANK_HASHES;
 
 /**LOW Ato5 HASHES */
+console.time("low5");
 export const HASHES_OF_FIVE_LOW8 = createRankOf5AceToFive_Low8();
 const HASH_RANK_FIVE_LOW8 = HASHES_OF_FIVE_LOW8.HASHES;
 export const HASHES_OF_FIVE_LOW9 = createRankOf5AceToFive_Low9();
 const HASH_RANK_FIVE_LOW9 = HASHES_OF_FIVE_LOW9.HASHES;
 export const HASEHS_OF_FIVE_LOW_Ato5 = createRankOf5AceToFive_Full();
 const HASH_RANK_FIVE_LOW_Ato5 = HASEHS_OF_FIVE_LOW_Ato5.HASHES;
+console.timeEnd("low5");
 
 /**LOW Ato5 on 7 cards HASHES */
+console.time("low7");
 export const HASHES_OF_SEVEN_LOW8 = createRankOf7AceToFive_Low(HASHES_OF_FIVE_LOW8, rankCards_low8);
 const HASH_RANK_SEVEN_LOW8 = HASHES_OF_SEVEN_LOW8.HASHES;
 export const HASHES_OF_SEVEN_LOW9 = createRankOf7AceToFive_Low(HASHES_OF_FIVE_LOW9, rankCards_low9);
@@ -87,6 +96,7 @@ export const HASHES_OF_SEVEN_LOW_Ato6 = createRankOf7AceToSix_Low(
 const FLUSH_CHECK_SEVEN_ATO6 = HASHES_OF_SEVEN_LOW_Ato6.FLUSH_CHECK_KEYS;
 const HASH_RANK_SEVEN_ATO6 = HASHES_OF_SEVEN_LOW_Ato6.HASHES;
 const FLUSH_RANK_SEVEN_ATO6 = HASHES_OF_SEVEN_LOW_Ato6.FLUSH_RANK_HASHES;
+console.timeEnd("low7");
 
 /** @function handOfFiveEval
  *
@@ -327,6 +337,52 @@ export const handOfFiveEvalIndexed: singleRankFiveCardHandEvalFn = (
   );
 };
 
+/** @function getHandInfo
+ *
+ * @param {Number} hand rank
+ * @returns {handInfo} object containing hand info
+ */
+export const getHandInfo = (
+  rank: number,
+  HASHES: hashRanking = HASHES_OF_FIVE,
+  INVERTED: boolean = false
+): handInfo => {
+  return HASHES.rankingInfos[INVERTED ? HIGH_MAX_RANK - rank : rank];
+};
+
+/** @function getHandInfo27
+ *
+ * @param {Number} hand rank
+ * @returns {handInfo} object containing hand info
+ */
+export const getHandInfo27 = (rank: number): handInfo => {
+  return getHandInfo(rank, HASHES_OF_FIVE, true);
+};
+
+/** @function getHandInfoAto5
+ *
+ * @param {Number} hand rank
+ * @returns {handInfo} object containing hand info
+ */
+export const getHandInfoAto5 = (rank: number): handInfo => {
+  return getHandInfo(rank, HASEHS_OF_FIVE_LOW_Ato5);
+};
+
+/** @function getHandInfoAto6
+ *
+ * @param {Number} hand rank
+ * @returns {handInfo} object containing hand info
+ */
+export const getHandInfoAto6 = (rank: number): handInfo => {
+  return getHandInfo(rank, HASHES_OF_FIVE_Ato6);
+};
+/**
+ * 
+ * 
+ * END OF FIVE EVAL
+ * 
+ */
+
 /** @function bfBestOfFiveOnX  @TODO move on routines or create helpersfunction.ts
  *
  * @param {Array:Number[]} hand array of 6 or more cards making up an hand
@@ -352,7 +408,7 @@ export const bfBestOfFiveOnXindexed = (
   return Math.max(...kombinatoricsJs.combinations(hand, 5).map(h => evalFn(...h)));
 };
 
-/** @function bfBestOfFiveFromTwoSets
+/** @function bfBestOfFiveFromTwoSets  @TODO make verbose version
  *
  * @param {Array:Number[]} handSetA array of sizeA cards representing hole cards
  * @param {Array:Number[]} handSetB array of sizeB cards representing board cards
@@ -527,6 +583,14 @@ export const bfBestOfFiveFromTwoSetsLowBall27Indexed = (
     handOfFiveEvalLowBall27
   );
 };
+
+/**
+ * 
+ * 
+ * HAND of 7 EVAL
+ * 
+ * 
+ */
 
 /** @function handOfSevenEval
  *
@@ -889,6 +953,38 @@ export const handOfSevenEvalHiLow9Indexed = (
   );
 };
 
+/** @function handOfSevenEvalIndexed
+ *
+ * @param {Array:Number[]} array of 7 cards making up an hand
+ * @returns {Number} hand ranking ( the best one on all combinations of input card in group of 5)
+ */
+export const handOfSevenEvalIndexed = (
+  c1: number,
+  c2: number,
+  c3: number,
+  c4: number,
+  c5: number,
+  c6: number,
+  c7: number
+): number => {
+  return handOfSevenEval(
+    fullCardsDeckHash_7[c1],
+    fullCardsDeckHash_7[c2],
+    fullCardsDeckHash_7[c3],
+    fullCardsDeckHash_7[c4],
+    fullCardsDeckHash_7[c5],
+    fullCardsDeckHash_7[c6],
+    fullCardsDeckHash_7[c7]
+  );
+};
+
+/**
+ * 
+ * 
+ * END OF SEVEN EVAL
+ * 
+ */
+
 /** @function handOfSixEvalIndexed
  *
  * @param {Array:Number[]} array of 6 cards making up an hand
@@ -1006,30 +1102,11 @@ export const handOfSixEvalHiLow9Indexed = (
   return res;
 };
 
-/** @function handOfSevenEvalIndexed
+/**
+ * 
+ * END OF SIX EVAL INDEXED
  *
- * @param {Array:Number[]} array of 7 cards making up an hand
- * @returns {Number} hand ranking ( the best one on all combinations of input card in group of 5)
  */
-export const handOfSevenEvalIndexed = (
-  c1: number,
-  c2: number,
-  c3: number,
-  c4: number,
-  c5: number,
-  c6: number,
-  c7: number
-): number => {
-  return handOfSevenEval(
-    fullCardsDeckHash_7[c1],
-    fullCardsDeckHash_7[c2],
-    fullCardsDeckHash_7[c3],
-    fullCardsDeckHash_7[c4],
-    fullCardsDeckHash_7[c5],
-    fullCardsDeckHash_7[c6],
-    fullCardsDeckHash_7[c7]
-  );
-};
 
 /** @function handOfSevenEval_Verbose  @TODO try to reuse
  *
@@ -1247,44 +1324,4 @@ export const handOfSevenEvalLow9Indexed_Verbose = (
     HASHES_OF_FIVE_LOW9,
     false
   );
-};
-
-/** @function getHandInfo
- *
- * @param {Number} hand rank
- * @returns {handInfo} object containing hand info
- */
-export const getHandInfo = (
-  rank: number,
-  HASHES: hashRanking = HASHES_OF_FIVE,
-  INVERTED: boolean = false
-): handInfo => {
-  return HASHES.rankingInfos[INVERTED ? HIGH_MAX_RANK - rank : rank];
-};
-
-/** @function getHandInfo27
- *
- * @param {Number} hand rank
- * @returns {handInfo} object containing hand info
- */
-export const getHandInfo27 = (rank: number): handInfo => {
-  return getHandInfo(rank, HASHES_OF_FIVE, true);
-};
-
-/** @function getHandInfoAto5
- *
- * @param {Number} hand rank
- * @returns {handInfo} object containing hand info
- */
-export const getHandInfoAto5 = (rank: number): handInfo => {
-  return getHandInfo(rank, HASEHS_OF_FIVE_LOW_Ato5);
-};
-
-/** @function getHandInfoAto6
- *
- * @param {Number} hand rank
- * @returns {handInfo} object containing hand info
- */
-export const getHandInfoAto6 = (rank: number): handInfo => {
-  return getHandInfo(rank, HASHES_OF_FIVE_Ato6);
 };

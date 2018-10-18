@@ -1,16 +1,10 @@
 import { handInfo, verboseHandInfo, hiLowRank, NumberMap, singleRankFiveCardHandEvalFn, hiLowRankFiveCardHandEvalFn, hashRankingSeven, hashRanking } from './interfaces';
-/**low hands ato5 as well as hand on 6 and omaha optimization are not created at boot,
- * they have to be instantiated explicitly
- */
 export declare const HASHES_OF_FIVE: Readonly<hashRanking>;
 export declare const HASHES_OF_FIVE_ON_SEVEN: Readonly<hashRankingSeven>;
-/**LOWBALL DEUCE TO SEVEN HASH ON 7 CARDS*/
 export declare const HASHES_OF_FIVE_ON_SEVEN_LOWBALL27: Readonly<hashRankingSeven>;
-/**LOW Ato5 HASHES */
 export declare const HASHES_OF_FIVE_LOW8: Readonly<hashRanking>;
 export declare const HASHES_OF_FIVE_LOW9: hashRanking;
 export declare const HASEHS_OF_FIVE_LOW_Ato5: Readonly<hashRanking>;
-/**LOW Ato5 on 7 cards HASHES */
 export declare const HASHES_OF_SEVEN_LOW8: Readonly<hashRankingSeven>;
 export declare const HASHES_OF_SEVEN_LOW9: Readonly<hashRankingSeven>;
 export declare const HASEHS_OF_SEVEN_LOW_Ato5: Readonly<hashRankingSeven>;
@@ -76,6 +70,36 @@ export declare const handOfFiveEvalLowBall27Indexed: singleRankFiveCardHandEvalF
  * @returns {Number} hand ranking
  */
 export declare const handOfFiveEvalIndexed: singleRankFiveCardHandEvalFn;
+/** @function getHandInfo
+ *
+ * @param {Number} hand rank
+ * @returns {handInfo} object containing hand info
+ */
+export declare const getHandInfo: (rank: number, HASHES?: hashRanking, INVERTED?: boolean) => handInfo;
+/** @function getHandInfo27
+ *
+ * @param {Number} hand rank
+ * @returns {handInfo} object containing hand info
+ */
+export declare const getHandInfo27: (rank: number) => handInfo;
+/** @function getHandInfoAto5
+ *
+ * @param {Number} hand rank
+ * @returns {handInfo} object containing hand info
+ */
+export declare const getHandInfoAto5: (rank: number) => handInfo;
+/** @function getHandInfoAto6
+ *
+ * @param {Number} hand rank
+ * @returns {handInfo} object containing hand info
+ */
+export declare const getHandInfoAto6: (rank: number) => handInfo;
+/**
+ *
+ *
+ * END OF FIVE EVAL
+ *
+ */
 /** @function bfBestOfFiveOnX  @TODO move on routines or create helpersfunction.ts
  *
  * @param {Array:Number[]} hand array of 6 or more cards making up an hand
@@ -90,7 +114,7 @@ export declare const bfBestOfFiveOnX: (hand: number[], evalFn?: Function) => num
  * @returns {Number} hand ranking ( the best one on all combinations of input card in group of 5)
  */
 export declare const bfBestOfFiveOnXindexed: (hand: number[], evalFn?: Function) => number;
-/** @function bfBestOfFiveFromTwoSets
+/** @function bfBestOfFiveFromTwoSets  @TODO make verbose version
  *
  * @param {Array:Number[]} handSetA array of sizeA cards representing hole cards
  * @param {Array:Number[]} handSetB array of sizeB cards representing board cards
@@ -188,6 +212,18 @@ export declare const handOfSevenEvalHiLow9: (c1: number, c2: number, c3: number,
  * @returns {hiLowRank} hand ranking object for both low 9 or better, and high ( if doesnt qualify for low it returns -1)
  */
 export declare const handOfSevenEvalHiLow9Indexed: (c1: number, c2: number, c3: number, c4: number, c5: number, c6: number, c7: number) => hiLowRank;
+/** @function handOfSevenEvalIndexed
+ *
+ * @param {Array:Number[]} array of 7 cards making up an hand
+ * @returns {Number} hand ranking ( the best one on all combinations of input card in group of 5)
+ */
+export declare const handOfSevenEvalIndexed: (c1: number, c2: number, c3: number, c4: number, c5: number, c6: number, c7: number) => number;
+/**
+ *
+ *
+ * END OF SEVEN EVAL
+ *
+ */
 /** @function handOfSixEvalIndexed
  *
  * @param {Array:Number[]} array of 6 cards making up an hand
@@ -224,12 +260,11 @@ export declare const handOfSixEvalHiLow8Indexed: (c1: number, c2: number, c3: nu
  * @returns {hiLowRank} hand ranking ( the best one on all combinations of input card in group of 5)
  */
 export declare const handOfSixEvalHiLow9Indexed: (c1: number, c2: number, c3: number, c4: number, c5: number, c6: number) => hiLowRank;
-/** @function handOfSevenEvalIndexed
+/**
  *
- * @param {Array:Number[]} array of 7 cards making up an hand
- * @returns {Number} hand ranking ( the best one on all combinations of input card in group of 5)
+ * END OF SIX EVAL INDEXED
+ *
  */
-export declare const handOfSevenEvalIndexed: (c1: number, c2: number, c3: number, c4: number, c5: number, c6: number, c7: number) => number;
 /** @function handOfSevenEval_Verbose  @TODO try to reuse
  *
  * @param {Number} c1...c7 cards hash from CONSTANTS.fullCardsDeckHash_7
@@ -247,27 +282,3 @@ export declare const handOfSevenEvalIndexed_Verbose: (c1: number, c2: number, c3
 export declare const handOfSevenEvalAto5Indexed_Verbose: (c1: number, c2: number, c3: number, c4: number, c5: number, c6: number, c7: number) => verboseHandInfo;
 export declare const handOfSevenEvalLow8Indexed_Verbose: (c1: number, c2: number, c3: number, c4: number, c5: number, c6: number, c7: number) => verboseHandInfo;
 export declare const handOfSevenEvalLow9Indexed_Verbose: (c1: number, c2: number, c3: number, c4: number, c5: number, c6: number, c7: number) => verboseHandInfo;
-/** @function getHandInfo
- *
- * @param {Number} hand rank
- * @returns {handInfo} object containing hand info
- */
-export declare const getHandInfo: (rank: number, HASHES?: hashRanking, INVERTED?: boolean) => handInfo;
-/** @function getHandInfo27
- *
- * @param {Number} hand rank
- * @returns {handInfo} object containing hand info
- */
-export declare const getHandInfo27: (rank: number) => handInfo;
-/** @function getHandInfoAto5
- *
- * @param {Number} hand rank
- * @returns {handInfo} object containing hand info
- */
-export declare const getHandInfoAto5: (rank: number) => handInfo;
-/** @function getHandInfoAto6
- *
- * @param {Number} hand rank
- * @returns {handInfo} object containing hand info
- */
-export declare const getHandInfoAto6: (rank: number) => handInfo;
