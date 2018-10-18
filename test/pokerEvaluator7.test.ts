@@ -20,6 +20,9 @@ import {
   handOfSevenEvalIndexed_Verbose,
   handOfSevenEval_Verbose
 } from '../src/pokerEvaluator7';
+
+import { fastHashesCreators } from '../src/pokerHashes7'
+
 import {
   HASHES_OF_SEVEN_LOW9,
   HASHES_OF_SEVEN_LOW8
@@ -27,98 +30,110 @@ import {
 
 import { fullCardsDeckHash_5, fullCardsDeckHash_7 } from '../src/constants';
 
+/** @TODO make a describe for non fastHashes and one for the fast one that includes the beforeAll */
+beforeAll(() => {
+  fastHashesCreators.high();
+  fastHashesCreators.Ato5();
+  fastHashesCreators.Ato6();
+  fastHashesCreators.low8();
+  fastHashesCreators.low9();
+  fastHashesCreators["2to7"]();
+});
+
 describe('testing hilo 8 and 9 on SEVEN cards', () => {
-  expect(
-    handOfSevenEvalHiLow8(
-      fullCardsDeckHash_7[6],
-      fullCardsDeckHash_7[5],
-      fullCardsDeckHash_7[4],
-      fullCardsDeckHash_7[3],
-      fullCardsDeckHash_7[12],
-      fullCardsDeckHash_7[25],
-      fullCardsDeckHash_7[38]
-    )
-  ).toEqual({ hi: 6898, low: 3 });
+  it("checks hilow eval 9 and 8 in both ways", () => {
+    expect(
+      handOfSevenEvalHiLow8(
+        fullCardsDeckHash_7[6],
+        fullCardsDeckHash_7[5],
+        fullCardsDeckHash_7[4],
+        fullCardsDeckHash_7[3],
+        fullCardsDeckHash_7[12],
+        fullCardsDeckHash_7[25],
+        fullCardsDeckHash_7[38]
+      )
+    ).toEqual({ hi: 6898, low: 3 });
 
-  expect(
-    handOfSevenEvalHiLow(
-      HASHES_OF_SEVEN_LOW9.HASHES,
-      fullCardsDeckHash_7[7],
-      fullCardsDeckHash_7[5],
-      fullCardsDeckHash_7[4],
-      fullCardsDeckHash_7[3],
-      fullCardsDeckHash_7[12],
-      fullCardsDeckHash_7[25],
-      fullCardsDeckHash_7[38]
-    )
-  ).toEqual({ hi: 6903, low: 38 });
+    expect(
+      handOfSevenEvalHiLow(
+        HASHES_OF_SEVEN_LOW9.HASHES,
+        fullCardsDeckHash_7[7],
+        fullCardsDeckHash_7[5],
+        fullCardsDeckHash_7[4],
+        fullCardsDeckHash_7[3],
+        fullCardsDeckHash_7[12],
+        fullCardsDeckHash_7[25],
+        fullCardsDeckHash_7[38]
+      )
+    ).toEqual({ hi: 6903, low: 38 });
 
-  expect(
-    handOfSevenEvalHiLow(
-      HASHES_OF_SEVEN_LOW8.HASHES,
-      fullCardsDeckHash_7[7],
-      fullCardsDeckHash_7[5],
-      fullCardsDeckHash_7[4],
-      fullCardsDeckHash_7[3],
-      fullCardsDeckHash_7[12],
-      fullCardsDeckHash_7[25],
-      fullCardsDeckHash_7[38]
-    )
-  ).toEqual({ hi: 6903, low: -1 });
+    expect(
+      handOfSevenEvalHiLow(
+        HASHES_OF_SEVEN_LOW8.HASHES,
+        fullCardsDeckHash_7[7],
+        fullCardsDeckHash_7[5],
+        fullCardsDeckHash_7[4],
+        fullCardsDeckHash_7[3],
+        fullCardsDeckHash_7[12],
+        fullCardsDeckHash_7[25],
+        fullCardsDeckHash_7[38]
+      )
+    ).toEqual({ hi: 6903, low: -1 });
 
-  expect(
-    handOfSevenEvalHiLow(
-      HASHES_OF_SEVEN_LOW8.HASHES,
-      fullCardsDeckHash_7[7],
-      fullCardsDeckHash_7[18],
-      fullCardsDeckHash_7[4],
-      fullCardsDeckHash_7[29],
-      fullCardsDeckHash_7[12],
-      fullCardsDeckHash_7[25],
-      fullCardsDeckHash_7[38]
-    )
-  ).toEqual({ hi: 5813, low: -1 });
+    expect(
+      handOfSevenEvalHiLow(
+        HASHES_OF_SEVEN_LOW8.HASHES,
+        fullCardsDeckHash_7[7],
+        fullCardsDeckHash_7[18],
+        fullCardsDeckHash_7[4],
+        fullCardsDeckHash_7[29],
+        fullCardsDeckHash_7[12],
+        fullCardsDeckHash_7[25],
+        fullCardsDeckHash_7[38]
+      )
+    ).toEqual({ hi: 5813, low: -1 });
 
-  expect(
-    handOfSevenEvalHiLow(
-      HASHES_OF_SEVEN_LOW9.HASHES,
-      fullCardsDeckHash_7[7],
-      fullCardsDeckHash_7[3],
-      fullCardsDeckHash_7[4],
-      fullCardsDeckHash_7[9],
-      fullCardsDeckHash_7[2],
-      fullCardsDeckHash_7[5],
-      fullCardsDeckHash_7[11]
-    )
-  ).toEqual({ hi: 7038, low: 35 });
+    expect(
+      handOfSevenEvalHiLow(
+        HASHES_OF_SEVEN_LOW9.HASHES,
+        fullCardsDeckHash_7[7],
+        fullCardsDeckHash_7[3],
+        fullCardsDeckHash_7[4],
+        fullCardsDeckHash_7[9],
+        fullCardsDeckHash_7[2],
+        fullCardsDeckHash_7[5],
+        fullCardsDeckHash_7[11]
+      )
+    ).toEqual({ hi: 7038, low: 35 });
 
-  expect(
-    handOfSevenEvalHiLow8(
-      fullCardsDeckHash_7[7],
-      fullCardsDeckHash_7[5],
-      fullCardsDeckHash_7[4],
-      fullCardsDeckHash_7[3],
-      fullCardsDeckHash_7[12],
-      fullCardsDeckHash_7[25],
-      fullCardsDeckHash_7[38]
-    )
-  ).toEqual({ hi: 6903, low: -1 });
+    expect(
+      handOfSevenEvalHiLow8(
+        fullCardsDeckHash_7[7],
+        fullCardsDeckHash_7[5],
+        fullCardsDeckHash_7[4],
+        fullCardsDeckHash_7[3],
+        fullCardsDeckHash_7[12],
+        fullCardsDeckHash_7[25],
+        fullCardsDeckHash_7[38]
+      )
+    ).toEqual({ hi: 6903, low: -1 });
 
-  expect(handOfSevenEvalHiLow8Indexed(7, 5, 4, 3, 12, 25, 38)).toEqual({ hi: 6903, low: -1 });
+    expect(handOfSevenEvalHiLow8Indexed(7, 5, 4, 3, 12, 25, 38)).toEqual({ hi: 6903, low: -1 });
 
-  expect(
-    handOfSevenEvalHiLow9(
-      fullCardsDeckHash_7[7],
-      fullCardsDeckHash_7[5],
-      fullCardsDeckHash_7[4],
-      fullCardsDeckHash_7[3],
-      fullCardsDeckHash_7[12],
-      fullCardsDeckHash_7[25],
-      fullCardsDeckHash_7[38]
-    )
-  ).toEqual({ hi: 6903, low: 38 });
+    expect(
+      handOfSevenEvalHiLow9(
+        fullCardsDeckHash_7[7],
+        fullCardsDeckHash_7[5],
+        fullCardsDeckHash_7[4],
+        fullCardsDeckHash_7[3],
+        fullCardsDeckHash_7[12],
+        fullCardsDeckHash_7[25],
+        fullCardsDeckHash_7[38]
+      )
+    ).toEqual({ hi: 6903, low: 38 });
 
-  expect(handOfSevenEvalHiLow9Indexed(7, 5, 4, 3, 12, 25, 38)).toEqual({ hi: 6903, low: 38 });
+    expect(handOfSevenEvalHiLow9Indexed(7, 5, 4, 3, 12, 25, 38)).toEqual({ hi: 6903, low: 38 });
+  });
 
   it('handOfSevenEvalLow_Ato5 has max on 6174 and min on 168', () => {
     expect(

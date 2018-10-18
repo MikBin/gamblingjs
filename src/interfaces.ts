@@ -90,3 +90,20 @@ export type hiLowRankSevenCardHandEvalFn = (
   c6: number,
   c7: number
 ) => hiLowRank;
+
+export interface gameTypesEvalFunction {
+  "high": Function;
+  "Ato5": Function;
+  "Ato6": Function;
+  "2to7": Function;
+  "low8": Function;
+  "low9": Function;
+};
+export interface gameTypesBool {
+  "high": boolean;
+  "Ato5": boolean;
+  "Ato6": boolean;
+  "2to7": boolean;
+  "low8": boolean;
+  "low9": boolean;
+};

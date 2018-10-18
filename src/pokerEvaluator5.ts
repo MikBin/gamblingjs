@@ -342,3 +342,20 @@ export const getHandInfo5onX = (hand: number[]/*gameType:*/) => {
    * start from verbose hand info
    * if flush, get flush suit to filter out correct cards --> */
 };
+
+export const bestFiveOnXGenericHiLow = (
+  evalFn: Function,
+  ...hand: number[]
+): hiLowRank => {
+  let res = { hi: -1, low: -1 };
+  //@ts-ignore
+  let all = kombinatoricsJs
+    .combinations(hand, 5)
+    //@ts-ignore
+    .map(hand => evalFn(...hand));
+  all.forEach((R, i) => {
+    R.hi > res.hi ? (res.hi = R.hi) : null;
+    R.low > res.low ? (res.low = R.low) : null;
+  });
+  return res;
+};

@@ -2,11 +2,13 @@
 import * as kombinatoricsJs from 'kombinatoricsjs';
 import {
   bfBestOfFiveOnXindexed,
+  handOfFiveEval,
   handOfFiveEvalLowBall27Indexed,
   handOfFiveEvalLow_Ato5Indexed,
   handOfFiveEvalLow_Ato6Indexed,
   handOfFiveEvalHiLow9Indexed,
-  handOfFiveEvalHiLow8Indexed
+  handOfFiveEvalHiLow8Indexed,
+  bestFiveOnXGeneric
 } from './pokerEvaluator5'
 
 import {
@@ -28,15 +30,8 @@ import {
  * @param {Array:Number[]} array of 6 cards making up an hand
  * @returns {Number} hand ranking ( the best one on all combinations of input card in group of 5)
  */
-export const handOfSixEvalIndexed = (
-  c1: number,
-  c2: number,
-  c3: number,
-  c4: number,
-  c5: number,
-  c6: number
-): number => {
-  return bfBestOfFiveOnXindexed([c1, c2, c3, c4, c5, c6]);
+export const handOfSixEvalIndexed = (...hand: number[]): number => {
+  return bfBestOfFiveOnXindexed(hand);
 };
 
 /** @function handOfSixEvalLowBall27Indexed
@@ -44,15 +39,8 @@ export const handOfSixEvalIndexed = (
  * @param {Array:Number[]} array of 6 cards making up an hand
  * @returns {Number} hand ranking ( the best one on all combinations of input card in group of 5)
  */
-export const handOfSixEvalLowBall27Indexed = (
-  c1: number,
-  c2: number,
-  c3: number,
-  c4: number,
-  c5: number,
-  c6: number
-): number => {
-  return bfBestOfFiveOnXindexed([c1, c2, c3, c4, c5, c6], handOfFiveEvalLowBall27Indexed);
+export const handOfSixEvalLowBall27Indexed = (...hand: number[]): number => {
+  return bfBestOfFiveOnXindexed(hand, handOfFiveEvalLowBall27Indexed);
 };
 
 /** @function handOfSixEvalato5Indexed
