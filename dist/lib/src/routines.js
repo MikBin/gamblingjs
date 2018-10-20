@@ -10,7 +10,7 @@ exports.getDiffDeck7 = function (listOfHands) {
     var deck = CONSTANTS.fullCardsDeckHash_7.slice().filter(function (c) { return !listOfHands.includes(c); });
     return deck;
 };
-exports.atLeast5Eq = function (list) {
+exports.atLeastFiveEqual = function (list) {
     return list.filter(function (v) {
         var l = v.length;
         var c = 0, i = 1;
@@ -37,6 +37,9 @@ exports.getVectorSum = function (v) {
     return s;
 };
 exports.getFlushSuit7 = function (v) {
+    if (v.length != 7) {
+        return 0;
+    }
     var t = v[0];
     var c = 0;
     var i = 1;
@@ -56,6 +59,9 @@ exports.getFlushSuit7 = function (v) {
     return t;
 };
 exports.checkStraight5on7 = function (arr) {
+    if (arr.length != 7) {
+        return false;
+    }
     var c = 0;
     if (arr[arr.length - 1] === 12 &&
         arr[0] === 0 &&

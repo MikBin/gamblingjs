@@ -75,6 +75,7 @@ exports.ranksHashOn7[9] = 83661;
 exports.ranksHashOn7[10] = 262349;
 exports.ranksHashOn7[11] = 636345;
 exports.ranksHashOn7[12] = 1479181;
+/** @TODO make it like below */
 exports.ranksHashOn5 = []; // one for each rank
 exports.ranksHashOn5[0] = 0; // 2
 exports.ranksHashOn5[1] = 1; // 3
@@ -201,7 +202,7 @@ exports.distinctHandsQuantityByGroup = {
     STRAIGHT_FLUSH: 10
 };
 /**
- * @TODO make function to work with non full decks. ex. deck of 40 cards
+ * @TODO make function to work with non full decks. ex. deck of 40 cards, just invert ranking of flush and fulls...
  *
  * */
 //# sourceMappingURL=constants.js.map

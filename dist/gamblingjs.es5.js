@@ -1,4 +1,147 @@
 /**
+ * think of using typed array for performance reasons as these data is accessed very often
+ * 8bit or 16bits arrays can be used
+ */
+var flushHash = [1, 2, 4, 8, 16, 32, 64, 128, 256, 512, 1024, 2048, 4096]; // to be implemented to speed up flushcheck on 7
+var suitsHash = [0, 57, 1, 8]; // 4 one for each suit
+/**check for !==undefined */
+var flush5hHashCheck = {
+    '0': 0,
+    '5': 1,
+    '40': 8,
+    '285': 57
+};
+var flushHashToName = {
+    0: 'spades',
+    1: 'diamonds',
+    8: 'hearts',
+    57: 'clubs'
+};
+var ranksHashOn7 = []; // 13 one for each rank
+ranksHashOn7[0] = 0;
+ranksHashOn7[1] = 1;
+ranksHashOn7[2] = 5;
+ranksHashOn7[3] = 22;
+ranksHashOn7[4] = 98;
+ranksHashOn7[5] = 453;
+ranksHashOn7[6] = 2031;
+ranksHashOn7[7] = 8698;
+ranksHashOn7[8] = 22854;
+ranksHashOn7[9] = 83661;
+ranksHashOn7[10] = 262349;
+ranksHashOn7[11] = 636345;
+ranksHashOn7[12] = 1479181;
+/** @TODO make it like below */
+var ranksHashOn5 = []; // one for each rank
+ranksHashOn5[0] = 0; // 2
+ranksHashOn5[1] = 1; // 3
+ranksHashOn5[2] = 5; // 4
+ranksHashOn5[3] = 22; // 5
+ranksHashOn5[4] = 94; // 6
+ranksHashOn5[5] = 312; // 7
+ranksHashOn5[6] = 992; // 8
+ranksHashOn5[7] = 2422; // 9
+ranksHashOn5[8] = 5624; // 10
+ranksHashOn5[9] = 12522; // J
+ranksHashOn5[10] = 19998; // Q
+ranksHashOn5[11] = 43258; // K
+ranksHashOn5[12] = 79415; // A
+/** @TODO to be tested tuples for hasof5 and 7 */
+var rankToFaceSymbol = [
+    '2',
+    '3',
+    '4',
+    '5',
+    '6',
+    '7',
+    '8',
+    '9',
+    'T',
+    'J',
+    'Q',
+    'K',
+    'A'
+];
+/*
+arrays initialization
+*/
+var deckOfRanks_5 = new Array(52);
+var deckOfRanks_7 = new Array(52);
+var deckOfFlushes = new Array(52);
+var deckOfSuits = new Array(52);
+var fullCardsDeckHash_5 = new Array(52);
+var fullCardsDeckHash_7 = new Array(52);
+var cardHashToDescription_7 = {};
+for (var i = 0; i < 52; i++) {
+    deckOfRanks_5[i] = ranksHashOn5[i % 13];
+    deckOfRanks_7[i] = ranksHashOn7[i % 13];
+    deckOfFlushes[i] = flushHash[i % 13];
+    deckOfSuits[i] = suitsHash[~~(i / 13)];
+    var card5 = (fullCardsDeckHash_5[i] = (deckOfRanks_5[i] << 9) + deckOfSuits[i]);
+    var card7 = (fullCardsDeckHash_7[i] = (deckOfRanks_7[i] << 9) + deckOfSuits[i]);
+    cardHashToDescription_7[card7] = i;
+}
+var STRAIGHTS = [
+    [12, 0, 1, 2, 3],
+    [0, 1, 2, 3, 4],
+    [1, 2, 3, 4, 5],
+    [2, 3, 4, 5, 6],
+    [3, 4, 5, 6, 7],
+    [4, 5, 6, 7, 8],
+    [5, 6, 7, 8, 9],
+    [6, 7, 8, 9, 10],
+    [7, 8, 9, 10, 11],
+    [8, 9, 10, 11, 12]
+];
+var rankCards = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12];
+var rankCards_low = [11, 10, 9, 8, 7, 6, 5, 4, 3, 2, 1, 0, 12];
+var HIGH_CARDS_5_AMOUNT = 1277;
+var FLUSHES_BASE_START = 5863;
+var STRAIGHT_FLUSH_BASE_START = 7452;
+var HIGH_MAX_RANK = 7461;
+var FLUSH_MASK = 511;
+var handsRankingDelimiter_5cards = [
+    1276,
+    4136,
+    4994,
+    5852,
+    5862,
+    7139,
+    7295,
+    7451,
+    7461
+];
+var handsRankingDelimiter_Ato5_5cards = [155, 311, 1169, 2027, 4887, 6174];
+var handsRankingDelimiter_Ato6_5cards = handsRankingDelimiter_5cards.map(function (r) { return 7461 - r; });
+handsRankingDelimiter_Ato6_5cards.pop();
+handsRankingDelimiter_Ato6_5cards.reverse().push(7461);
+//console.log(handsRankingDelimiter_Ato6_5cards);
+var handRankingGroupNames_Ato5 = [
+    'four of a kind',
+    'full house',
+    'three of a kind',
+    'two pair',
+    'one pair',
+    'high card'
+];
+var handRankingGroupNames = [
+    'high card',
+    'one pair',
+    'two pair',
+    'three of a kind',
+    'straight',
+    'flush',
+    'full house',
+    'four of a kind',
+    'straight flush'
+];
+var handRankingGroupNames_Ato6 = handRankingGroupNames.slice().reverse();
+/**
+ * @TODO make function to work with non full decks. ex. deck of 40 cards, just invert ranking of flush and fulls...
+ *
+ * */
+
+/**
  *@method
  *
  *@param
@@ -157,150 +300,6 @@ const crossProduct = (list, k) => {
     return crossProdList;
 };
 
-/**
- * think of using typed array for performance reasons as these data is accessed very often
- * 8bit or 16bits arrays can be used
- */
-var flushHash = [1, 2, 4, 8, 16, 32, 64, 128, 256, 512, 1024, 2048, 4096]; // to be implemented to speed up flushcheck on 7
-var suitsHash = [0, 57, 1, 8]; // 4 one for each suit
-/**check for !==undefined */
-var flush5hHashCheck = {
-    '0': 0,
-    '5': 1,
-    '40': 8,
-    '285': 57
-};
-var flushHashToName = {
-    0: 'spades',
-    1: 'diamonds',
-    8: 'hearts',
-    57: 'clubs'
-};
-var ranksHashOn7 = []; // 13 one for each rank
-ranksHashOn7[0] = 0;
-ranksHashOn7[1] = 1;
-ranksHashOn7[2] = 5;
-ranksHashOn7[3] = 22;
-ranksHashOn7[4] = 98;
-ranksHashOn7[5] = 453;
-ranksHashOn7[6] = 2031;
-ranksHashOn7[7] = 8698;
-ranksHashOn7[8] = 22854;
-ranksHashOn7[9] = 83661;
-ranksHashOn7[10] = 262349;
-ranksHashOn7[11] = 636345;
-ranksHashOn7[12] = 1479181;
-var ranksHashOn5 = []; // one for each rank
-ranksHashOn5[0] = 0; // 2
-ranksHashOn5[1] = 1; // 3
-ranksHashOn5[2] = 5; // 4
-ranksHashOn5[3] = 22; // 5
-ranksHashOn5[4] = 94; // 6
-ranksHashOn5[5] = 312; // 7
-ranksHashOn5[6] = 992; // 8
-ranksHashOn5[7] = 2422; // 9
-ranksHashOn5[8] = 5624; // 10
-ranksHashOn5[9] = 12522; // J
-ranksHashOn5[10] = 19998; // Q
-ranksHashOn5[11] = 43258; // K
-ranksHashOn5[12] = 79415; // A
-/** @TODO to be tested tuples for hasof5 and 7 */
-var rankToFaceSymbol = [
-    '2',
-    '3',
-    '4',
-    '5',
-    '6',
-    '7',
-    '8',
-    '9',
-    'T',
-    'J',
-    'Q',
-    'K',
-    'A'
-];
-/*
-arrays initialization
-*/
-var deckOfRanks_5 = new Array(52);
-var deckOfRanks_7 = new Array(52);
-var deckOfFlushes = new Array(52);
-var deckOfSuits = new Array(52);
-var fullCardsDeckHash_5 = new Array(52);
-var fullCardsDeckHash_7 = new Array(52);
-var cardHashToDescription_7 = {};
-for (var i = 0; i < 52; i++) {
-    deckOfRanks_5[i] = ranksHashOn5[i % 13];
-    deckOfRanks_7[i] = ranksHashOn7[i % 13];
-    deckOfFlushes[i] = flushHash[i % 13];
-    deckOfSuits[i] = suitsHash[~~(i / 13)];
-    var card5 = (fullCardsDeckHash_5[i] = (deckOfRanks_5[i] << 9) + deckOfSuits[i]);
-    var card7 = (fullCardsDeckHash_7[i] = (deckOfRanks_7[i] << 9) + deckOfSuits[i]);
-    cardHashToDescription_7[card7] = i;
-}
-var STRAIGHTS = [
-    [12, 0, 1, 2, 3],
-    [0, 1, 2, 3, 4],
-    [1, 2, 3, 4, 5],
-    [2, 3, 4, 5, 6],
-    [3, 4, 5, 6, 7],
-    [4, 5, 6, 7, 8],
-    [5, 6, 7, 8, 9],
-    [6, 7, 8, 9, 10],
-    [7, 8, 9, 10, 11],
-    [8, 9, 10, 11, 12]
-];
-var rankCards = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12];
-var rankCards_low8 = [6, 5, 4, 3, 2, 1, 0, 12];
-var rankCards_low9 = [7, 6, 5, 4, 3, 2, 1, 0, 12];
-var rankCards_low = [11, 10, 9, 8, 7, 6, 5, 4, 3, 2, 1, 0, 12];
-var HIGH_CARDS_5_AMOUNT = 1277;
-var FLUSHES_BASE_START = 5863;
-var STRAIGHT_FLUSH_BASE_START = 7452;
-var HIGH_MAX_RANK = 7461;
-var FLUSH_MASK = 511;
-var handsRankingDelimiter_5cards = [
-    1276,
-    4136,
-    4994,
-    5852,
-    5862,
-    7139,
-    7295,
-    7451,
-    7461
-];
-var handsRankingDelimiter_Ato5_5cards = [155, 311, 1169, 2027, 4887, 6174];
-var handsRankingDelimiter_Ato6_5cards = handsRankingDelimiter_5cards.map(function (r) { return 7461 - r; });
-handsRankingDelimiter_Ato6_5cards.pop();
-handsRankingDelimiter_Ato6_5cards.reverse().push(7461);
-//console.log(handsRankingDelimiter_Ato6_5cards);
-var handRankingGroupNames_Ato5 = [
-    'four of a kind',
-    'full house',
-    'three of a kind',
-    'two pair',
-    'one pair',
-    'high card'
-];
-var handRankingGroupNames = [
-    'high card',
-    'one pair',
-    'two pair',
-    'three of a kind',
-    'straight',
-    'flush',
-    'full house',
-    'four of a kind',
-    'straight flush'
-];
-var handRankingGroupNames_Ato6 = handRankingGroupNames.slice().reverse();
-/**
- * @TODO make function to work with non full decks. ex. deck of 40 cards
- *
- * */
-
 var getDiffDeck7 = function (listOfHands) {
     var deck = fullCardsDeckHash_7.slice().filter(function (c) { return !listOfHands.includes(c); });
     return deck;
@@ -410,18 +409,6 @@ var removeStraights = function (list) {
     return list.filter(function (hand, idx) {
         return !checkStraight(hand);
     });
-};
-var _rankOf5onX = function (hand, rankHash, INVERTED) {
-    if (INVERTED === void 0) { INVERTED = false; }
-    var comb = combinations(hand, 5);
-    var max = 0;
-    comb.forEach(function (h) {
-        var s = getVectorSum(h);
-        var r = rankHash[s];
-        INVERTED ? (r = HIGH_MAX_RANK - r) : null;
-        max = max < r ? r : max;
-    });
-    return max;
 };
 /**
  * @function filterWinningCards
@@ -553,61 +540,6 @@ var createRankOfFiveHashes = function () {
     });
     return hashRankingOfFive;
 };
-// @TODO export const createRankOf5On6Hashes = () => { };
-var createRankOf5On7Hashes = function (hashRankOfFive, INVERTED) {
-    if (INVERTED === void 0) { INVERTED = false; }
-    var hashRankingOfFiveOnSeven = {
-        HASHES: {},
-        FLUSH_CHECK_KEYS: {},
-        FLUSH_RANK_HASHES: {},
-        FLUSH_HASHES: {},
-        MULTI_FLUSH_RANK_HASHES: { 5: {}, 6: {}, 7: {} },
-        baseRankValues: ranksHashOn7,
-        baseSuitValues: suitsHash,
-        rankingInfos: hashRankOfFive.rankingInfos
-    };
-    var rankCards$$1 = rankCards;
-    var ranksHashOn7$$1 = hashRankingOfFiveOnSeven.baseRankValues;
-    multiCombinations(rankCards$$1, 7, 4).forEach(function (hand, i) {
-        var h7 = hand.map(function (card) { return ranksHashOn7$$1[card]; });
-        var h5 = hand.map(function (card) { return hashRankOfFive.baseRankValues[card]; });
-        var hash7 = getVectorSum(h7);
-        hashRankingOfFiveOnSeven.HASHES[hash7] = _rankOf5onX(h5, hashRankOfFive.HASHES, INVERTED);
-    });
-    var FLUSH_RANK_HASHES = hashRankingOfFiveOnSeven.MULTI_FLUSH_RANK_HASHES;
-    var fiveFlushes = combinations(rankCards$$1, 5);
-    var sixFlushes = combinations(rankCards$$1, 6);
-    var sevenFlushes = combinations(rankCards$$1, 7);
-    fiveFlushes.concat(sixFlushes, sevenFlushes).forEach(function (h) {
-        var h5 = h.map(function (c) { return hashRankOfFive.baseRankValues[c]; });
-        var h7 = h.map(function (c) { return hashRankingOfFiveOnSeven.baseRankValues[c]; });
-        var hash7 = getVectorSum(h7);
-        var rank = _rankOf5onX(h5, hashRankOfFive.FLUSH_RANK_HASHES, INVERTED);
-        FLUSH_RANK_HASHES[h.length][hash7] = rank;
-    });
-    var fiveFlushHashes = [[0, 0, 0, 0, 0], [1, 1, 1, 1, 1], [8, 8, 8, 8, 8], [57, 57, 57, 57, 57]];
-    var sixFlushHashes = [];
-    fiveFlushHashes.forEach(function (v, i) {
-        sixFlushHashes.push(v.concat([0]), v.concat([1]), v.concat([8]), v.concat([57]));
-    });
-    var sevenFlushHashes = [];
-    sixFlushHashes.forEach(function (v) {
-        sevenFlushHashes.push(v.concat([0]), v.concat([1]), v.concat([8]), v.concat([57]));
-    });
-    var FLUSH_CHECK_KEYS = hashRankingOfFiveOnSeven.FLUSH_CHECK_KEYS;
-    if (INVERTED) {
-        sevenFlushHashes = [
-            [0, 0, 0, 0, 0, 0, 0],
-            [1, 1, 1, 1, 1, 1, 1],
-            [8, 8, 8, 8, 8, 8, 8],
-            [57, 57, 57, 57, 57, 57, 57]
-        ];
-    }
-    sevenFlushHashes.forEach(function (h) {
-        FLUSH_CHECK_KEYS[getVectorSum(h)] = h[0];
-    });
-    return hashRankingOfFiveOnSeven;
-};
 var createRankOf5AceToFive_Low8 = function () {
     var lowHands = multiCombinations([6, 5, 4, 3, 2, 1, 0, 12], 5, 1);
     var hashRankingLow8 = {
@@ -702,103 +634,6 @@ var createRankOf5AceToSix_Full = function () {
     });
     return hashRankingLow;
 };
-var createRankOf7AceToSix_Low = function (hashRankOfFive, baseLowRanking) {
-    var hashRankingLow = {
-        HASHES: {},
-        FLUSH_CHECK_KEYS: {},
-        FLUSH_RANK_HASHES: {},
-        FLUSH_HASHES: {},
-        MULTI_FLUSH_RANK_HASHES: { 5: {}, 6: {}, 7: {} },
-        baseRankValues: ranksHashOn7,
-        baseSuitValues: suitsHash,
-        rankingInfos: hashRankOfFive.rankingInfos
-    };
-    var ranksHashOn7$$1 = ranksHashOn7;
-    /**filling ranks */
-    multiCombinations(baseLowRanking, 7, 4).forEach(function (hand, idx) {
-        var h7 = hand.map(function (card) { return ranksHashOn7$$1[card]; });
-        var h5 = hand.map(function (card) { return hashRankOfFive.baseRankValues[card]; });
-        var hash7 = getVectorSum(h7);
-        hashRankingLow.HASHES[hash7] = _rankOf5onX(h5, hashRankOfFive.HASHES);
-    });
-    /*let fiveFlushes = kombinatoricsJs.combinations(baseLowRanking, 5);
-    let sixFlushes = kombinatoricsJs.combinations(baseLowRanking, 6);*/
-    var sevenFlushes = combinations(baseLowRanking, 7);
-    /*
-    fiveFlushes.concat(sixFlushes, sevenFlushes).forEach((h: number[]) => {
-      let h5: number[] = h.map(c => hashRankOfFive.baseRankValues[c]);
-      let h7: number[] = h.map(c => hashRankingLow.baseRankValues[c]);
-      let hash7 = getVectorSum(h7);
-  
-      let rank = _rankOf5onX(h5, hashRankOfFive.FLUSH_RANK_HASHES);
-  
-      FLUSH_RANK_HASHES[h.length][hash7] = rank;
-    });
-  
-    let fiveFlushHashes = [[0, 0, 0, 0, 0], [1, 1, 1, 1, 1], [8, 8, 8, 8, 8], [57, 57, 57, 57, 57]];
-    let sixFlushHashes: number[][] = [];
-    fiveFlushHashes.forEach((v, i) => {
-      sixFlushHashes.push(v.concat([0]), v.concat([1]), v.concat([8]), v.concat([57]));
-    });
-    let sevenFlushHashes: number[][] = [];
-  
-    sixFlushHashes.forEach(v => {
-      sevenFlushHashes.push(v.concat([0]), v.concat([1]), v.concat([8]), v.concat([57]));
-    });*/
-    var sevenFlushHashes = [
-        [0, 0, 0, 0, 0, 0, 0],
-        [1, 1, 1, 1, 1, 1, 1],
-        [8, 8, 8, 8, 8, 8, 8],
-        [57, 57, 57, 57, 57, 57, 57]
-    ];
-    /**filling only seven flushes as for 5 and 6 the best hand would never be a flush but another combos */
-    sevenFlushHashes.forEach(function (h) {
-        hashRankingLow.FLUSH_CHECK_KEYS[getVectorSum(h)] = h[0];
-    });
-    sevenFlushes.forEach(function (h) {
-        var h5 = h.map(function (c) { return hashRankOfFive.baseRankValues[c]; });
-        var h7 = h.map(function (c) { return hashRankingLow.baseRankValues[c]; });
-        var hash7 = getVectorSum(h7);
-        var rank = _rankOf5onX(h5, hashRankOfFive.FLUSH_RANK_HASHES);
-        hashRankingLow.FLUSH_RANK_HASHES[hash7] = rank;
-    });
-    return hashRankingLow;
-};
-var createRankOf7AceToFive_Low = function (hashRankOfFive, baseLowRanking, fullFlag) {
-    if (fullFlag === void 0) { fullFlag = false; }
-    var hashRankingLow = {
-        HASHES: {},
-        FLUSH_CHECK_KEYS: {},
-        FLUSH_RANK_HASHES: {},
-        MULTI_FLUSH_RANK_HASHES: {},
-        FLUSH_HASHES: {},
-        baseRankValues: ranksHashOn7,
-        baseSuitValues: suitsHash,
-        rankingInfos: hashRankOfFive.rankingInfos
-    };
-    var ranksHashOn7$$1 = ranksHashOn7;
-    if (fullFlag) {
-        multiCombinations(baseLowRanking, 7, 4).forEach(function (hand, idx) {
-            var h7 = hand.map(function (card) { return ranksHashOn7$$1[card]; });
-            var h5 = hand.map(function (card) { return hashRankOfFive.baseRankValues[card]; });
-            var hash7 = getVectorSum(h7);
-            hashRankingLow.HASHES[hash7] = _rankOf5onX(h5, hashRankOfFive.HASHES);
-        });
-    }
-    else {
-        var lowHands_1 = multiCombinations(baseLowRanking, 5, 1);
-        multiCombinations(rankCards, 2, 2).forEach(function (pair, i) {
-            lowHands_1.forEach(function (lo, idx) {
-                var hand = lo.concat(pair);
-                var h7 = hand.map(function (card) { return ranksHashOn7$$1[card]; });
-                var h5 = hand.map(function (card) { return hashRankOfFive.baseRankValues[card]; });
-                var hash7 = getVectorSum(h7);
-                hashRankingLow.HASHES[hash7] = _rankOf5onX(h5, hashRankOfFive.HASHES);
-            });
-        });
-    }
-    return hashRankingLow;
-};
 var createRankOf5AceToFive_Low9 = function () {
     var lowHands = multiCombinations([7, 6, 5, 4, 3, 2, 1, 0, 12], 5, 1);
     var hashRankingLow9 = {
@@ -816,42 +651,24 @@ var createRankOf5AceToFive_Low9 = function () {
     return hashRankingLow9;
 };
 
-/** @TODO --> pokerEvaluators.ts have to gather all below functions from specific evaluators files
- *  ex deuceToSevenEval.ts, highRankEval.ts... */
-/**low hands ato5 as well as hand on 6 and omaha optimization are not created at boot,
- * they have to be instantiated explicitly
- */
-console.time("h5");
+/**hashes to be created at boot by default!!!! */
+/**HIGH*/
 var HASHES_OF_FIVE = createRankOfFiveHashes();
-console.timeEnd("h5");
 var FLUSH_CHECK_FIVE = HASHES_OF_FIVE.FLUSH_CHECK_KEYS;
 var HASH_RANK_FIVE = HASHES_OF_FIVE.HASHES;
 var FLUSH_RANK_FIVE = HASHES_OF_FIVE.FLUSH_RANK_HASHES;
-console.time("h7");
-var HASHES_OF_FIVE_ON_SEVEN = createRankOf5On7Hashes(HASHES_OF_FIVE);
-console.timeEnd("h7");
-var FLUSH_CHECK_SEVEN = HASHES_OF_FIVE_ON_SEVEN.FLUSH_CHECK_KEYS;
-var HASH_RANK_SEVEN = HASHES_OF_FIVE_ON_SEVEN.HASHES;
-var FLUSH_RANK_SEVEN = HASHES_OF_FIVE_ON_SEVEN.MULTI_FLUSH_RANK_HASHES;
-/**LOWBALL DEUCE TO SEVEN HASH ON 7 CARDS*/
-console.time("h7low");
-var HASHES_OF_FIVE_ON_SEVEN_LOWBALL27 = createRankOf5On7Hashes(HASHES_OF_FIVE, true);
-console.timeEnd("h7low");
-/**LOW Ato5 HASHES */
-console.time("low5");
+/**LOW Ato5*/
 var HASHES_OF_FIVE_LOW8 = createRankOf5AceToFive_Low8();
+var HASH_RANK_FIVE_LOW8 = HASHES_OF_FIVE_LOW8.HASHES;
 var HASHES_OF_FIVE_LOW9 = createRankOf5AceToFive_Low9();
-var HASEHS_OF_FIVE_LOW_Ato5 = createRankOf5AceToFive_Full();
-console.timeEnd("low5");
-/**LOW Ato5 on 7 cards HASHES */
-console.time("low7");
-var HASHES_OF_SEVEN_LOW8 = createRankOf7AceToFive_Low(HASHES_OF_FIVE_LOW8, rankCards_low8);
-var HASHES_OF_SEVEN_LOW9 = createRankOf7AceToFive_Low(HASHES_OF_FIVE_LOW9, rankCards_low9);
-var HASEHS_OF_SEVEN_LOW_Ato5 = createRankOf7AceToFive_Low(HASEHS_OF_FIVE_LOW_Ato5, rankCards_low, true);
-/**LOW Ato6 HASHES */
+var HASH_RANK_FIVE_LOW9 = HASHES_OF_FIVE_LOW9.HASHES;
+var HASHES_OF_FIVE_LOW_Ato5 = createRankOf5AceToFive_Full();
+var HASH_RANK_FIVE_LOW_Ato5 = HASHES_OF_FIVE_LOW_Ato5.HASHES;
+/**LOW Ato6*/
 var HASHES_OF_FIVE_Ato6 = createRankOf5AceToSix_Full();
-var HASHES_OF_SEVEN_LOW_Ato6 = createRankOf7AceToSix_Low(HASHES_OF_FIVE_Ato6, rankCards_low);
-console.timeEnd("low7");
+var HASH_RANK_FIVE_ATO6 = HASHES_OF_FIVE_Ato6.HASHES;
+var FLUSH_RANK_FIVE_ATO6 = HASHES_OF_FIVE_Ato6.FLUSH_RANK_HASHES;
+
 /** @function handOfFiveEval
  *
  * @param {Number} c1...c5 cards hash from CONSTANTS.fullCardsDeckHash_5
@@ -875,14 +692,18 @@ var handOfFiveEvalIndexed = function (c1, c2, c3, c4, c5) {
     return handOfFiveEval(fullCardsDeckHash_5[c1], fullCardsDeckHash_5[c2], fullCardsDeckHash_5[c3], fullCardsDeckHash_5[c4], fullCardsDeckHash_5[c5]);
 };
 /** @function getHandInfo
- *
- * @param {Number} hand rank
- * @returns {handInfo} object containing hand info
- */
+*
+* @param {Number} hand rank
+* @returns {handInfo} object containing hand info
+*/
 var getHandInfo = function (rank, HASHES, INVERTED) {
     if (HASHES === void 0) { HASHES = HASHES_OF_FIVE; }
     if (INVERTED === void 0) { INVERTED = false; }
-    return HASHES.rankingInfos[INVERTED ? HIGH_MAX_RANK - rank : rank];
+    return HASHES.rankingInfos[INVERTED ? HIGH_MAX_RANK - rank : rank] || {
+        hand: [],
+        faces: '',
+        handGroup: 'unqualified'
+    };
 };
 /** @function bfBestOfFiveOnXindexed
  *
@@ -895,6 +716,84 @@ var bfBestOfFiveOnXindexed = function (hand, evalFn) {
     //@ts-ignore
     return Math.max.apply(Math, combinations(hand, 5).map(function (h) { return evalFn.apply(void 0, h); }));
 };
+
+/** @function handOfSixEvalIndexed
+ *
+ * @param {Array:Number[]} array of 6 cards making up an hand
+ * @returns {Number} hand ranking ( the best one on all combinations of input card in group of 5)
+ */
+var handOfSixEvalIndexed = function () {
+    var hand = [];
+    for (var _i = 0; _i < arguments.length; _i++) {
+        hand[_i] = arguments[_i];
+    }
+    return bfBestOfFiveOnXindexed(hand);
+};
+/** @TODO verbose versions (taking again the one from 5 cards hand) */
+
+var baseHashRankingSeven = {
+    HASHES: {},
+    FLUSH_HASHES: {},
+    FLUSH_CHECK_KEYS: {},
+    MULTI_FLUSH_RANK_HASHES: {},
+    FLUSH_RANK_HASHES: {},
+    baseRankValues: [],
+    baseSuitValues: [],
+    rankingInfos: []
+};
+/*
+export const HASHES_OF_FIVE_ON_SEVEN = createRankOf5On7Hashes(HASHES_OF_FIVE);
+export const FLUSH_CHECK_SEVEN = HASHES_OF_FIVE_ON_SEVEN.FLUSH_CHECK_KEYS;
+export const HASH_RANK_SEVEN = HASHES_OF_FIVE_ON_SEVEN.HASHES;
+export const FLUSH_RANK_SEVEN = HASHES_OF_FIVE_ON_SEVEN.MULTI_FLUSH_RANK_HASHES;
+
+export const HASHES_OF_FIVE_ON_SEVEN_LOWBALL27 = createRankOf5On7Hashes(HASHES_OF_FIVE, true);
+export const FLUSH_CHECK_SEVEN_LOWBALL27 = HASHES_OF_FIVE_ON_SEVEN_LOWBALL27.FLUSH_CHECK_KEYS;
+export const HASH_RANK_SEVEN_LOWBALL27 = HASHES_OF_FIVE_ON_SEVEN_LOWBALL27.HASHES;
+export const FLUSH_RANK_SEVEN_LOWBALL27 = HASHES_OF_FIVE_ON_SEVEN_LOWBALL27.MULTI_FLUSH_RANK_HASHES;
+
+export const HASHES_OF_SEVEN_LOW8 = createRankOf7AceToFive_Low(HASHES_OF_FIVE_LOW8, rankCards_low8);
+export const HASH_RANK_SEVEN_LOW8 = HASHES_OF_SEVEN_LOW8.HASHES;
+export const HASHES_OF_SEVEN_LOW9 = createRankOf7AceToFive_Low(HASHES_OF_FIVE_LOW9, rankCards_low9);
+export const HASH_RANK_SEVEN_LOW9 = HASHES_OF_SEVEN_LOW9.HASHES;
+export const HASHES_OF_SEVEN_LOW_Ato5 = createRankOf7AceToFive_Low(
+  HASHES_OF_FIVE_LOW_Ato5,
+  rankCards_low,
+  true
+);
+export const HASH_RANK_SEVEN_LOW_Ato5 = HASHES_OF_SEVEN_LOW_Ato5.HASHES;
+
+export const HASHES_OF_SEVEN_LOW_Ato6 = createRankOf7AceToSix_Low(
+  HASHES_OF_FIVE_Ato6,
+  rankCards_low
+);
+export const FLUSH_CHECK_SEVEN_ATO6 = HASHES_OF_SEVEN_LOW_Ato6.FLUSH_CHECK_KEYS;
+export const HASH_RANK_SEVEN_ATO6 = HASHES_OF_SEVEN_LOW_Ato6.HASHES;
+export const FLUSH_RANK_SEVEN_ATO6 = HASHES_OF_SEVEN_LOW_Ato6.FLUSH_RANK_HASHES;
+*/
+var HASHES_OF_FIVE_ON_SEVEN = JSON.parse(JSON.stringify(baseHashRankingSeven));
+var FLUSH_CHECK_SEVEN = HASHES_OF_FIVE_ON_SEVEN.FLUSH_CHECK_KEYS;
+var HASH_RANK_SEVEN = HASHES_OF_FIVE_ON_SEVEN.HASHES;
+var FLUSH_RANK_SEVEN = HASHES_OF_FIVE_ON_SEVEN.MULTI_FLUSH_RANK_HASHES;
+var HASHES_OF_FIVE_ON_SEVEN_LOWBALL27 = JSON.parse(JSON.stringify(baseHashRankingSeven));
+var FLUSH_CHECK_SEVEN_LOWBALL27 = HASHES_OF_FIVE_ON_SEVEN_LOWBALL27.FLUSH_CHECK_KEYS;
+var HASH_RANK_SEVEN_LOWBALL27 = HASHES_OF_FIVE_ON_SEVEN_LOWBALL27.HASHES;
+var FLUSH_RANK_SEVEN_LOWBALL27 = HASHES_OF_FIVE_ON_SEVEN_LOWBALL27.MULTI_FLUSH_RANK_HASHES;
+var HASHES_OF_SEVEN_LOW8 = JSON.parse(JSON.stringify(baseHashRankingSeven));
+var HASH_RANK_SEVEN_LOW8 = HASHES_OF_SEVEN_LOW8.HASHES;
+var HASHES_OF_SEVEN_LOW9 = JSON.parse(JSON.stringify(baseHashRankingSeven));
+var HASH_RANK_SEVEN_LOW9 = HASHES_OF_SEVEN_LOW9.HASHES;
+var HASHES_OF_SEVEN_LOW_Ato5 = JSON.parse(JSON.stringify(baseHashRankingSeven));
+var HASH_RANK_SEVEN_LOW_Ato5 = HASHES_OF_SEVEN_LOW_Ato5.HASHES;
+var HASHES_OF_SEVEN_LOW_Ato6 = JSON.parse(JSON.stringify(baseHashRankingSeven));
+var FLUSH_CHECK_SEVEN_ATO6 = HASHES_OF_SEVEN_LOW_Ato6.FLUSH_CHECK_KEYS;
+var HASH_RANK_SEVEN_ATO6 = HASHES_OF_SEVEN_LOW_Ato6.HASHES;
+var FLUSH_RANK_SEVEN_ATO6 = HASHES_OF_SEVEN_LOW_Ato6.FLUSH_RANK_HASHES;
+/**do not export rank of 7 hashes...just export a function wrapper that could return falsy
+ * in test files create all hashes
+ * function replacement will be in gamblingjs.ts where a big object contains all evaluators (here they can be swapped for the faster one)
+ */
+
 /** @function handOfSevenEval
  *
  * @param {Number} c1...c7 cards hash from CONSTANTS.fullCardsDeckHash_7
@@ -951,26 +850,7 @@ var handOfSevenEval = function (c1, c2, c3, c4, c5, c6, c7) {
 var handOfSevenEvalIndexed = function (c1, c2, c3, c4, c5, c6, c7) {
     return handOfSevenEval(fullCardsDeckHash_7[c1], fullCardsDeckHash_7[c2], fullCardsDeckHash_7[c3], fullCardsDeckHash_7[c4], fullCardsDeckHash_7[c5], fullCardsDeckHash_7[c6], fullCardsDeckHash_7[c7]);
 };
-/**
- *
- *
- * END OF SEVEN EVAL
- *
- */
-/** @function handOfSixEvalIndexed
- *
- * @param {Array:Number[]} array of 6 cards making up an hand
- * @returns {Number} hand ranking ( the best one on all combinations of input card in group of 5)
- */
-var handOfSixEvalIndexed = function (c1, c2, c3, c4, c5, c6) {
-    return bfBestOfFiveOnXindexed([c1, c2, c3, c4, c5, c6]);
-};
-/**
- *
- * END OF SIX EVAL INDEXED
- *
- */
-/** @function handOfSevenEval_Verbose  @TODO try to reuse
+/** @function handOfSevenEval_Verbose
  *
  * @param {Number} c1...c7 cards hash from CONSTANTS.fullCardsDeckHash_7
  * @returns {verboseHandInfo} verbose information about best hand of 5 cards on seven
@@ -1093,18 +973,7 @@ var getPartialHandStatsIndexed_7 = function (partialHand, totalRuns) {
     return stats;
 };
 
-/**hashes to be created at boot by default!!!! */
-/**HIGH*/
-var HASHES_OF_FIVE$1 = createRankOfFiveHashes();
-var HASH_RANK_FIVE$1 = HASHES_OF_FIVE$1.HASHES;
-/**LOW Ato5*/
-var HASHES_OF_FIVE_LOW8$1 = createRankOf5AceToFive_Low8();
-var HASHES_OF_FIVE_LOW9$1 = createRankOf5AceToFive_Low9();
-var HASHES_OF_FIVE_LOW_Ato5 = createRankOf5AceToFive_Full();
-/**LOW Ato6*/
-var HASHES_OF_FIVE_Ato6$1 = createRankOf5AceToSix_Full();
-
-/**@TODO create a config module, if development build all hashes? or used to preconfigure the library? */
+/**@TODO create a config module, if development build all hashes? or used to preconfigure the library??? */
 var FIVE_CARD_POKER_EVAL = {
     HandRank: {
         5: {
@@ -1113,7 +982,7 @@ var FIVE_CARD_POKER_EVAL = {
             low9: function () { },
             Ato5: function () { },
             Ato6: function () { },
-            _2to7: function () { }
+            "2to7": function () { }
         },
         6: {
             high: function () { },
@@ -1121,7 +990,7 @@ var FIVE_CARD_POKER_EVAL = {
             low9: function () { },
             Ato5: function () { },
             Ato6: function () { },
-            _2to7: function () { }
+            "2to7": function () { }
         },
         7: {
             high: function () { },
@@ -1129,12 +998,13 @@ var FIVE_CARD_POKER_EVAL = {
             low9: function () { },
             Ato5: function () { },
             Ato6: function () { },
-            _2To7: function () { }
+            "2To7": function () { }
         }
     },
     /**generate hashesofSeven and set  FIVE_CARD_POKER_EVAL.HandRank.7.high = fastEvalfunction
      * @TODO create verbose to work starting from numericRank and fullHand array, drawing flushy cards always in the same way
      * whther faster hashes are generated or not
+     * if hashes are not generated use the basic version...
     */
     hashLoaders: {
         6: {},
@@ -1144,46 +1014,50 @@ var FIVE_CARD_POKER_EVAL = {
             low9: function () { },
             Ato5: function () { },
             Ato6: function () { },
-            _2to7: function () { }
+            "2to7": function () { }
         }
     }
 };
-var getTableSlice = function (startIdx, keys, gapSize) {
-    if (gapSize === void 0) { gapSize = 1; }
-    var i = startIdx + 1;
-    var slice = {
-        start: startIdx,
-        end: startIdx,
-        values: [keys[startIdx]]
-    };
-    var nogap = true;
-    while (i < keys.length && nogap) {
-        if (keys[i] - keys[i - 1] > gapSize) {
-            nogap = false;
-        }
-        else {
-            slice.end = i;
-            slice.values.push(keys[i]);
-            i++;
-        }
+/*
+export const getTableSlice = (startIdx: number, keys: number[], gapSize: number = 1) => {
+  let count: number = 0;
+  let i = startIdx + 1;
+  let slice = {
+    start: startIdx,
+    end: startIdx,
+    values: [keys[startIdx]]
+  };
+  let nogap = true;
+  while (i < keys.length && nogap) {
+    if (keys[i] - keys[i - 1] > gapSize) {
+      nogap = false;
+    } else {
+      slice.end = i;
+      slice.values.push(keys[i]);
+      i++;
     }
-    return slice;
+  }
+
+  return slice;
 };
-var splitHashTable = function (hashTable, gapSize) {
-    if (gapSize === void 0) { gapSize = 1; }
-    var splitted = [];
-    var keys = Object.keys(hashTable).map(function (v) { return parseInt(v); });
-    keys.sort(function (a, b) { return a - b; });
-    console.log(keys);
-    var aSlice = getTableSlice(0, keys, gapSize);
-    while (aSlice.end < keys.length - 1) {
-        splitted.push(aSlice);
-        aSlice = getTableSlice(aSlice.end + 1, keys, gapSize);
-    }
-    console.log(splitted);
+
+export const splitHashTable = (hashTable: Object,gapSize=1) => {
+  let splitted = [];
+  let keys = Object.keys(hashTable).map(v=>parseInt(v));
+  keys.sort((a,b)=>{return a-b});
+  console.log(keys);
+  let aSlice = getTableSlice(0,keys,gapSize);
+  while(aSlice.end<keys.length-1) {
+    splitted.push(aSlice);
+    aSlice = getTableSlice(aSlice.end+1,keys,gapSize);
+  }
+console.log(splitted);
 };
-console.log(splitHashTable(HASHES_OF_FIVE_ON_SEVEN.HASHES, 1000));
+
+console.log(splitHashTable(HASHES_OF_FIVE_ON_SEVEN.HASHES,1000));
+
+*/
 /**@TODO yahtzee ,poker dice,yacht,generala ,cheerio and the various caisino video poker*/
 
-export { HASH_RANK_FIVE$1 as HASH_RANK_FIVE, HASHES_OF_FIVE_ON_SEVEN, handOfSevenEvalIndexed, handOfFiveEvalIndexed, getHandInfo, handOfSevenEvalIndexed_Verbose, handOfSixEvalIndexed, getPartialHandStatsIndexed_7, FIVE_CARD_POKER_EVAL, getTableSlice, splitHashTable };
+export { handOfSevenEvalIndexed, handOfFiveEvalIndexed, getHandInfo, handOfSevenEvalIndexed_Verbose, handOfSixEvalIndexed, getPartialHandStatsIndexed_7, FIVE_CARD_POKER_EVAL };
 //# sourceMappingURL=gamblingjs.es5.js.map

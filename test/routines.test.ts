@@ -1,5 +1,5 @@
 import {
-  atLeast5Eq,
+  atLeastFiveEqual,
   getVectorSum,
   getFlushSuit7,
   checkStraight5on7,
@@ -41,7 +41,7 @@ describe('testing diffs: ', () => {
 });
 describe('testing basic routines', () => {
   it('returns the only element with 5 equals', () => {
-    expect(atLeast5Eq([[2, 3, 1, 1, 1, 1, 1, 5], [1, 1, 1, 1]])).toEqual([
+    expect(atLeastFiveEqual([[2, 3, 1, 1, 1, 1, 1, 5], [1, 1, 1, 1]])).toEqual([
       [2, 3, 1, 1, 1, 1, 1, 5]
     ]);
   });
@@ -169,7 +169,7 @@ describe('ranking calculators and hashes managers', () => {
     expect(_rankOf5onX([1, 1, 1, 1, 1, 1, 2], fakeHash)).toBe(6);
   });
 
-  let tempObj = {
+  let tempObj: hashRanking = {
     HASHES: { 3: 3 },
     FLUSH_CHECK_KEYS: {},
     FLUSH_RANK_HASHES: {},
@@ -180,7 +180,11 @@ describe('ranking calculators and hashes managers', () => {
   };
 
   it('fills rank of 5 hi and hi low', () => {
-    tempObj.rankingInfos[3] = 3;
+    /* tempObj.rankingInfos[3] = {
+       hand: [0, 1],
+       faces: "",
+       handGroup: ""
+     };*/
 
     expect(fillRank5([1, 1, 1], 3, fakeRankingObj).HASHES).toEqual(tempObj.HASHES);
   });
@@ -191,14 +195,22 @@ describe('ranking calculators and hashes managers', () => {
   });
 
   it('fills with post flush values', () => {
-    tempObj.rankingInfos[12] = 2;
+    /*tempObj.rankingInfos[12] = {
+      hand: [0, 1],
+      faces: "",
+      handGroup: ""
+    };*/
     tempObj.HASHES[2] = 12;
     expect(fillRank5PlusFlushes([1, 1, 0], 2, fakeRankingObj, 10).HASHES).toEqual(tempObj.HASHES);
   });
 
   it('fills flush ranking', () => {
     tempObj.FLUSH_RANK_HASHES[2] = 5875;
-    tempObj.rankingInfos[5875] = 2;
+    /*tempObj.rankingInfos[5875] = {
+      hand: [0, 1],
+      faces: "",
+      handGroup: ""
+    };*/
     expect(fillRankFlushes([1, 1, 0], fakeRankingObj).FLUSH_RANK_HASHES).toEqual(
       tempObj.FLUSH_RANK_HASHES
     );

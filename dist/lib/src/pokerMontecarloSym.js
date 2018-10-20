@@ -3,7 +3,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 var kombinatoricsjs_1 = require("kombinatoricsjs");
 var constants_1 = require("./constants");
 var routines_1 = require("./routines");
-var pokerEvaluators_1 = require("./pokerEvaluators");
+var pokerEvaluator7_1 = require("./pokerEvaluator7");
 var DEFAULT_N_RUNS = 10000;
 exports.categoryByRankingValue = function (rank) {
     var i = 0;
@@ -39,7 +39,7 @@ exports.getPartialHandStatsIndexed_7 = function (partialHand, totalRuns) {
             fullHand[pHand.length + t] = partialDeck[j];
             if (t === missingCardsLength) {
                 //@ts-ignore
-                var rank = pokerEvaluators_1.handOfSevenEval.apply(void 0, fullHand);
+                var rank = pokerEvaluator7_1.handOfSevenEval.apply(void 0, fullHand);
                 stats.average += rank;
                 stats[exports.categoryByRankingValue(rank)]++;
                 t = 0;

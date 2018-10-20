@@ -127,7 +127,11 @@ exports.handOfFiveEvalIndexed = function (c1, c2, c3, c4, c5) {
 exports.getHandInfo = function (rank, HASHES, INVERTED) {
     if (HASHES === void 0) { HASHES = pokerHashes5_1.HASHES_OF_FIVE; }
     if (INVERTED === void 0) { INVERTED = false; }
-    return HASHES.rankingInfos[INVERTED ? constants_1.HIGH_MAX_RANK - rank : rank];
+    return HASHES.rankingInfos[INVERTED ? constants_1.HIGH_MAX_RANK - rank : rank] || {
+        hand: [],
+        faces: '',
+        handGroup: 'unqualified'
+    };
 };
 /** @function getHandInfo27
  *
@@ -136,6 +140,22 @@ exports.getHandInfo = function (rank, HASHES, INVERTED) {
  */
 exports.getHandInfo27 = function (rank) {
     return exports.getHandInfo(rank, pokerHashes5_1.HASHES_OF_FIVE, true);
+};
+/** @function getHandInfoLow8
+ *
+ * @param {Number} hand rank
+ * @returns {handInfo} object containing hand info
+ */
+exports.getHandInfoLow8 = function (rank) {
+    return exports.getHandInfo(rank, pokerHashes5_1.HASHES_OF_FIVE_LOW8);
+};
+/** @function getHandInfoLow9
+ *
+ * @param {Number} hand rank
+ * @returns {handInfo} object containing hand info
+ */
+exports.getHandInfoLow9 = function (rank) {
+    return exports.getHandInfo(rank, pokerHashes5_1.HASHES_OF_FIVE_LOW9);
 };
 /** @function getHandInfoAto5
  *
@@ -174,5 +194,54 @@ exports.bfBestOfFiveOnXindexed = function (hand, evalFn) {
     if (evalFn === void 0) { evalFn = exports.handOfFiveEvalIndexed; }
     //@ts-ignore
     return Math.max.apply(Math, kombinatoricsJs.combinations(hand, 5).map(function (h) { return evalFn.apply(void 0, h); }));
+};
+/**to be used in generic verbose eval function  */
+var evaluatorByGameType = {
+    "high": exports.handOfFiveEvalIndexed,
+    "low8": exports.handOfFiveEvalHiLow8Indexed,
+    "low9": exports.handOfFiveEvalHiLow9Indexed,
+    "Ato5": exports.handOfFiveEvalLow_Ato5Indexed,
+    "Ato6": exports.handOfFiveEvalLow_Ato6Indexed,
+    "2to7": exports.handOfFiveEvalLowBall27Indexed
+};
+var evaluatorInfoByGameType = {
+    "high": exports.getHandInfo,
+    "low8": exports.getHandInfoLow8,
+    "low9": exports.getHandInfoLow9,
+    "Ato5": exports.getHandInfoAto5,
+    "Ato6": exports.getHandInfoAto6,
+    "2to7": exports.getHandInfo27
+};
+/** @function getHandInfo5onX
+* @param {Array:Number[]} hand array of 6 or more cards making up an hand
+* @returns {verboseHandInfo} info of best 5 cards hand
+*/
+exports.getHandInfo5onX = function (hand, gameType) {
+    /** game types decides which HASH and which Evalfunction
+     * start from verbose hand info
+     * if flush, get flush suit to filter out correct cards --> */
+    var combinations = kombinatoricsJs.combinations(hand, 5);
+    var winningCards = [];
+    return {
+        handRank: 875,
+        hand: [],
+        faces: "SDF",
+        handGroup: "",
+        winningCards: [],
+        flushSuit: 'no flush'
+    };
+};
+exports.bestFiveOnXHiLowIndexed = function (evalFn, hand) {
+    var res = { hi: -1, low: -1 };
+    //@ts-ignore
+    var all = kombinatoricsJs
+        .combinations(hand, 5)
+        //@ts-ignore
+        .map(function (hand) { return evalFn.apply(void 0, hand); });
+    all.forEach(function (R, i) {
+        R.hi > res.hi ? (res.hi = R.hi) : null;
+        R.low > res.low ? (res.low = R.low) : null;
+    });
+    return res;
 };
 //# sourceMappingURL=pokerEvaluator5.js.map

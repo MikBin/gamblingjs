@@ -8,6 +8,10 @@ export interface StringMap {
   [s: string]: string;
 }
 
+export interface StringFunctionMap {
+  [s: string]: Function;
+}
+
 export interface NumberToStringMap {
   [s: number]: string | number;
 }
@@ -58,6 +62,7 @@ export interface hashRankingSeven extends hashRanking {
   MULTI_FLUSH_RANK_HASHES: MultiNumberMap;
 }
 
+/** @TODO make types for verbose function too  */
 export type singleRankFiveCardHandEvalFn = (
   c1: number,
   c2: number,
@@ -91,7 +96,7 @@ export type hiLowRankSevenCardHandEvalFn = (
   c7: number
 ) => hiLowRank;
 
-export interface gameTypesEvalFunction {
+export interface gameTypesEvalFunction extends StringFunctionMap {
   "high": Function;
   "Ato5": Function;
   "Ato6": Function;

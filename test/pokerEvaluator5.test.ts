@@ -14,6 +14,8 @@ import {
   getHandInfo27,
   getHandInfoAto5,
   getHandInfoAto6,
+  getHandInfoLow8,
+  getHandInfoLow9,
   handOfFiveEvalLow_Ato6,
   handOfFiveEvalLow_Ato6Indexed,
   bfBestOfFiveOnXindexed,
@@ -267,6 +269,9 @@ describe('testing LowBall27: ', () => {
 });
 
 describe('test hand info: ', () => {
+  /**@TODO one assertion for each test case 
+   * extend test to all hand groups 
+  */
   it('should get some infos: ', () => {
     expect(getHandInfo(2345)).toBeInstanceOf(Object);
     expect(getHandInfo(2345)).toEqual({
@@ -305,4 +310,51 @@ describe('test hand info: ', () => {
     });
   });
 
+  it("get info on low8 on five cards: ", () => {
+    expect(getHandInfoLow8(28)).toEqual({
+      hand: [6, 4, 2, 0, 12],
+      faces: '8642A',
+      handGroup: 'high card'
+    });
+  });
+
+  it("get no hand defined for that rank: ", () => {
+    expect(getHandInfoLow8(88)).toEqual({
+      hand: [],
+      faces: '',
+      handGroup: 'unqualified'
+    });
+  });
+
+  it("get info on low9 on five cards: ", () => {
+    expect(getHandInfoLow9(28)).toEqual({
+      hand: [7, 6, 3, 1, 0],
+      faces: '98532',
+      handGroup: 'high card'
+    });
+  });
+
+  it("get info on low8 on five cards for best hand possible: ", () => {
+    expect(getHandInfoLow8(55)).toEqual({
+      hand: [3, 2, 1, 0, 12],
+      faces: '5432A',
+      handGroup: 'high card'
+    });
+  });
+
+  it("get info on low9 on five cards for best hand possible: ", () => {
+    expect(getHandInfoLow9(125)).toEqual({
+      hand: [3, 2, 1, 0, 12],
+      faces: '5432A',
+      handGroup: 'high card'
+    });
+  });
+
+  it("in low9 get no hand defined for that rank: ", () => {
+    expect(getHandInfoLow9(588)).toEqual({
+      hand: [],
+      faces: '',
+      handGroup: 'unqualified'
+    });
+  });
 });

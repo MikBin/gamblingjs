@@ -9,10 +9,11 @@ import {
   createRankOf5AceToSix_Full
 } from '../src/hashesCreator';
 import * as CONSTANTS from '../src/constants';
+import { hashRanking, hashRankingSeven } from '../src/interfaces'
 
 /**something wrong in length and max rank value---> @TODO verify */
 describe('testing rank of 5 and 7 hashes creator', () => {
-  let HASHES_OF_FIVE;
+  let HASHES_OF_FIVE: hashRanking;
   it('has 7462 hands', () => {
     expect((HASHES_OF_FIVE = createRankOfFiveHashes())).toBeTruthy();
     expect(HASHES_OF_FIVE.rankingInfos.length).toBe(7462);
@@ -63,7 +64,7 @@ describe('testing rank of 5 and 7 hashes creator', () => {
     expect(m).toBe(7461);
   });
 
-  let HASHES_OF_FIVE_ON_SEVEN;
+  let HASHES_OF_FIVE_ON_SEVEN: hashRankingSeven;
   it('has 7462 hands too', () => {
     expect((HASHES_OF_FIVE_ON_SEVEN = createRankOf5On7Hashes(HASHES_OF_FIVE))).toBeTruthy();
     expect(HASHES_OF_FIVE_ON_SEVEN.rankingInfos.length).toBe(7462);
@@ -78,7 +79,7 @@ describe('testing rank of 5 and 7 hashes creator', () => {
     let all5 = [];
     let all6 = [];
     let all7 = [];
-    let checkGaps = vector => {
+    let checkGaps = (vector: number[]) => {
       vector.sort();
       let count = 0;
       let diffsum = 0;
@@ -116,7 +117,7 @@ describe('testing rank of 5 and 7 hashes creator', () => {
 });
 
 describe('testing hash of low Ato5: ', () => {
-  let HASHES_OF_LOW8_on5;
+  let HASHES_OF_LOW8_on5: hashRanking;
   it('low8 hash 56 hands', () => {
     expect((HASHES_OF_LOW8_on5 = createRankOf5AceToFive_Low8())).toBeTruthy();
     expect(HASHES_OF_LOW8_on5.rankingInfos.length).toBe(56);

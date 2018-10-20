@@ -9,7 +9,9 @@ import {
   HASH_RANK_FIVE_ATO6,
   FLUSH_RANK_FIVE_ATO6,
   HASHES_OF_FIVE_LOW_Ato5,
-  HASHES_OF_FIVE_Ato6
+  HASHES_OF_FIVE_Ato6,
+  HASHES_OF_FIVE_LOW8,
+  HASHES_OF_FIVE_LOW9
 } from './pokerHashes5';
 
 import {
@@ -24,7 +26,9 @@ import {
   NumberMap,
   singleRankFiveCardHandEvalFn,
   hiLowRankFiveCardHandEvalFn,
-  hashRanking
+  hashRanking,
+  gameTypesEvalFunction,
+  verboseHandInfo
 } from './interfaces';
 
 import * as kombinatoricsJs from 'kombinatoricsjs'
@@ -278,7 +282,11 @@ export const getHandInfo = (
   HASHES: hashRanking = HASHES_OF_FIVE,
   INVERTED: boolean = false
 ): handInfo => {
-  return HASHES.rankingInfos[INVERTED ? HIGH_MAX_RANK - rank : rank];
+  return HASHES.rankingInfos[INVERTED ? HIGH_MAX_RANK - rank : rank] || {
+    hand: [],
+    faces: '',
+    handGroup: 'unqualified'
+  };
 };
 
 /** @function getHandInfo27
@@ -288,6 +296,24 @@ export const getHandInfo = (
  */
 export const getHandInfo27 = (rank: number): handInfo => {
   return getHandInfo(rank, HASHES_OF_FIVE, true);
+};
+
+/** @function getHandInfoLow8
+ *
+ * @param {Number} hand rank
+ * @returns {handInfo} object containing hand info
+ */
+export const getHandInfoLow8 = (rank: number): handInfo => {
+  return getHandInfo(rank, HASHES_OF_FIVE_LOW8);
+};
+
+/** @function getHandInfoLow9
+ *
+ * @param {Number} hand rank
+ * @returns {handInfo} object containing hand info
+ */
+export const getHandInfoLow9 = (rank: number): handInfo => {
+  return getHandInfo(rank, HASHES_OF_FIVE_LOW9);
 };
 
 /** @function getHandInfoAto5
@@ -333,19 +359,50 @@ export const bfBestOfFiveOnXindexed = (
   return Math.max(...kombinatoricsJs.combinations(hand, 5).map(h => evalFn(...h)));
 };
 
+/**to be used in generic verbose eval function  */
+const evaluatorByGameType: gameTypesEvalFunction = {
+  "high": handOfFiveEvalIndexed,
+  "low8": handOfFiveEvalHiLow8Indexed,
+  "low9": handOfFiveEvalHiLow9Indexed,
+  "Ato5": handOfFiveEvalLow_Ato5Indexed,
+  "Ato6": handOfFiveEvalLow_Ato6Indexed,
+  "2to7": handOfFiveEvalLowBall27Indexed
+};
+
+const evaluatorInfoByGameType: gameTypesEvalFunction = {
+  "high": getHandInfo,
+  "low8": getHandInfoLow8,
+  "low9": getHandInfoLow9,
+  "Ato5": getHandInfoAto5,
+  "Ato6": getHandInfoAto6,
+  "2to7": getHandInfo27
+};
+
 /** @function getHandInfo5onX  
 * @param {Array:Number[]} hand array of 6 or more cards making up an hand
 * @returns {verboseHandInfo} info of best 5 cards hand
 */
-export const getHandInfo5onX = (hand: number[]/*gameType:*/) => {
+export const getHandInfo5onX = (hand: number[], gameType: string): verboseHandInfo => {
   /** game types decides which HASH and which Evalfunction
    * start from verbose hand info
    * if flush, get flush suit to filter out correct cards --> */
+  let combinations = kombinatoricsJs.combinations(hand, 5);
+  let evalFn: Function = evaluatorByGameType[gameType];
+  let winningCards = [];
+
+  return {
+    handRank: 875,
+    hand: [],
+    faces: "SDF",
+    handGroup: "",
+    winningCards: [],
+    flushSuit: 'no flush'
+  }
 };
 
-export const bestFiveOnXGenericHiLow = (
+export const bestFiveOnXHiLowIndexed = (
   evalFn: Function,
-  ...hand: number[]
+  hand: number[]
 ): hiLowRank => {
   let res = { hi: -1, low: -1 };
   //@ts-ignore

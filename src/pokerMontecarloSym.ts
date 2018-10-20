@@ -9,7 +9,7 @@ import {
 } from './constants';
 import { handInfo, verboseHandInfo, handCategoryDistribution } from './interfaces';
 import { getDiffDeck7 } from './routines';
-import { handOfSevenEval } from './pokerEvaluators';
+import { handOfSevenEval } from './pokerEvaluator7';
 
 const DEFAULT_N_RUNS = 10000;
 

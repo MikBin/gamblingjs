@@ -2,28 +2,27 @@ import * as kombinatoricsJs from 'kombinatoricsjs';
 import { hashRanking, NumberMap } from './interfaces';
 import * as CONSTANTS from './constants';
 
+/** rename in getDeckWithHandCardsRemoved */
 export const getDiffDeck5 = (listOfHands: number[]): number[] => {
-  let deck = CONSTANTS.fullCardsDeckHash_5.slice().filter(c => !listOfHands.includes(c));
-  return deck;
+  return CONSTANTS.fullCardsDeckHash_5.slice().filter(c => !listOfHands.includes(c));
 };
 export const getDiffDeck7 = (listOfHands: number[]): number[] => {
-  let deck = CONSTANTS.fullCardsDeckHash_7.slice().filter(c => !listOfHands.includes(c));
-  return deck;
+  return CONSTANTS.fullCardsDeckHash_7.slice().filter(c => !listOfHands.includes(c));
 };
 
-export const atLeast5Eq = (list: (number | string)[][]): (number | string)[][] => {
+export const atLeastFiveEqual = (list: (number | string)[][]): (number | string)[][] => {
   return list.filter(v => {
-    let l = v.length;
-    let c = 0,
-      i = 1;
+    let l: number = v.length;
+    let c: number = 0,
+      i: number = 1;
     while (i < l) {
-      if (v[i] === v[i - 1]) {
+      if (v[i] == v[i - 1]) {
         c++;
       } else {
         c = 0;
       }
       i++;
-      if (c === 4) break;
+      if (c == 4) break;
     }
     return c >= 4;
   });
@@ -38,6 +37,9 @@ export const getVectorSum = (v: number[]): number => {
 };
 
 export const getFlushSuit7 = (v: number[]): number => {
+  if (v.length != 7) {
+    return 0;
+  }
   let t: number = v[0];
   let c: number = 0;
   let i: number = 1;
@@ -56,6 +58,9 @@ export const getFlushSuit7 = (v: number[]): number => {
 };
 
 export const checkStraight5on7 = (arr: number[]): boolean => {
+  if (arr.length != 7) {
+    return false;
+  }
   let c: number = 0;
   if (
     arr[arr.length - 1] === 12 &&
@@ -207,10 +212,10 @@ export const _rankOf5onX = (hand: number[], rankHash: NumberMap, INVERTED: boole
 
 /**
  * @function filterWinningCards
- * @param {Array} fullHand array of indexes in deck of cards 0..51
+ * @param {Array} fullHand array of indexes in deck of cards 0..51 (more than 5 cards)
  * @param {Array} winningRanks array of 5 cards indexes
  * @return {Array} only cards of winning hand
- * @TODO add flushKey ... in case a flush filtering is necessary
+ * @TODO add flushKey? ... in case a flush filtering is necessary ---> better to do it before this using another filer
  */
 export const filterWinningCards = (fullHand: number[], winningRanks: number[]): number[] => {
   let winning: NumberMap = {};

@@ -1,18 +1,18 @@
 import {
-  handOfSevenEvalIndexed,
   handOfFiveEvalIndexed,
-  getHandInfo,
-  handOfSevenEvalIndexed_Verbose,
+  getHandInfo
+} from './pokerEvaluator5';
+import {
   handOfSixEvalIndexed
-} from './pokerEvaluators';
-
+} from './pokerEvaluator6';
+import {
+  handOfSevenEvalIndexed,
+  handOfSevenEvalIndexed_Verbose
+} from './pokerEvaluator7';
 /* istanbul ignore next */
 import { getPartialHandStatsIndexed_7 } from './pokerMontecarloSym';
 
 import { HASH_RANK_FIVE } from './pokerHashes5'
-import { HASHES_OF_FIVE_ON_SEVEN } from './pokerEvaluators'
-/* istanbul ignore next */
-export { HASH_RANK_FIVE, HASHES_OF_FIVE_ON_SEVEN };
 
 export {
   handOfSevenEvalIndexed,

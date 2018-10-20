@@ -18,7 +18,13 @@ import {
   handOfSevenEvalLow9Indexed_Verbose,
   handOfSevenEvalLowBall27Indexed_Verbose,
   handOfSevenEvalIndexed_Verbose,
-  handOfSevenEval_Verbose
+  handOfSevenEval_Verbose,
+  _handOfSevenEvalIndexed,
+  _handOfSevenEvalLowBall27Indexed,
+  _handOfSevenEvalLow_Ato5Indexed,
+  _handOfSevenEval_Ato6Indexed,
+  _handOfSevenEvalHiLow8Indexed,
+  _handOfSevenEvalHiLow9Indexed
 } from '../src/pokerEvaluator7';
 
 import { fastHashesCreators } from '../src/pokerHashes7'
@@ -30,7 +36,10 @@ import {
 
 import { fullCardsDeckHash_5, fullCardsDeckHash_7 } from '../src/constants';
 
-/** @TODO make a describe for non fastHashes and one for the fast one that includes the beforeAll */
+/** @TODO make a describe for non fastHashes and one for the fast one that includes the beforeAll
+ * use same data for both
+ * fill with test cases where slow bf version have to equal the fast one
+ */
 beforeAll(() => {
   fastHashesCreators.high();
   fastHashesCreators.Ato5();
@@ -41,7 +50,7 @@ beforeAll(() => {
 });
 
 describe('testing hilo 8 and 9 on SEVEN cards', () => {
-  it("checks hilow eval 9 and 8 in both ways", () => {
+  it("hand strong for high but weak for low 8", () => {
     expect(
       handOfSevenEvalHiLow8(
         fullCardsDeckHash_7[6],
@@ -53,7 +62,9 @@ describe('testing hilo 8 and 9 on SEVEN cards', () => {
         fullCardsDeckHash_7[38]
       )
     ).toEqual({ hi: 6898, low: 3 });
+  });
 
+  it("hand strong for high but weak for low9 using general hilow eval", () => {
     expect(
       handOfSevenEvalHiLow(
         HASHES_OF_SEVEN_LOW9.HASHES,
@@ -66,7 +77,9 @@ describe('testing hilo 8 and 9 on SEVEN cards', () => {
         fullCardsDeckHash_7[38]
       )
     ).toEqual({ hi: 6903, low: 38 });
+  });
 
+  it("hand strong for high not qualified low8 using general hilow eval", () => {
     expect(
       handOfSevenEvalHiLow(
         HASHES_OF_SEVEN_LOW8.HASHES,
@@ -79,7 +92,9 @@ describe('testing hilo 8 and 9 on SEVEN cards', () => {
         fullCardsDeckHash_7[38]
       )
     ).toEqual({ hi: 6903, low: -1 });
+  });
 
+  it("hand strong for high not qualified low8 using general hilow eval", () => {
     expect(
       handOfSevenEvalHiLow(
         HASHES_OF_SEVEN_LOW8.HASHES,
@@ -92,7 +107,9 @@ describe('testing hilo 8 and 9 on SEVEN cards', () => {
         fullCardsDeckHash_7[38]
       )
     ).toEqual({ hi: 5813, low: -1 });
+  });
 
+  it("hand strong for high but weak for low9 using general hilow eval", () => {
     expect(
       handOfSevenEvalHiLow(
         HASHES_OF_SEVEN_LOW9.HASHES,
@@ -105,7 +122,8 @@ describe('testing hilo 8 and 9 on SEVEN cards', () => {
         fullCardsDeckHash_7[11]
       )
     ).toEqual({ hi: 7038, low: 35 });
-
+  });
+  it("hand strong for high but weak for low handOfSevenEvalHiLow8", () => {
     expect(
       handOfSevenEvalHiLow8(
         fullCardsDeckHash_7[7],
@@ -117,9 +135,16 @@ describe('testing hilo 8 and 9 on SEVEN cards', () => {
         fullCardsDeckHash_7[38]
       )
     ).toEqual({ hi: 6903, low: -1 });
-
+  });
+  it("hand strong for high not qualified low8 handOfSevenEvalHiLow8Indexed", () => {
     expect(handOfSevenEvalHiLow8Indexed(7, 5, 4, 3, 12, 25, 38)).toEqual({ hi: 6903, low: -1 });
+  });
 
+  it("hand strong for high not qualified low8 _handOfSevenEvalHiLow8Indexed (slow one)", () => {
+    expect(_handOfSevenEvalHiLow8Indexed(7, 5, 4, 3, 12, 25, 38)).toEqual({ hi: 6903, low: -1 });
+  });
+
+  it("hand strong for high but weak for low handOfSevenEvalHiLow9", () => {
     expect(
       handOfSevenEvalHiLow9(
         fullCardsDeckHash_7[7],
@@ -131,10 +156,18 @@ describe('testing hilo 8 and 9 on SEVEN cards', () => {
         fullCardsDeckHash_7[38]
       )
     ).toEqual({ hi: 6903, low: 38 });
-
+  });
+  it("hand strong for high but weak for low handOfSevenEvalHiLow9Indexed", () => {
     expect(handOfSevenEvalHiLow9Indexed(7, 5, 4, 3, 12, 25, 38)).toEqual({ hi: 6903, low: 38 });
   });
 
+  it("hand strong for high but weak for low _handOfSevenEvalHiLow9Indexed (slow one)", () => {
+    expect(_handOfSevenEvalHiLow9Indexed(7, 5, 4, 3, 12, 25, 38)).toEqual({ hi: 6903, low: 38 });
+  });
+
+});
+
+describe("Ato5 on SEVEN fast and slow", () => {
   it('handOfSevenEvalLow_Ato5 has max on 6174 and min on 168', () => {
     expect(
       handOfSevenEvalLow_Ato5(
@@ -147,11 +180,23 @@ describe('testing hilo 8 and 9 on SEVEN cards', () => {
         fullCardsDeckHash_7[10]
       )
     ).toBe(168);
+  });
 
+  it('handOfSevenEvalLow_Ato5 has max on 6174 and min on 168', () => {
     expect(handOfSevenEvalLow_Ato5Indexed(11, 11, 11, 11, 10, 10, 10)).toBe(168);
-
+  });
+  it('handOfSevenEvalLow_Ato5 has max on 6174 and min on 168', () => {
     expect(handOfSevenEvalLow_Ato5Indexed(12, 0, 1, 2, 16, 29, 42)).toBe(6174);
+  });
 
+  it('_handOfSevenEvalLow_Ato5 has max on 6174 and min on 168 in slow version too ', () => {
+    expect(_handOfSevenEvalLow_Ato5Indexed(11, 11, 11, 11, 10, 10, 10)).toBe(168);
+  });
+  it('_handOfSevenEvalLow_Ato5 has max on 6174 and min on 168 in slow version too', () => {
+    expect(_handOfSevenEvalLow_Ato5Indexed(12, 0, 1, 2, 16, 29, 42)).toBe(6174);
+  });
+
+  it('handOfSevenEvalLow_Ato5 has max on 6174 and min on 168', () => {
     expect(
       handOfSevenEvalLow_Ato5(
         fullCardsDeckHash_7[12],
@@ -163,6 +208,67 @@ describe('testing hilo 8 and 9 on SEVEN cards', () => {
         fullCardsDeckHash_7[42]
       )
     ).toBe(6174);
+  });
+});
+
+describe('Ato6  on SEVEN', () => {
+  it('on seven cards the lowest is a full house, since straight flush is not possible', () => {
+    expect(
+      handOfSevenEval_Ato6(
+        fullCardsDeckHash_7[11],
+        fullCardsDeckHash_7[24],
+        fullCardsDeckHash_7[37],
+        fullCardsDeckHash_7[50],
+        fullCardsDeckHash_7[10],
+        fullCardsDeckHash_7[23],
+        fullCardsDeckHash_7[36]
+      )
+    ).toBe(177);
+  });
+
+  it('handOfSevenEval_Ato6Indexed in seven eval straight flush is not possible', () => {
+    expect(handOfSevenEval_Ato6Indexed(11, 10, 9, 8, 7, 6, 5)).toBe(934);
+  });
+
+  it(' _handOfSevenEval_Ato6Indexed in seven eval straight flush is not possible', () => {
+    expect(_handOfSevenEval_Ato6Indexed(11, 10, 9, 8, 7, 6, 5)).toBe(934);
+  });
+
+});
+
+describe('2to7  on SEVEN', () => {
+  it('top straight flush cannot exist in 7 eval as the minimum is KJT98 ', () => {
+    expect(
+      handOfSevenEvalLowBall27(
+        fullCardsDeckHash_7[12],
+        fullCardsDeckHash_7[11],
+        fullCardsDeckHash_7[10],
+        fullCardsDeckHash_7[9],
+        fullCardsDeckHash_7[8],
+        fullCardsDeckHash_7[7],
+        fullCardsDeckHash_7[6]
+      )
+    ).toBe(339);
+  });
+
+  it('handOfSevenEvalLowBall27Indexed top straight flush cannot exist in 7 eval as the minimum is KJT98 ', () => {
+    expect(handOfSevenEvalLowBall27Indexed(12, 11, 10, 9, 8, 7, 6)).toBe(339);
+  });
+  it('handOfSevenEvalLowBall27Indexed 23458 is the second absolute best hand ranked 7460', () => {
+    expect(handOfSevenEvalLowBall27Indexed(0, 1, 2, 3, 4, 23, 45)).toBe(7460);
+  });
+  it('handOfSevenEvalLowBall27Indexed 23457 is the absolute best hand', () => {
+    expect(handOfSevenEvalLowBall27Indexed(0, 1, 2, 3, 4, 23, 44)).toBe(7461);
+  });
+
+  it('_handOfSevenEvalLowBall27Indexed top straight flush cannot exist in 7 eval as the minimum is KJT98', () => {
+    expect(_handOfSevenEvalLowBall27Indexed(12, 11, 10, 9, 8, 7, 6)).toBe(339);
+  });
+  it('_handOfSevenEvalLowBall27Indexed 23458 is the second absolute best hand ranked 7460', () => {
+    expect(_handOfSevenEvalLowBall27Indexed(0, 1, 2, 3, 4, 23, 45)).toBe(7460);
+  });
+  it('_handOfSevenEvalLowBall27Indexed 23457 is the absolute best hand', () => {
+    expect(_handOfSevenEvalLowBall27Indexed(0, 1, 2, 3, 4, 23, 44)).toBe(7461);
   });
 });
 
@@ -186,10 +292,22 @@ describe('testing hand of seven eval', () => {
     expect(handOfSevenEvalIndexed(17, 3, 1, 2, 0, 21, 12)).toBe(7452);
   });
 
+  it('A2345+J7 suited rank should be 7452 in slow bruteforce eval too', () => {
+    expect(_handOfSevenEvalIndexed(17, 3, 1, 2, 0, 21, 12)).toBe(7452);
+  });
+
   it('has 10 straights in right order ', () => {
     expect(handOfSevenEvalIndexed(12, 0, 14, 15, 29, 44, 25)).toBe(5853);
     expect(handOfSevenEvalIndexed(12, 0, 14, 15, 29, 50, 30)).toBe(5854);
     expect(handOfSevenEvalIndexed(31, 50, 14, 15, 29, 44, 30)).toBe(5855);
+
+  });
+
+  it('has 10 straights in right order in slow brute force eval too ', () => {
+    expect(_handOfSevenEvalIndexed(12, 0, 14, 15, 29, 44, 25)).toBe(5853);
+    expect(_handOfSevenEvalIndexed(12, 0, 14, 15, 29, 50, 30)).toBe(5854);
+    expect(_handOfSevenEvalIndexed(31, 50, 14, 15, 29, 44, 30)).toBe(5855);
+
   });
 
 });

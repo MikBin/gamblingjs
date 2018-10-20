@@ -30,7 +30,8 @@ import {
 
 import {
   bfBestOfFiveOnXindexed, handOfFiveEvalLowBall27Indexed,
-  handOfFiveEvalLow_Ato5Indexed, handOfFiveEvalLow_Ato6Indexed
+  handOfFiveEvalLow_Ato5Indexed, handOfFiveEvalLow_Ato6Indexed,
+  bestFiveOnXHiLowIndexed, handOfFiveEvalHiLow8Indexed, handOfFiveEvalHiLow9Indexed
 } from './pokerEvaluator5'
 
 import {
@@ -445,7 +446,7 @@ export const handOfSevenEvalIndexed = (
   );
 };
 
-/** @function handOfSevenEval_Verbose  @TODO try to reuse
+/** @function handOfSevenEval_Verbose 
  *
  * @param {Number} c1...c7 cards hash from CONSTANTS.fullCardsDeckHash_7
  * @returns {verboseHandInfo} verbose information about best hand of 5 cards on seven
@@ -670,27 +671,13 @@ export const handOfSevenEvalLow9Indexed_Verbose = (
  * 
  *  */
 
-/**
- * 
- * @TODO use a generic function (...hand)=>{ return bfBestOfFiveOnXindexed(hand,evalFn)}
- * one for high(returns single rank) one for hilow (returns object with both ranks)
- * 
- */
 /** @function _handOfSevenEvalIndexed
  *
  * @param {Array:Number[]} array of 7 cards making up an hand
  * @returns {Number} hand ranking ( the best one on all combinations of input card in group of 5)
  */
-export const _handOfSevenEvalIndexed = (
-  c1: number,
-  c2: number,
-  c3: number,
-  c4: number,
-  c5: number,
-  c6: number,
-  c7: number
-): number => {
-  return bfBestOfFiveOnXindexed([c1, c2, c3, c4, c5, c6, c7]);
+export const _handOfSevenEvalIndexed = (...hand: number[]): number => {
+  return bfBestOfFiveOnXindexed(hand);
 };
 
 /** @function _handOfSevenEvalLowBall27Indexed
@@ -698,16 +685,8 @@ export const _handOfSevenEvalIndexed = (
  * @param {Array:Number[]} array of 6 cards making up an hand
  * @returns {Number} hand ranking ( the best one on all combinations of input card in group of 5)
  */
-export const _handOfSevenEvalLowBall27Indexed = (
-  c1: number,
-  c2: number,
-  c3: number,
-  c4: number,
-  c5: number,
-  c6: number,
-  c7: number
-): number => {
-  return bfBestOfFiveOnXindexed([c1, c2, c3, c4, c5, c6], handOfFiveEvalLowBall27Indexed);
+export const _handOfSevenEvalLowBall27Indexed = (...hand: number[]): number => {
+  return bfBestOfFiveOnXindexed(hand, handOfFiveEvalLowBall27Indexed);
 };
 
 /** @function _handOfSevenEvalato5Indexed
@@ -715,16 +694,8 @@ export const _handOfSevenEvalLowBall27Indexed = (
  * @param {Array:Number[]} array of 6 cards making up an hand
  * @returns {Number} hand ranking ( the best one on all combinations of input card in group of 5)
  */
-export const _handOfSevenEvalAto5Indexed = (
-  c1: number,
-  c2: number,
-  c3: number,
-  c4: number,
-  c5: number,
-  c6: number,
-  c7: number
-): number => {
-  return bfBestOfFiveOnXindexed([c1, c2, c3, c4, c5, c6], handOfFiveEvalLow_Ato5Indexed);
+export const _handOfSevenEvalLow_Ato5Indexed = (...hand: number[]): number => {
+  return bfBestOfFiveOnXindexed(hand, handOfFiveEvalLow_Ato5Indexed);
 };
 
 /** @function _handOfSevenEvalAto6Indexed
@@ -732,16 +703,8 @@ export const _handOfSevenEvalAto5Indexed = (
  * @param {Array:Number[]} array of 6 cards making up an hand
  * @returns {Number} hand ranking ( the best one on all combinations of input card in group of 5)
  */
-export const _handOfSevenEvalAto6Indexed = (
-  c1: number,
-  c2: number,
-  c3: number,
-  c4: number,
-  c5: number,
-  c6: number,
-  c7: number
-): number => {
-  return bfBestOfFiveOnXindexed([c1, c2, c3, c4, c5, c6], handOfFiveEvalLow_Ato6Indexed);
+export const _handOfSevenEval_Ato6Indexed = (...hand: number[]): number => {
+  return bfBestOfFiveOnXindexed(hand, handOfFiveEvalLow_Ato6Indexed);
 };
 
 /** @function _handOfSevenEvalHiLow8Indexed
@@ -749,27 +712,8 @@ export const _handOfSevenEvalAto6Indexed = (
  * @param {Array:Number[]} array of 6 cards making up an hand
  * @returns {hiLowRank} hand ranking ( the best one on all combinations of input card in group of 5)
  */
-export const _handOfSevenEvalHiLow8Indexed = (
-  c1: number,
-  c2: number,
-  c3: number,
-  c4: number,
-  c5: number,
-  c6: number,
-  c7: number
-): hiLowRank => {
-  let res = { hi: -1, low: -1 };
-
-  let all = kombinatoricsJs
-    .combinations([c1, c2, c3, c4, c5, c6, c7], 5)
-    //@ts-ignore
-    .map(hand => handOfFiveEvalHiLow8Indexed(...hand));
-  all.forEach((R, i) => {
-    R.hi > res.hi ? (res.hi = R.hi) : null;
-    R.low > res.low ? (res.low = R.low) : null;
-  });
-
-  return res;
+export const _handOfSevenEvalHiLow8Indexed = (...hand: number[]): hiLowRank => {
+  return bestFiveOnXHiLowIndexed(handOfFiveEvalHiLow8Indexed, hand);
 };
 
 /** @function _handOfSevenEvalHiLow9Indexed
@@ -777,24 +721,6 @@ export const _handOfSevenEvalHiLow8Indexed = (
  * @param {Array:Number[]} array of 6 cards making up an hand
  * @returns {hiLowRank} hand ranking ( the best one on all combinations of input card in group of 5)
  */
-export const _handOfSevenEvalHiLow9Indexed = (
-  c1: number,
-  c2: number,
-  c3: number,
-  c4: number,
-  c5: number,
-  c6: number,
-  c7: number
-): hiLowRank => {
-  let res = { hi: -1, low: -1 };
-  //@ts-ignore
-  let all = kombinatoricsJs
-    .combinations([c1, c2, c3, c4, c5, c6, c7], 5)
-    //@ts-ignore
-    .map(hand => handOfFiveEvalHiLow9Indexed(...hand));
-  all.forEach((R, i) => {
-    R.hi > res.hi ? (res.hi = R.hi) : null;
-    R.low > res.low ? (res.low = R.low) : null;
-  });
-  return res;
+export const _handOfSevenEvalHiLow9Indexed = (...hand: number[]): hiLowRank => {
+  return bestFiveOnXHiLowIndexed(handOfFiveEvalHiLow9Indexed, hand);
 };

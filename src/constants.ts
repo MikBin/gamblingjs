@@ -86,7 +86,7 @@ ranksHashOn7[9] = 83661;
 ranksHashOn7[10] = 262349;
 ranksHashOn7[11] = 636345;
 ranksHashOn7[12] = 1479181;
-
+/** @TODO make it like below */
 export const ranksHashOn5: number[] = []; // one for each rank
 
 ranksHashOn5[0] = 0; // 2

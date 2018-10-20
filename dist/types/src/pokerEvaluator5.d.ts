@@ -1,4 +1,4 @@
-import { handInfo, hiLowRank, NumberMap, singleRankFiveCardHandEvalFn, hiLowRankFiveCardHandEvalFn, hashRanking } from './interfaces';
+import { handInfo, hiLowRank, NumberMap, singleRankFiveCardHandEvalFn, hiLowRankFiveCardHandEvalFn, hashRanking, verboseHandInfo } from './interfaces';
 /** @function handOfFiveEval
  *
  * @param {Number} c1...c5 cards hash from CONSTANTS.fullCardsDeckHash_5
@@ -72,6 +72,18 @@ export declare const getHandInfo: (rank: number, HASHES?: hashRanking, INVERTED?
  * @returns {handInfo} object containing hand info
  */
 export declare const getHandInfo27: (rank: number) => handInfo;
+/** @function getHandInfoLow8
+ *
+ * @param {Number} hand rank
+ * @returns {handInfo} object containing hand info
+ */
+export declare const getHandInfoLow8: (rank: number) => handInfo;
+/** @function getHandInfoLow9
+ *
+ * @param {Number} hand rank
+ * @returns {handInfo} object containing hand info
+ */
+export declare const getHandInfoLow9: (rank: number) => handInfo;
 /** @function getHandInfoAto5
  *
  * @param {Number} hand rank
@@ -98,3 +110,9 @@ export declare const bfBestOfFiveOnX: (hand: number[], evalFn?: Function) => num
  * @returns {Number} hand ranking ( the best one on all combinations of input card in group of 5)
  */
 export declare const bfBestOfFiveOnXindexed: (hand: number[], evalFn?: Function) => number;
+/** @function getHandInfo5onX
+* @param {Array:Number[]} hand array of 6 or more cards making up an hand
+* @returns {verboseHandInfo} info of best 5 cards hand
+*/
+export declare const getHandInfo5onX: (hand: number[], gameType: string) => verboseHandInfo;
+export declare const bestFiveOnXHiLowIndexed: (evalFn: Function, hand: number[]) => hiLowRank;

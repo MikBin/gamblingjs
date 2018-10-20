@@ -15,6 +15,7 @@ export declare const flush5hHashCheck: Readonly<NumberMap>;
 export declare const flushHashToName: Readonly<NumberToStringMap>;
 export declare const flush7HashCheck: Readonly<NumberMap>;
 export declare const ranksHashOn7: number[];
+/** @TODO make it like below */
 export declare const ranksHashOn5: number[];
 /** @TODO to be tested tuples for hasof5 and 7 */
 export declare const rankToFaceSymbol: string[];
@@ -59,7 +60,15 @@ export declare const distinctHandsQuantityByGroup: {
     FOUR_OF_A_KIND: number;
     STRAIGHT_FLUSH: number;
 };
+export declare const enum gameType {
+    HIGH = 0,
+    Ato5 = 1,
+    Ato6 = 2,
+    _2to7 = 3,
+    LOW8 = 4,
+    LOW9 = 5
+}
 /**
- * @TODO make function to work with non full decks. ex. deck of 40 cards
+ * @TODO make function to work with non full decks. ex. deck of 40 cards, just invert ranking of flush and fulls...
  *
  * */

@@ -1,5 +1,13 @@
 import { getPartialHandStatsIndexed_7, categoryByRankingValue } from '../src/pokerMontecarloSym';
-
+import { fastHashesCreators } from '../src/pokerHashes7'
+beforeAll(() => {
+  fastHashesCreators.high();
+  /*fastHashesCreators.Ato5();
+  fastHashesCreators.Ato6();
+  fastHashesCreators.low8();
+  fastHashesCreators.low9();
+  fastHashesCreators["2to7"]();*/
+});
 describe('testing montecarlo sym on 7 hand holdem: ', () => {
   it('should return an object of stats: ', () => {
     expect(getPartialHandStatsIndexed_7([1, 2, 3, 4], 100)).toBeInstanceOf(Object);
