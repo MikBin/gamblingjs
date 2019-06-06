@@ -19,6 +19,7 @@ export const categoryByRankingValue = (rank: number): string => {
   return handRankingGroupNames[i];
 };
 
+/** @TODO compute total runs using combinations formula */
 export const getPartialHandStatsIndexed_7 = (
   partialHand: number[],
   totalRuns: number = DEFAULT_N_RUNS

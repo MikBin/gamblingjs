@@ -21,15 +21,18 @@ import {
   gameType
 } from './constants';
 import {
-  handInfo,
   hiLowRank,
   NumberMap,
   singleRankFiveCardHandEvalFn,
   hiLowRankFiveCardHandEvalFn,
   hashRanking,
   gameTypesEvalFunction,
-  verboseHandInfo
+  verboseHandInfo,
+  HiLowVerboseHandInfo,
+  handInfo
 } from './interfaces';
+
+import { filterWinningCards, getFlushSuitFromIndex } from './routines'
 
 import * as kombinatoricsJs from 'kombinatoricsjs'
 
@@ -359,6 +362,23 @@ export const bfBestOfFiveOnXindexed = (
   return Math.max(...kombinatoricsJs.combinations(hand, 5).map(h => evalFn(...h)));
 };
 
+export const bestFiveOnXHiLowIndexed = (
+  evalFn: Function,
+  hand: number[]
+): hiLowRank => {
+  let res = { hi: -1, low: -1 };
+  //@ts-ignore
+  let all = kombinatoricsJs
+    .combinations(hand, 5)
+    //@ts-ignore
+    .map(hand => evalFn(...hand));
+  all.forEach((R, i) => {
+    R.hi > res.hi ? (res.hi = R.hi) : null;
+    R.low > res.low ? (res.low = R.low) : null;
+  });
+  return res;
+};
+
 /**to be used in generic verbose eval function  */
 const evaluatorByGameType: gameTypesEvalFunction = {
   "high": handOfFiveEvalIndexed,
@@ -383,36 +403,56 @@ const evaluatorInfoByGameType: gameTypesEvalFunction = {
 * @returns {verboseHandInfo} info of best 5 cards hand
 */
 export const getHandInfo5onX = (hand: number[], gameType: string): verboseHandInfo => {
-  /** game types decides which HASH and which Evalfunction
-   * start from verbose hand info
-   * if flush, get flush suit to filter out correct cards --> */
-  let combinations = kombinatoricsJs.combinations(hand, 5);
+
+  let combinations: number[][] = kombinatoricsJs.combinations(hand, 5);
   let evalFn: Function = evaluatorByGameType[gameType];
-  let winningCards = [];
+  let rank: number = Math.max(...combinations.map(H => evalFn(...H)));
+  let handInfo: handInfo = evaluatorInfoByGameType[gameType](rank);
+  let winningCards: number[] = filterWinningCards(hand, handInfo.hand);
+  let flushSuit: string = handInfo.handGroup == "flush" ? getFlushSuitFromIndex(winningCards[0]) : "no flush";
 
   return {
-    handRank: 875,
-    hand: [],
-    faces: "SDF",
-    handGroup: "",
-    winningCards: [],
-    flushSuit: 'no flush'
+    handRank: rank,
+    hand: handInfo.hand,
+    faces: handInfo.faces,
+    handGroup: handInfo.handGroup,
+    winningCards: winningCards,
+    flushSuit: flushSuit
   }
 };
 
-export const bestFiveOnXHiLowIndexed = (
-  evalFn: Function,
-  hand: number[]
-): hiLowRank => {
-  let res = { hi: -1, low: -1 };
-  //@ts-ignore
-  let all = kombinatoricsJs
-    .combinations(hand, 5)
-    //@ts-ignore
-    .map(hand => evalFn(...hand));
-  all.forEach((R, i) => {
-    R.hi > res.hi ? (res.hi = R.hi) : null;
-    R.low > res.low ? (res.low = R.low) : null;
-  });
-  return res;
+/** @function getHandInfo5onXHiLow  
+* @param {Array:Number[]} hand array of 6 or more cards making up an hand
+* @returns {verboseHandInfo} info of best 5 cards hand
+*/
+export const getHandInfo5onXHiLow = (hand: number[], gameType: string): HiLowVerboseHandInfo => {
+
+  let evalFn: Function = evaluatorByGameType[gameType];
+  let ranks: hiLowRank = bestFiveOnXHiLowIndexed(evalFn, hand);
+
+  let handInfoLow: handInfo = evaluatorInfoByGameType[gameType](ranks.low);
+  let winningCardsLow: number[] = filterWinningCards(hand, handInfoLow.hand);
+
+  let handInfoHi: handInfo = evaluatorInfoByGameType["high"](ranks.hi);
+  let winningCardsHi: number[] = filterWinningCards(hand, handInfoHi.hand);
+  let flushSuit: string = handInfoHi.handGroup == "flush" ? getFlushSuitFromIndex(winningCardsHi[0]) : "no flush";
+
+  return {
+    hi: {
+      handRank: ranks.hi,
+      hand: handInfoHi.hand,
+      faces: handInfoHi.faces,
+      handGroup: handInfoHi.handGroup,
+      winningCards: winningCardsHi,
+      flushSuit: flushSuit
+    },
+    low: {
+      handRank: ranks.low,
+      hand: handInfoLow.hand,
+      faces: handInfoLow.faces,
+      handGroup: handInfoLow.handGroup,
+      winningCards: winningCardsLow,
+      flushSuit: "no flush"
+    }
+  }
 };

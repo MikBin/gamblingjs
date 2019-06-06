@@ -36,6 +36,11 @@ export interface verboseHandInfo extends handInfo {
   handRank: number;
 }
 
+export interface HiLowVerboseHandInfo {
+  hi: verboseHandInfo;
+  low: verboseHandInfo;
+}
+
 export interface handCategoryDistribution extends StringToNumberMap {
   'high card': number;
   'one pair': number;

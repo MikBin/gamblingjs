@@ -5,20 +5,19 @@ import {
 import {
   handOfSixEvalIndexed
 } from './pokerEvaluator6';
-import {
-  handOfSevenEvalIndexed,
-  handOfSevenEvalIndexed_Verbose
-} from './pokerEvaluator7';
+
 /* istanbul ignore next */
 import { getPartialHandStatsIndexed_7 } from './pokerMontecarloSym';
 
-import { HASH_RANK_FIVE } from './pokerHashes5'
+import * as FiveEvaluators from './pokerEvaluator5'
+import * as SevenEvaluators from './pokerEvaluator7'
+import * as SixEvaluators from './pokerEvaluator6'
+
+import { fastHashesCreators } from '../src/pokerHashes7'
 
 export {
-  handOfSevenEvalIndexed,
   handOfFiveEvalIndexed,
   getHandInfo,
-  handOfSevenEvalIndexed_Verbose,
   handOfSixEvalIndexed,
   getPartialHandStatsIndexed_7
 };
@@ -28,44 +27,78 @@ export {
 export const FIVE_CARD_POKER_EVAL = {
   HandRank: {
     5: {
-      high: () => { },
-      low8: () => { },
-      low9: () => { },
-      Ato5: () => { },
-      Ato6: () => { },
-      "2to7": () => { }
+      "high": FiveEvaluators.handOfFiveEvalIndexed,
+      "low8": FiveEvaluators.handOfFiveEvalHiLow8Indexed,
+      "low9": FiveEvaluators.handOfFiveEvalHiLow9Indexed,
+      "Ato5": FiveEvaluators.handOfFiveEvalLow_Ato5Indexed,
+      "Ato6": FiveEvaluators.handOfFiveEvalLow_Ato6Indexed,
+      "2to7": FiveEvaluators.handOfFiveEvalLowBall27Indexed
     },
     6: {
-      high: () => { },
-      low8: () => { },
-      low9: () => { },
-      Ato5: () => { },
-      Ato6: () => { },
-      "2to7": () => { }
+      /**@TODO to be renamed with _  and looks same as 5 and 7 evaluators */
+      "high": SixEvaluators.handOfSixEvalIndexed,
+      "low8": SixEvaluators.handOfSixEvalHiLow8Indexed,
+      "low9": SixEvaluators.handOfSixEvalHiLow9Indexed,
+      "Ato5": SixEvaluators.handOfSixEvalAto5Indexed,
+      "Ato6": SixEvaluators.handOfSixEvalAto6Indexed,
+      "2to7": SixEvaluators.handOfSixEvalLowBall27Indexed
     },
     7: {
-      high: () => { },
-      low8: () => { },
-      low9: () => { },
-      Ato5: () => { },
-      Ato6: () => { },
-      "2To7": () => { }
+      "high": SevenEvaluators._handOfSevenEvalIndexed,
+      "low8": SevenEvaluators._handOfSevenEvalHiLow8Indexed,
+      "low9": SevenEvaluators._handOfSevenEvalHiLow9Indexed,
+      "Ato5": SevenEvaluators._handOfSevenEvalLow_Ato5Indexed,
+      "Ato6": SevenEvaluators._handOfSevenEval_Ato6Indexed,
+      "2to7": SevenEvaluators._handOfSevenEvalLowBall27Indexed
     }
   },
-  /**generate hashesofSeven and set  FIVE_CARD_POKER_EVAL.HandRank.7.high = fastEvalfunction
-   * @TODO create verbose to work starting from numericRank and fullHand array, drawing flushy cards always in the same way
-   * whther faster hashes are generated or not
-   * if hashes are not generated use the basic version...
-  */
+  HandRankVerbose: {},
   hashLoaders: {
-    6: {},
+    6: {
+      "high": () => {
+        throw Error("method not yet implemented");
+      },
+      "low8": () => {
+        throw Error("method not yet implemented");
+      },
+      "low9": () => {
+        throw Error("method not yet implemented");
+      },
+      "Ato5": () => {
+        throw Error("method not yet implemented");
+      },
+      "Ato6": () => {
+        throw Error("method not yet implemented");
+      },
+      "2to7": () => {
+        throw Error("method not yet implemented");
+      }
+    },
     7: {
-      high: () => { },
-      low8: () => { },
-      low9: () => { },
-      Ato5: () => { },
-      Ato6: () => { },
-      "2to7": () => { }
+      "high": () => {
+        fastHashesCreators.high();
+        FIVE_CARD_POKER_EVAL.HandRank[7].high = SevenEvaluators.handOfSevenEvalIndexed;
+      },
+      "low8": () => {
+        fastHashesCreators.low8();
+        FIVE_CARD_POKER_EVAL.HandRank[7].low8 = SevenEvaluators.handOfSevenEvalHiLow8Indexed;
+      },
+      "low9": () => {
+        fastHashesCreators.low9();
+        FIVE_CARD_POKER_EVAL.HandRank[7].low9 = SevenEvaluators.handOfSevenEvalHiLow9Indexed;
+      },
+      "Ato5": () => {
+        fastHashesCreators.Ato5();
+        FIVE_CARD_POKER_EVAL.HandRank[7].Ato5 = SevenEvaluators.handOfSevenEvalLow_Ato5Indexed;
+      },
+      "Ato6": () => {
+        fastHashesCreators.Ato6();
+        FIVE_CARD_POKER_EVAL.HandRank[7].Ato6 = SevenEvaluators.handOfSevenEval_Ato6Indexed;
+      },
+      "2to7": () => {
+        fastHashesCreators["2to7"]();
+        FIVE_CARD_POKER_EVAL.HandRank[7]["2to7"] = SevenEvaluators.handOfSevenEvalLowBall27Indexed;
+      }
     }
   }
 };

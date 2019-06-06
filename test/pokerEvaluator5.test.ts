@@ -19,7 +19,9 @@ import {
   handOfFiveEvalLow_Ato6,
   handOfFiveEvalLow_Ato6Indexed,
   bfBestOfFiveOnXindexed,
-  bfBestOfFiveOnX
+  bfBestOfFiveOnX,
+  getHandInfo5onX,
+  getHandInfo5onXHiLow
 } from '../src/pokerEvaluator5';
 import {
   HASHES_OF_FIVE_LOW8,
@@ -27,6 +29,8 @@ import {
 } from '../src/pokerHashes5'
 
 import { fullCardsDeckHash_5 } from '../src/constants';
+
+import { TEST_DATA } from './test_data/hiLowVerboseTestData'
 
 describe("best of five on X", () => {
 
@@ -357,4 +361,46 @@ describe('test hand info: ', () => {
       handGroup: 'unqualified'
     });
   });
+});
+
+describe("testing hand info of best five cards from hand of > 5 cards", () => {
+  it("gets info of best high hand of 5 cards on group of 7", () => {
+    expect(getHandInfo5onX([4, 17, 19, 20, 11, 5, 0], "high")).toEqual({
+      hand: [4, 4, 6, 7, 11],
+      handRank: 2345,
+      faces: '6689K',
+      handGroup: 'one pair',
+      flushSuit: "no flush",
+      winningCards: [4, 17, 19, 20, 11]
+    });
+  });
+
+  it("gets info of best high hand of 5 cards on group of 6, tells flush suit (spades)", () => {
+    expect(getHandInfo5onX([4, 6, 19, 20, 11, 5, 0], "high")).toEqual({
+      hand: [0, 4, 5, 6, 11],
+      handRank: 6234,
+      faces: '2678K',
+      handGroup: 'flush',
+      flushSuit: "spades",
+      winningCards: [4, 6, 11, 5, 0]
+    });
+  });
+
+  it("gets info of best high hand of 5 cards on group of 6, tells flush suit (hearts)", () => {
+    expect(getHandInfo5onX([30, 32, 19, 20, 37, 33, 26], "high")).toEqual({
+      hand: [0, 4, 6, 7, 11],
+      handRank: 6254,
+      faces: '2689K',
+      handGroup: 'flush',
+      flushSuit: "hearts",
+      winningCards: [30, 32, 20, 37, 26]
+    });
+  });
+});
+
+describe("testing hand info of best five cards from hand of > 5 cards HiLow version ---> returns HiLowVerboseHandInfo", () => {
+  it("gets info of best high hand of 5 cards on group of 7", () => {
+    expect(getHandInfo5onXHiLow(TEST_DATA.low8[0]["inputs"][7], "low8")).toEqual(TEST_DATA.low8[0].output);
+  });
+
 });

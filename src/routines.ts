@@ -38,7 +38,7 @@ export const getVectorSum = (v: number[]): number => {
 
 export const getFlushSuit7 = (v: number[]): number => {
   if (v.length != 7) {
-    return 0;
+    return -1;
   }
   let t: number = v[0];
   let c: number = 0;
@@ -233,6 +233,15 @@ export const filterWinningCards = (fullHand: number[], winningRanks: number[]): 
   });
 
   return full;
+};
+
+/**
+ * @function getFlushSuitFromIndex
+ * @param {number} card index in deck 0...51
+ * @return {string} only cards of winning hand
+ */
+export const getFlushSuitFromIndex = (c: number): string => {
+  return CONSTANTS.flushIndexToName[~~(c / 13)];
 };
 
 /**

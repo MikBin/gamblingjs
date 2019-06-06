@@ -21,7 +21,8 @@ import {
   getDiffDeck5,
   getDiffDeck7,
   fillRank5_ato5,
-  filterWinningCards
+  filterWinningCards,
+  getFlushSuitFromIndex
 } from '../src/routines';
 import { NumberMap, hashRanking } from '../src/interfaces';
 import { fullCardsDeckHash_5, fullCardsDeckHash_7 } from '../src/constants';
@@ -39,6 +40,7 @@ describe('testing diffs: ', () => {
     expect(getDiffDeck7(f27)).toEqual(hd7);
   });
 });
+
 describe('testing basic routines', () => {
   it('returns the only element with 5 equals', () => {
     expect(atLeastFiveEqual([[2, 3, 1, 1, 1, 1, 1, 5], [1, 1, 1, 1]])).toEqual([
@@ -49,12 +51,19 @@ describe('testing basic routines', () => {
     expect(getVectorSum([2, 3, 1, 1, 1, 1, 1, 5])).toEqual(15);
   });
 
-  it('gets sum suits on 7', () => {
+  it('gets flush hash suits on 7', () => {
     expect(getFlushSuit7([1, 2, 3, 2, 2, 2, 2])).toEqual(2);
+  });
+  it('it fails on getting flush hash 7 suits when length!=7', () => {
+    expect(getFlushSuit7([1, 2, 3, 2, 2, 2])).toEqual(-1);
   });
 
   it('false when no straight is passed', () => {
     expect(checkStraight5on7([1, 2, 3, 2, 2, 2, 2])).toEqual(false);
+  });
+
+  it('false when length!=7', () => {
+    expect(checkStraight5on7([1, 2, 3, 2, 2])).toEqual(false);
   });
 
   it('true when  straight is passed', () => {
@@ -214,5 +223,12 @@ describe('ranking calculators and hashes managers', () => {
     expect(fillRankFlushes([1, 1, 0], fakeRankingObj).FLUSH_RANK_HASHES).toEqual(
       tempObj.FLUSH_RANK_HASHES
     );
+  });
+
+  it("gets flush name string given card rank", () => {
+    expect(getFlushSuitFromIndex(25)).toBe("diamonds");
+    expect(getFlushSuitFromIndex(5)).toBe("spades");
+    expect(getFlushSuitFromIndex(28)).toBe("hearts");
+    expect(getFlushSuitFromIndex(45)).toBe("clubs");
   });
 });
