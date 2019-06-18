@@ -1,0 +1,7 @@
+<div class="full-deck">
+
+  <div class="card" *ngFor="let card of deck; let i = index" [ngStyle]=backImages[card] (click)="cardClick(i)">
+
+  </div>
+</div>
+<!-- deck-index={{card}}  -->

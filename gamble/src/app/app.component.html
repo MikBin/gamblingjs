@@ -1,0 +1,20 @@
+<!--The content below is only a placeholder and can be replaced.-->
+<div class="container-fluid">
+  <div style="text-align:center">
+    <h1>
+      Poker Hand Ranks Evaluator
+    </h1>
+
+  </div>
+
+
+  <div>
+    <app-fulldeck [cardPubSub]="localCardMessages"></app-fulldeck>
+  </div>
+
+  <div>
+    <app-hand-analyzer [cardPubSub]="localCardMessages"></app-hand-analyzer>
+  </div>
+
+  <router-outlet></router-outlet>
+</div>

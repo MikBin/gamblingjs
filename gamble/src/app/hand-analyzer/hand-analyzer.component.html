@@ -1,0 +1,81 @@
+<div class="single-hand-container">
+  <div class="single-hand">
+
+    <div *ngFor="let card of hand; let i = index" [ngClass]="handWinClasses[i]" [ngStyle]=backImages[card]
+      (click)="cardClick(i)">
+    </div>
+    <div class="columns data-panels">
+      <div class="left-data-panel column">
+        <table class="table is-fullwidth">
+          <thead>
+            <tr>
+              <th>property</th>
+              <th>value</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>rank category</td>
+              <td>{{dataStats.rankCategory}}</td>
+            </tr>
+            <tr>
+              <td>rank value</td>
+              <td>{{dataStats.rankValue}}</td>
+            </tr>
+            <tr>
+              <td>average potential rank</td>
+              <td>{{dataStats.avgPotentialRank}}</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+      <div class="right-data-panel column">
+        <table class="table is-fullwidth">
+          <thead>
+            <tr>
+              <th>Hand Category</th>
+              <th>Frequency</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>high card</td>
+              <td>{{dataStats.stats["high card"] || 0}}%</td>
+            </tr>
+            <tr>
+              <td>one pair</td>
+              <td>{{dataStats.stats["one pair"] || 0}}%</td>
+            </tr>
+            <tr>
+              <td>two pair</td>
+              <td>{{dataStats.stats["two pair"] || 0}}%</td>
+            </tr>
+            <tr>
+              <td>three of a kind</td>
+              <td>{{dataStats.stats["three of a kind"] || 0}}%</td>
+            </tr>
+            <tr>
+              <td>straight</td>
+              <td>{{dataStats.stats["straight"] || 0}}%</td>
+            </tr>
+            <tr>
+              <td>flush</td>
+              <td>{{dataStats.stats["flush"] || 0}}%</td>
+            </tr>
+            <tr>
+              <td>full house</td>
+              <td>{{dataStats.stats["full house"] || 0}}%</td>
+            </tr>
+            <tr>
+              <td>four of a kind</td>
+              <td>{{dataStats.stats["four of a kind"] || 0}}%</td>
+            </tr>
+            <tr>
+              <td>straight flush</td>
+              <td>{{dataStats.stats["straight flush"] || 0}}%</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
