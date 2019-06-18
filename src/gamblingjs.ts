@@ -52,7 +52,12 @@ export const FIVE_CARD_POKER_EVAL = {
       "2to7": SevenEvaluators._handOfSevenEvalLowBall27Indexed
     }
   },
-  HandRankVerbose: {},
+  HandRankVerbose: {
+    7: {
+      "high": SevenEvaluators.handOfSevenEvalIndexed_Verbose
+    }
+
+  },
   hashLoaders: {
     6: {
       "high": () => {
@@ -78,6 +83,7 @@ export const FIVE_CARD_POKER_EVAL = {
       "high": () => {
         fastHashesCreators.high();
         FIVE_CARD_POKER_EVAL.HandRank[7].high = SevenEvaluators.handOfSevenEvalIndexed;
+        //FIVE_CARD_POKER_EVAL.HandRankVerbose[7].high = SevenEvaluators.handOfSevenEvalIndexed_Verbose
       },
       "low8": () => {
         fastHashesCreators.low8();
