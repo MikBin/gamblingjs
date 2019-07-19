@@ -1,3 +1,5 @@
+
+
 export abstract class AbstractDeck {
   ranks: Array<string>;
   suits: Array<string>;
@@ -6,8 +8,7 @@ export abstract class AbstractDeck {
   backFaceUrl: object;
   cardsOut: number;
   assetsUri: string;
-  constructor(assetsUri: string) {
-    this.assetsUri = assetsUri;
+  constructor() {
     this.cardsOut = 0;
     this.ranks = [
       "2",
@@ -29,12 +30,14 @@ export abstract class AbstractDeck {
     });
 
     this.suits = ['s', 'd', 'h', 'c'];
+    /**@TODO make it extends onInint */
+
+  }
+
+  _OnInit() {
     this.backImages = this.deck.map((V, I) => {
       return { backgroundImage: `url(${this.assetsUri}${this.ranks[I % 13]}${this.suits[~~(I / 13)]}-min.png)` }
     });
-    this.backFaceUrl = {
-      backgroundImage: `url(${this.assetsUri}54-min.png)`
-    };
 
     this.backImages.push({
       backgroundImage: `url(${this.assetsUri}54-min.png)`

@@ -16,15 +16,22 @@ export class FulldeckComponent extends AbstractDeck implements OnInit {
   backImages: Array<object>;
   backFaceUrl: object;
   cardsOut: number;
-  assetsUri: string;
-
+  @Input() assetsUri: string;
   @Input() cardPubSub: DeckMessageService;
+
   constructor() {
-    super("assets/imgs/");
+    super();
 
   }
   ngOnInit() {
-    this.cardPubSub.cardBackToDeck.subscribe((v) => { this.setCardBack(v); })
+    this.cardPubSub.cardBackToDeck.subscribe((v) => { this.setCardBack(v); });
+    this.backImages = this.deck.map((V, I) => {
+      return { backgroundImage: `url(${this.assetsUri}${this.ranks[I % 13]}${this.suits[~~(I / 13)]}.png)` }
+    });
+
+    this.backImages.push({
+      backgroundImage: `url(${this.assetsUri}54.png)`
+    })
   }
 
   cardClick(cardIndex: number): void {

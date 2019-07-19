@@ -17,7 +17,7 @@ type dataStats = {
   rankCategory: string;
   rankValue: number;
   avgPotentialRank: number;
-  stats: handCategoryDistribution;
+  stats: handCategoryDistribution;//this have to change for hilow
 };
 
 @Component({
@@ -31,9 +31,10 @@ export class HandAnalyzerComponent extends AbstractDeck implements OnInit {
   handWinClasses: Array<string>;
   cardsIn: number;
   dataStats: dataStats;
+  @Input() assetsUri: string;
   @Input() cardPubSub: DeckMessageService;
   constructor() {
-    super("assets/imgs/");
+    super();
     this.dataStats = {
       rankCategory: "",
       rankValue: 0,
@@ -71,14 +72,21 @@ export class HandAnalyzerComponent extends AbstractDeck implements OnInit {
       "card"
     ];
 
-    this.deck.push(52);
-    this.backImages.push({
-      backgroundImage: `url(${this.assetsUri}54-min.png)`
-    })
   }
 
   ngOnInit() {
+
     this.cardPubSub.addCardToHand.subscribe((v) => { this.setCard(v); })
+
+    this.backImages = this.deck.map((V, I) => {
+      return { backgroundImage: `url(${this.assetsUri}${this.ranks[I % 13]}${this.suits[~~(I / 13)]}.png)` }
+    });
+
+    this.backImages.push({
+      backgroundImage: `url(${this.assetsUri}54.png)`
+    })
+    this.deck.push(52);
+
   }
 
   cardClick(cardIndex: number): void {

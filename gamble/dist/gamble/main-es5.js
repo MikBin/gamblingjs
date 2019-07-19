@@ -2293,7 +2293,18 @@ webpackEmptyAsyncContext.id = "./$$_lazy_route_resource lazy recursive";
 /*! no static exports found */
 /***/ (function(module, exports) {
 
-module.exports = "<!--The content below is only a placeholder and can be replaced.-->\n<div class=\"container-fluid\">\n  <div style=\"text-align:center\">\n    <h1>\n      Poker Hand Ranks Evaluator\n    </h1>\n\n  </div>\n\n\n  <div>\n    <app-fulldeck [cardPubSub]=\"localCardMessages\"></app-fulldeck>\n  </div>\n\n  <div>\n    <app-hand-analyzer [cardPubSub]=\"localCardMessages\"></app-hand-analyzer>\n  </div>\n\n  <router-outlet></router-outlet>\n</div>\n"
+module.exports = "<!--The content below is only a placeholder and can be replaced.-->\n<div class=\"container-fluid\">\n  <nav>\n    <a routerLink=\"/holdem\" routerLinkActive=\"active\">holdem</a>\n    <a routerLink=\"/27\" routerLinkActive=\"active\">27</a>\n  </nav>\n  <router-outlet></router-outlet>\n</div>\n"
+
+/***/ }),
+
+/***/ "./node_modules/raw-loader/index.js!./src/app/deuce-seven-view/deuce-seven-view.component.html":
+/*!********************************************************************************************!*\
+  !*** ./node_modules/raw-loader!./src/app/deuce-seven-view/deuce-seven-view.component.html ***!
+  \********************************************************************************************/
+/*! no static exports found */
+/***/ (function(module, exports) {
+
+module.exports = "<div style=\"text-align:center\">\n  <h1>\n    Poker Hand Ranks Evaluator 27\n  </h1>\n\n</div>\n\n\n<div>\n  <app-fulldeck [assetsUri]=\"'assets/imgs/dcolors/'\" [cardPubSub]=\"localCardMessages\"></app-fulldeck>\n</div>\n\n<div>\n  <app-hand-analyzer [assetsUri]=\"'assets/imgs/dcolors/'\" [cardPubSub]=\"localCardMessages\"></app-hand-analyzer>\n</div>\n"
 
 /***/ }),
 
@@ -2319,6 +2330,17 @@ module.exports = "<div class=\"single-hand-container\">\n  <div class=\"single-h
 
 /***/ }),
 
+/***/ "./node_modules/raw-loader/index.js!./src/app/tholdem-view/tholdem-view.component.html":
+/*!************************************************************************************!*\
+  !*** ./node_modules/raw-loader!./src/app/tholdem-view/tholdem-view.component.html ***!
+  \************************************************************************************/
+/*! no static exports found */
+/***/ (function(module, exports) {
+
+module.exports = "<div style=\"text-align:center\">\n  <h1>\n    Poker Hand Ranks Evaluator 27\n  </h1>\n\n</div>\n\n\n<div>\n  <app-fulldeck [assetsUri]=\"'assets/imgs/4colors/'\" [cardPubSub]=\"localCardMessages\"></app-fulldeck>\n</div>\n\n<div>\n  <app-hand-analyzer [assetsUri]=\"'assets/imgs/4colors/'\" [cardPubSub]=\"localCardMessages\"></app-hand-analyzer>\n</div>\n"
+
+/***/ }),
+
 /***/ "./src/app/AbstractDeck.ts":
 /*!*********************************!*\
   !*** ./src/app/AbstractDeck.ts ***!
@@ -2330,9 +2352,7 @@ module.exports = "<div class=\"single-hand-container\">\n  <div class=\"single-h
 __webpack_require__.r(__webpack_exports__);
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "AbstractDeck", function() { return AbstractDeck; });
 var AbstractDeck = /** @class */ (function () {
-    function AbstractDeck(assetsUri) {
-        var _this = this;
-        this.assetsUri = assetsUri;
+    function AbstractDeck() {
         this.cardsOut = 0;
         this.ranks = [
             "2",
@@ -2353,16 +2373,17 @@ var AbstractDeck = /** @class */ (function () {
             return i;
         });
         this.suits = ['s', 'd', 'h', 'c'];
+        /**@TODO make it extends onInint */
+    }
+    AbstractDeck.prototype._OnInit = function () {
+        var _this = this;
         this.backImages = this.deck.map(function (V, I) {
             return { backgroundImage: "url(" + _this.assetsUri + _this.ranks[I % 13] + _this.suits[~~(I / 13)] + "-min.png)" };
         });
-        this.backFaceUrl = {
-            backgroundImage: "url(" + this.assetsUri + "54-min.png)"
-        };
         this.backImages.push({
             backgroundImage: "url(" + this.assetsUri + "54-min.png)"
         });
-    }
+    };
     return AbstractDeck;
 }());
 
@@ -2383,10 +2404,17 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var tslib__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! tslib */ "./node_modules/tslib/tslib.es6.js");
 /* harmony import */ var _angular_core__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! @angular/core */ "./node_modules/@angular/core/fesm5/core.js");
 /* harmony import */ var _angular_router__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! @angular/router */ "./node_modules/@angular/router/fesm5/router.js");
+/* harmony import */ var _tholdem_view_tholdem_view_component__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ./tholdem-view/tholdem-view.component */ "./src/app/tholdem-view/tholdem-view.component.ts");
+/* harmony import */ var _deuce_seven_view_deuce_seven_view_component__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! ./deuce-seven-view/deuce-seven-view.component */ "./src/app/deuce-seven-view/deuce-seven-view.component.ts");
 
 
 
-var routes = [];
+
+
+var routes = [
+    { path: "holdem", component: _tholdem_view_tholdem_view_component__WEBPACK_IMPORTED_MODULE_3__["TholdemViewComponent"] },
+    { path: "27", component: _deuce_seven_view_deuce_seven_view_component__WEBPACK_IMPORTED_MODULE_4__["DeuceSevenViewComponent"] }
+];
 var AppRoutingModule = /** @class */ (function () {
     function AppRoutingModule() {
     }
@@ -2426,22 +2454,12 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "AppComponent", function() { return AppComponent; });
 /* harmony import */ var tslib__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! tslib */ "./node_modules/tslib/tslib.es6.js");
 /* harmony import */ var _angular_core__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! @angular/core */ "./node_modules/@angular/core/fesm5/core.js");
-/* harmony import */ var _pubsub_service__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ./pubsub.service */ "./src/app/pubsub.service.ts");
-/* harmony import */ var _src_gamblingjs__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ../../../src/gamblingjs */ "../src/gamblingjs.ts");
-
-
 
 
 var AppComponent = /** @class */ (function () {
     function AppComponent() {
         this.title = 'gamble';
-        this.localCardMessages = new _pubsub_service__WEBPACK_IMPORTED_MODULE_2__["DeckMessageService"]();
     }
-    AppComponent.prototype.cardFromDeckToHand = function (ci) { };
-    AppComponent.prototype.cardFromHandToDeck = function (ci) { };
-    AppComponent.prototype.ngOnInit = function () {
-        _src_gamblingjs__WEBPACK_IMPORTED_MODULE_3__["FIVE_CARD_POKER_EVAL"].hashLoaders[7].high();
-    };
     AppComponent = tslib__WEBPACK_IMPORTED_MODULE_0__["__decorate"]([
         Object(_angular_core__WEBPACK_IMPORTED_MODULE_1__["Component"])({
             selector: 'app-root',
@@ -2473,6 +2491,10 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var _app_component__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! ./app.component */ "./src/app/app.component.ts");
 /* harmony import */ var _fulldeck_fulldeck_component__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(/*! ./fulldeck/fulldeck.component */ "./src/app/fulldeck/fulldeck.component.ts");
 /* harmony import */ var _hand_analyzer_hand_analyzer_component__WEBPACK_IMPORTED_MODULE_6__ = __webpack_require__(/*! ./hand-analyzer/hand-analyzer.component */ "./src/app/hand-analyzer/hand-analyzer.component.ts");
+/* harmony import */ var _tholdem_view_tholdem_view_component__WEBPACK_IMPORTED_MODULE_7__ = __webpack_require__(/*! ./tholdem-view/tholdem-view.component */ "./src/app/tholdem-view/tholdem-view.component.ts");
+/* harmony import */ var _deuce_seven_view_deuce_seven_view_component__WEBPACK_IMPORTED_MODULE_8__ = __webpack_require__(/*! ./deuce-seven-view/deuce-seven-view.component */ "./src/app/deuce-seven-view/deuce-seven-view.component.ts");
+
+
 
 
 
@@ -2488,7 +2510,9 @@ var AppModule = /** @class */ (function () {
             declarations: [
                 _app_component__WEBPACK_IMPORTED_MODULE_4__["AppComponent"],
                 _fulldeck_fulldeck_component__WEBPACK_IMPORTED_MODULE_5__["FulldeckComponent"],
-                _hand_analyzer_hand_analyzer_component__WEBPACK_IMPORTED_MODULE_6__["HandAnalyzerComponent"]
+                _hand_analyzer_hand_analyzer_component__WEBPACK_IMPORTED_MODULE_6__["HandAnalyzerComponent"],
+                _tholdem_view_tholdem_view_component__WEBPACK_IMPORTED_MODULE_7__["TholdemViewComponent"],
+                _deuce_seven_view_deuce_seven_view_component__WEBPACK_IMPORTED_MODULE_8__["DeuceSevenViewComponent"]
             ],
             imports: [
                 _angular_platform_browser__WEBPACK_IMPORTED_MODULE_1__["BrowserModule"],
@@ -2499,6 +2523,55 @@ var AppModule = /** @class */ (function () {
         })
     ], AppModule);
     return AppModule;
+}());
+
+
+
+/***/ }),
+
+/***/ "./src/app/deuce-seven-view/deuce-seven-view.component.scss":
+/*!******************************************************************!*\
+  !*** ./src/app/deuce-seven-view/deuce-seven-view.component.scss ***!
+  \******************************************************************/
+/*! no static exports found */
+/***/ (function(module, exports) {
+
+module.exports = "\n/*# sourceMappingURL=data:application/json;base64,eyJ2ZXJzaW9uIjozLCJzb3VyY2VzIjpbXSwibmFtZXMiOltdLCJtYXBwaW5ncyI6IiIsImZpbGUiOiJzcmMvYXBwL2RldWNlLXNldmVuLXZpZXcvZGV1Y2Utc2V2ZW4tdmlldy5jb21wb25lbnQuc2NzcyJ9 */"
+
+/***/ }),
+
+/***/ "./src/app/deuce-seven-view/deuce-seven-view.component.ts":
+/*!****************************************************************!*\
+  !*** ./src/app/deuce-seven-view/deuce-seven-view.component.ts ***!
+  \****************************************************************/
+/*! exports provided: DeuceSevenViewComponent */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "DeuceSevenViewComponent", function() { return DeuceSevenViewComponent; });
+/* harmony import */ var tslib__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! tslib */ "./node_modules/tslib/tslib.es6.js");
+/* harmony import */ var _angular_core__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! @angular/core */ "./node_modules/@angular/core/fesm5/core.js");
+/* harmony import */ var _pubsub_service__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ../pubsub.service */ "./src/app/pubsub.service.ts");
+
+
+
+var DeuceSevenViewComponent = /** @class */ (function () {
+    function DeuceSevenViewComponent() {
+        this.localCardMessages = new _pubsub_service__WEBPACK_IMPORTED_MODULE_2__["DeckMessageService"]();
+    }
+    DeuceSevenViewComponent.prototype.ngOnInit = function () {
+        //FIVE_CARD_POKER_EVAL.hashLoaders[7].high();
+    };
+    DeuceSevenViewComponent = tslib__WEBPACK_IMPORTED_MODULE_0__["__decorate"]([
+        Object(_angular_core__WEBPACK_IMPORTED_MODULE_1__["Component"])({
+            selector: 'app-deuce-seven-view',
+            template: __webpack_require__(/*! raw-loader!./deuce-seven-view.component.html */ "./node_modules/raw-loader/index.js!./src/app/deuce-seven-view/deuce-seven-view.component.html"),
+            styles: [__webpack_require__(/*! ./deuce-seven-view.component.scss */ "./src/app/deuce-seven-view/deuce-seven-view.component.scss")]
+        }),
+        tslib__WEBPACK_IMPORTED_MODULE_0__["__metadata"]("design:paramtypes", [])
+    ], DeuceSevenViewComponent);
+    return DeuceSevenViewComponent;
 }());
 
 
@@ -2538,11 +2611,17 @@ __webpack_require__.r(__webpack_exports__);
 var FulldeckComponent = /** @class */ (function (_super) {
     tslib__WEBPACK_IMPORTED_MODULE_0__["__extends"](FulldeckComponent, _super);
     function FulldeckComponent() {
-        return _super.call(this, "assets/imgs/") || this;
+        return _super.call(this) || this;
     }
     FulldeckComponent.prototype.ngOnInit = function () {
         var _this = this;
         this.cardPubSub.cardBackToDeck.subscribe(function (v) { _this.setCardBack(v); });
+        this.backImages = this.deck.map(function (V, I) {
+            return { backgroundImage: "url(" + _this.assetsUri + _this.ranks[I % 13] + _this.suits[~~(I / 13)] + "-min.png)" };
+        });
+        this.backImages.push({
+            backgroundImage: "url(" + this.assetsUri + "54-min.png)"
+        });
     };
     FulldeckComponent.prototype.cardClick = function (cardIndex) {
         if (this.cardsOut == 7)
@@ -2558,6 +2637,10 @@ var FulldeckComponent = /** @class */ (function (_super) {
         this.deck[cardIndex] = cardIndex;
         this.cardsOut--;
     };
+    tslib__WEBPACK_IMPORTED_MODULE_0__["__decorate"]([
+        Object(_angular_core__WEBPACK_IMPORTED_MODULE_1__["Input"])(),
+        tslib__WEBPACK_IMPORTED_MODULE_0__["__metadata"]("design:type", String)
+    ], FulldeckComponent.prototype, "assetsUri", void 0);
     tslib__WEBPACK_IMPORTED_MODULE_0__["__decorate"]([
         Object(_angular_core__WEBPACK_IMPORTED_MODULE_1__["Input"])(),
         tslib__WEBPACK_IMPORTED_MODULE_0__["__metadata"]("design:type", _pubsub_service__WEBPACK_IMPORTED_MODULE_2__["DeckMessageService"])
@@ -2615,7 +2698,7 @@ console.log(_src_gamblingjs__WEBPACK_IMPORTED_MODULE_3__["FIVE_CARD_POKER_EVAL"]
 var HandAnalyzerComponent = /** @class */ (function (_super) {
     tslib__WEBPACK_IMPORTED_MODULE_0__["__extends"](HandAnalyzerComponent, _super);
     function HandAnalyzerComponent() {
-        var _this = _super.call(this, "assets/imgs/") || this;
+        var _this = _super.call(this) || this;
         _this.dataStats = {
             rankCategory: "",
             rankValue: 0,
@@ -2652,15 +2735,18 @@ var HandAnalyzerComponent = /** @class */ (function (_super) {
             "card",
             "card"
         ];
-        _this.deck.push(52);
-        _this.backImages.push({
-            backgroundImage: "url(" + _this.assetsUri + "54-min.png)"
-        });
         return _this;
     }
     HandAnalyzerComponent.prototype.ngOnInit = function () {
         var _this = this;
         this.cardPubSub.addCardToHand.subscribe(function (v) { _this.setCard(v); });
+        this.backImages = this.deck.map(function (V, I) {
+            return { backgroundImage: "url(" + _this.assetsUri + _this.ranks[I % 13] + _this.suits[~~(I / 13)] + "-min.png)" };
+        });
+        this.backImages.push({
+            backgroundImage: "url(" + this.assetsUri + "54-min.png)"
+        });
+        this.deck.push(52);
     };
     HandAnalyzerComponent.prototype.cardClick = function (cardIndex) {
         var card = this.hand[cardIndex];
@@ -2728,6 +2814,10 @@ var HandAnalyzerComponent = /** @class */ (function (_super) {
     };
     tslib__WEBPACK_IMPORTED_MODULE_0__["__decorate"]([
         Object(_angular_core__WEBPACK_IMPORTED_MODULE_1__["Input"])(),
+        tslib__WEBPACK_IMPORTED_MODULE_0__["__metadata"]("design:type", String)
+    ], HandAnalyzerComponent.prototype, "assetsUri", void 0);
+    tslib__WEBPACK_IMPORTED_MODULE_0__["__decorate"]([
+        Object(_angular_core__WEBPACK_IMPORTED_MODULE_1__["Input"])(),
         tslib__WEBPACK_IMPORTED_MODULE_0__["__metadata"]("design:type", _pubsub_service__WEBPACK_IMPORTED_MODULE_4__["DeckMessageService"])
     ], HandAnalyzerComponent.prototype, "cardPubSub", void 0);
     HandAnalyzerComponent = tslib__WEBPACK_IMPORTED_MODULE_0__["__decorate"]([
@@ -2777,6 +2867,57 @@ var DeckMessageService = /** @class */ (function () {
         tslib__WEBPACK_IMPORTED_MODULE_0__["__metadata"]("design:paramtypes", [])
     ], DeckMessageService);
     return DeckMessageService;
+}());
+
+
+
+/***/ }),
+
+/***/ "./src/app/tholdem-view/tholdem-view.component.scss":
+/*!**********************************************************!*\
+  !*** ./src/app/tholdem-view/tholdem-view.component.scss ***!
+  \**********************************************************/
+/*! no static exports found */
+/***/ (function(module, exports) {
+
+module.exports = "\n/*# sourceMappingURL=data:application/json;base64,eyJ2ZXJzaW9uIjozLCJzb3VyY2VzIjpbXSwibmFtZXMiOltdLCJtYXBwaW5ncyI6IiIsImZpbGUiOiJzcmMvYXBwL3Rob2xkZW0tdmlldy90aG9sZGVtLXZpZXcuY29tcG9uZW50LnNjc3MifQ== */"
+
+/***/ }),
+
+/***/ "./src/app/tholdem-view/tholdem-view.component.ts":
+/*!********************************************************!*\
+  !*** ./src/app/tholdem-view/tholdem-view.component.ts ***!
+  \********************************************************/
+/*! exports provided: TholdemViewComponent */
+/***/ (function(module, __webpack_exports__, __webpack_require__) {
+
+"use strict";
+__webpack_require__.r(__webpack_exports__);
+/* harmony export (binding) */ __webpack_require__.d(__webpack_exports__, "TholdemViewComponent", function() { return TholdemViewComponent; });
+/* harmony import */ var tslib__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! tslib */ "./node_modules/tslib/tslib.es6.js");
+/* harmony import */ var _angular_core__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! @angular/core */ "./node_modules/@angular/core/fesm5/core.js");
+/* harmony import */ var _pubsub_service__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ../pubsub.service */ "./src/app/pubsub.service.ts");
+/* harmony import */ var _src_gamblingjs__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! ../../../../src/gamblingjs */ "../src/gamblingjs.ts");
+
+
+
+
+var TholdemViewComponent = /** @class */ (function () {
+    function TholdemViewComponent() {
+        this.localCardMessages = new _pubsub_service__WEBPACK_IMPORTED_MODULE_2__["DeckMessageService"]();
+    }
+    TholdemViewComponent.prototype.ngOnInit = function () {
+        _src_gamblingjs__WEBPACK_IMPORTED_MODULE_3__["FIVE_CARD_POKER_EVAL"].hashLoaders[7].high();
+    };
+    TholdemViewComponent = tslib__WEBPACK_IMPORTED_MODULE_0__["__decorate"]([
+        Object(_angular_core__WEBPACK_IMPORTED_MODULE_1__["Component"])({
+            selector: 'app-tholdem-view',
+            template: __webpack_require__(/*! raw-loader!./tholdem-view.component.html */ "./node_modules/raw-loader/index.js!./src/app/tholdem-view/tholdem-view.component.html"),
+            styles: [__webpack_require__(/*! ./tholdem-view.component.scss */ "./src/app/tholdem-view/tholdem-view.component.scss")]
+        }),
+        tslib__WEBPACK_IMPORTED_MODULE_0__["__metadata"]("design:paramtypes", [])
+    ], TholdemViewComponent);
+    return TholdemViewComponent;
 }());
 
 
