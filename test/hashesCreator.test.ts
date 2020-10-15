@@ -6,7 +6,11 @@ import {
   createRankOf5AceToFive_Low9,
   createRankOf5AceToFive_Full,
   createRankOf7AceToFive_Low,
-  createRankOf5AceToSix_Full
+  createRankOf5AceToSix_Full,
+  getFlushDrawsHands,
+  getLow8DrawsHands,
+  getDoubleSidedStraightDrawsHands,
+  getDoubleBellyBusterDrawsHands
 } from '../src/hashesCreator';
 import * as CONSTANTS from '../src/constants';
 import { hashRanking, hashRankingSeven } from '../src/interfaces'
@@ -150,3 +154,12 @@ describe('testing hash of low ace to six', () => {
   expect(Object.keys(HASHESATo6.HASHES).length).toBe(6175);
   expect(Object.keys(HASHESATo6.FLUSH_RANK_HASHES).length).toBe(1287);
 });
+
+
+describe('testing draw hands generator', () => {
+
+  console.log("flush draws:", getFlushDrawsHands().length);
+  console.log("straight draws:", getDoubleSidedStraightDrawsHands().length);
+  console.log("belly buster draws:", getDoubleBellyBusterDrawsHands().length);
+  console.log("low 8  draws:", getLow8DrawsHands().length);
+})

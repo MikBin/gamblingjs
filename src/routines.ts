@@ -347,3 +347,118 @@ export const fillRankFlushes = (h: number[], rankingObject: hashRanking): hashRa
 
   return rankingObject;
 };
+
+
+export const allTwoCardsHands = () => {
+  let allRanksOff: number[][] = kombinatoricsJs.multiCombinations(CONSTANTS.ranksHashOn7.map(r => r << 9), 2, 2);
+  for (let i = 0; i < allRanksOff.length; i++) allRanksOff[i][1]++;//settings different suit for the second rank
+  let allRanksSuited: number[][] = kombinatoricsJs.multiCombinations(CONSTANTS.ranksHashOn7.map(r => r << 9), 2, 1)//all spades
+  console.log("all ranks test", allRanksOff.length, allRanksSuited.length);
+}
+
+export const allThreeCardsHands = () => { }
+
+const fourCardSuitsTemplates = {
+  '1111': [[0, 13, 26, 39]],
+  '211': [[13, 26, 0, 0],
+  [13, 0, 26, 0],
+  [13, 0, 0, 26],
+  [0, 13, 26, 0],
+  [0, 13, 0, 26],
+  [0, 0, 13, 26]],
+  '22': [[13, 13, 0, 0],
+  [13, 0, 13, 0],
+  [13, 0, 0, 13],
+  [0, 13, 13, 0],
+  [0, 13, 0, 13],
+  [0, 0, 13, 13]],
+  '31': [[13, 0, 0, 0]],
+  '4': [[0, 0, 0, 0]]
+}
+
+const canApplySuitTemplate = (hand: number[], template: number[]): boolean => {
+  let l = hand.length;
+  for (let i = 1; i < l; i++) {
+    if (hand[i] === hand[i - 1] && template[i] === template[i - 1]) return false;
+  }
+  return true;
+}
+
+const applySuitTemplate = (hand: number[], template: number[]) => {
+  return hand.map((c, i) => { return c + template[i] });
+}
+
+export const allFourCardsHands = () => {
+
+  const shiftedRanks = (new Array(13)).fill(0).map((v, i) => i);
+
+  const ALL: number[][] = kombinatoricsJs.multiCombinations(shiftedRanks, 4, 4).map(hand => hand.sort());
+
+  const noReps: number[][] = kombinatoricsJs.multiCombinations(shiftedRanks, 4, 1);
+
+  const twoPairs: number[][] = kombinatoricsJs.multiCombinations(shiftedRanks, 2, 1).map(c => [c[0], c[0], c[1], c[1]]);
+
+  const tempOnePair: number[][] = kombinatoricsJs.multiCombinations(shiftedRanks, 3, 1);
+
+  const onePair: number[][] = tempOnePair.map(c => [c[0], c[0], c[1], c[2]])
+    .concat(tempOnePair.map(c => [c[1], c[1], c[0], c[2]]), tempOnePair.map(c => [c[2], c[2], c[0], c[1]]));
+  //pair is always the firs two cards
+
+  const tempTriple = kombinatoricsJs.multiCombinations(shiftedRanks, 2, 1);
+  const triple: number[][] = tempTriple.map(c => [c[0], c[0], c[0], c[1]]).concat(tempTriple.map(c => [c[1], c[1], c[1], c[0]]));
+
+  //apply rainbow to quadruple as is the only one possibile
+  console.log("counting 4 card hands", noReps.length, twoPairs.length, onePair.length, triple.length);
+  //apply 1111 to all
+  //211 to no reps pairs  twopairs and triple
+  //22 to noreps pairs and two pairs
+  //31 to noreps and pairs
+  const rainbowTemplate = [0, 13, 26, 39];
+
+  const quadruple: number[][] = shiftedRanks.map(c => [c, c, c, c]).map(hand => applySuitTemplate(hand, rainbowTemplate));
+
+
+
+  const rainbowsHands = ALL.map(hand => applySuitTemplate(hand, rainbowTemplate));
+
+  const singleSuited = fourCardSuitsTemplates['211']
+    .map(template => noReps.map(hand => applySuitTemplate(hand, template)))
+    .flat()
+    .concat(
+      twoPairs.map(hand => applySuitTemplate(hand, [13, 0, 0, 26])),
+      [[13, 26, 0, 0],
+      [13, 0, 26, 0],
+      [13, 0, 0, 26],
+      ].map(template => onePair.map(hand => applySuitTemplate(hand, template)).flat()
+      ));
+
+  const doubleSuited = twoPairs.map(hand => applySuitTemplate(hand, [13, 0, 13, 0]))
+    .concat(
+      noReps.map(hand => applySuitTemplate(hand, [13, 0, 13, 0])),
+      noReps.map(hand => applySuitTemplate(hand, [13, 13, 0, 0])),
+      onePair.map(hand => applySuitTemplate(hand, [13, 0, 13, 0]))
+    );
+
+    /**@TODO return organized by rank as well? */
+    console.log(rainbowsHands.length,singleSuited.length,doubleSuited.length);
+  return { rainbowsHands, singleSuited, doubleSuited };
+
+/**@TODO add more info to starting hand:
+ * {hand[1,2,3,4],
+ * suits[0,1,2,3] or [0,0,1,1]
+ * type:'pair'|'dpair'|'nopair'}
+ */
+
+ /**@TODO filter for those having at least two cards<9 to get hands suitable for low too
+  * and filter for those hands with no low potential
+  */
+ 
+  /**@TOOD why care of quadruple and triple? as are very bad hands? 
+   * same reasoning for 3 suits and 4 suits....just bad hands....
+  */
+}
+
+//console.log("permmutation repetition", kombinatoricsJs.permutationsMultiSets([13, 13, 0, 0]));
+
+allTwoCardsHands();
+allFourCardsHands();

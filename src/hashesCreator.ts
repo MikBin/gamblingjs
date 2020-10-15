@@ -67,6 +67,66 @@ export const createRankOfFiveHashes = (): Readonly<hashRanking> => {
 
 // @TODO export const createRankOf5On6Hashes = () => { };
 
+export const getDoubleBellyBusterDrawsHands = ():number[][] => {
+
+  const hands = [];
+  for (let i = 0; i < 7; i++) {
+    hands.push([i + 13, i + 2, i + 3, i + 4, i + 6]);
+  }
+  //push A low straight draw
+  hands.push([12, 1, 2, 3, 5]);
+  return hands
+}
+
+//@ND these are containing a flush draw as well ---> remove it from here and consider as another category
+export const getDoubleSidedStraightDrawsHands = ():number[][] => {
+  const ranks = (new Array(13)).fill(0).map((r, i) => { return i; });
+  const fourCardsHands = [];
+  for (let i = 0; i < 9; i++) {
+    fourCardsHands.push([i + 13, i + 1, i + 2, i + 3]); //+13 to not have a flush
+  }
+  return fourCardsHands.flatMap(
+    (hand, i) => {
+      let f = hand[0] - 1;
+      let l = hand[3] + 1;
+      let possbileCards = ranks.filter(r => r !== f && r !== l);
+      return possbileCards.map(c => [...hand, c]);
+    }
+  )
+}
+
+export const getLow8DrawsHands = ():number[][] => {
+  const highRanks = (new Array(5)).fill(0).map((r, i) => { return 11 - i; });
+  const lowRanks = (new Array(8)).fill(0);
+
+  for (let i = 0; i < 8; i++) {
+    lowRanks[i] = i - 1;
+  }
+  lowRanks[0] = 12;//ace
+
+  const fourCardsHands = kombinatoricsJs.multiCombinations(lowRanks, 4, 1);
+  return fourCardsHands.flatMap(
+    (hand, i) => {
+      let possbileCards = lowRanks.filter(r => !hand.includes(r)).concat(highRanks);
+      return possbileCards.map(c => [...hand, c]);
+    }
+  )
+}
+
+/**
+ * @TODO of draws add info about other category 
+ * ex its a pair as well
+ * 
+ */
+
+ //@ND these flush draws contains straight draws as well...must be separated?
+export const getFlushDrawsHands = ():number[][] => {
+  const ranks = (new Array(13)).fill(0).map((r, i) => { return i; });
+  const fourCardsHands = kombinatoricsJs.multiCombinations(ranks, 4, 1);
+  const otherSuitsRanks = ranks.map(r => r + 13);
+  return fourCardsHands.flatMap(hand => otherSuitsRanks.map(c => [c, ...hand]));
+}
+
 export const createRankOf5On7Hashes = (
   hashRankOfFive: hashRanking,
   INVERTED: boolean = false
