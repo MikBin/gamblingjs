@@ -148,18 +148,21 @@ describe('testing hash of low Ato5: ', () => {
 });
 
 describe('testing hash of low ace to six', () => {
-  let HASHESATo6;
-  expect((HASHESATo6 = createRankOf5AceToSix_Full())).toBeTruthy();
-  expect(HASHESATo6.rankingInfos.length).toBe(7462);
-  expect(Object.keys(HASHESATo6.HASHES).length).toBe(6175);
-  expect(Object.keys(HASHESATo6.FLUSH_RANK_HASHES).length).toBe(1287);
+  it('should create hashes for low ace to six', () => {
+    let HASHESATo6;
+    expect((HASHESATo6 = createRankOf5AceToSix_Full())).toBeTruthy();
+    expect(HASHESATo6.rankingInfos.length).toBe(7462);
+    expect(Object.keys(HASHESATo6.HASHES).length).toBe(6175);
+    expect(Object.keys(HASHESATo6.FLUSH_RANK_HASHES).length).toBe(1287);
+  });
 });
 
 
 describe('testing draw hands generator', () => {
-
-  console.log("flush draws:", getFlushDrawsHands().length);
-  console.log("straight draws:", getDoubleSidedStraightDrawsHands().length);
-  console.log("belly buster draws:", getDoubleBellyBusterDrawsHands().length);
-  console.log("low 8  draws:", getLow8DrawsHands().length);
+  it('should generate draw hands', () => {
+    expect(getFlushDrawsHands().length).toBeGreaterThan(0);
+    expect(getDoubleSidedStraightDrawsHands().length).toBeGreaterThan(0);
+    expect(getDoubleBellyBusterDrawsHands().length).toBeGreaterThan(0);
+    expect(getLow8DrawsHands().length).toBeGreaterThan(0);
+  });
 })

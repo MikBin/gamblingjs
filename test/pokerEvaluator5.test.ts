@@ -49,7 +49,9 @@ describe("best of five on X", () => {
 
   });
 
-  expect(bfBestOfFiveOnXindexed([12, 0, 1, 2, 3, 25, 38])).toBe(7452);
+  it('get best hand of 5 card on 7 (brute force version) - indexed', () => {
+    expect(bfBestOfFiveOnXindexed([12, 0, 1, 2, 3, 25, 38])).toBe(7452);
+  });
 });
 describe('testing hand of five eval', () => {
   it('A2345 suited rank should be 7452', () => {
@@ -88,8 +90,8 @@ describe('testing hand of five eval', () => {
 });
 
 describe('testing hilo 8 and 9 routines: ', () => {
-
-  expect(
+  it('should evaluate hi/low hands correctly', () => {
+    expect(
     handOfFiveEvalHiLow8(
       fullCardsDeckHash_5[12],
       fullCardsDeckHash_5[11],
@@ -164,6 +166,7 @@ describe('testing hilo 8 and 9 routines: ', () => {
       fullCardsDeckHash_5[12]
     )
   ).toEqual({ hi: 6903, low: 38 });
+  });
 });
 
 describe('ace to five lowball: ', () => {
