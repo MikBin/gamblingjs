@@ -65,7 +65,61 @@ export const createRankOfFiveHashes = (): Readonly<hashRanking> => {
   return hashRankingOfFive;
 };
 
-// @TODO export const createRankOf5On6Hashes = () => { };
+export const createRankOf5On6Hashes = (
+  hashRankOfFive: hashRanking,
+  INVERTED: boolean = false
+): Readonly<hashRankingSeven> => {
+  const hashRankingOfFiveOnSix: hashRankingSeven = {
+    HASHES: {},
+    FLUSH_CHECK_KEYS: {},
+    FLUSH_RANK_HASHES: {},
+    FLUSH_HASHES: {},
+    MULTI_FLUSH_RANK_HASHES: { 5: {}, 6: {} },
+    baseRankValues: CONSTANTS.ranksHashOn7, // Reuse 7-card hash values for consistency
+    baseSuitValues: CONSTANTS.suitsHash,
+    rankingInfos: hashRankOfFive.rankingInfos
+  };
+
+  const rankCards = CONSTANTS.rankCards;
+  const ranksHashOn7 = hashRankingOfFiveOnSix.baseRankValues;
+
+  kombinatoricsJs.multiCombinations(rankCards, 6, 4).forEach((hand: number[], i: number) => {
+    let h6 = hand.map(card => ranksHashOn7[card]);
+    let h5 = hand.map(card => hashRankOfFive.baseRankValues[card]);
+    let hash6: number = getVectorSum(h6);
+
+    hashRankingOfFiveOnSix.HASHES[hash6] = _rankOf5onX(h5, hashRankOfFive.HASHES, INVERTED);
+  });
+
+  let FLUSH_RANK_HASHES = hashRankingOfFiveOnSix.MULTI_FLUSH_RANK_HASHES;
+
+  let fiveFlushes = kombinatoricsJs.combinations(rankCards, 5);
+  let sixFlushes = kombinatoricsJs.combinations(rankCards, 6);
+
+  fiveFlushes.concat(sixFlushes).forEach((h: number[]) => {
+    let h5: number[] = h.map(c => hashRankOfFive.baseRankValues[c]);
+    let h6: number[] = h.map(c => hashRankingOfFiveOnSix.baseRankValues[c]);
+    let hash6 = getVectorSum(h6);
+
+    let rank = _rankOf5onX(h5, hashRankOfFive.FLUSH_RANK_HASHES, INVERTED);
+
+    FLUSH_RANK_HASHES[h.length][hash6] = rank;
+  });
+
+  let fiveFlushHashes = [[0, 0, 0, 0, 0], [1, 1, 1, 1, 1], [8, 8, 8, 8, 8], [57, 57, 57, 57, 57]];
+  let sixFlushHashes: number[][] = [];
+  fiveFlushHashes.forEach((v, i) => {
+    sixFlushHashes.push(v.concat([0]), v.concat([1]), v.concat([8]), v.concat([57]));
+  });
+
+  const FLUSH_CHECK_KEYS = hashRankingOfFiveOnSix.FLUSH_CHECK_KEYS;
+
+  sixFlushHashes.forEach(h => {
+    FLUSH_CHECK_KEYS[getVectorSum(h)] = h[0];
+  });
+
+  return hashRankingOfFiveOnSix;
+};
 
 export const getDoubleBellyBusterDrawsHands = ():number[][] => {
 

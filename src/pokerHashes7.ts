@@ -3,6 +3,7 @@ import {
   createRankOf5On7Hashes,
   createRankOf7AceToSix_Low,
   createRankOf7AceToFive_Low,
+  createRankOf5On6Hashes,
 } from './hashesCreator';
 import {
   HASHES_OF_FIVE,
@@ -101,6 +102,8 @@ export const FLUSH_CHECK_SEVEN_ATO6 = HASHES_OF_SEVEN_LOW_Ato6.FLUSH_CHECK_KEYS;
 export const HASH_RANK_SEVEN_ATO6 = HASHES_OF_SEVEN_LOW_Ato6.HASHES;
 export const FLUSH_RANK_SEVEN_ATO6 = HASHES_OF_SEVEN_LOW_Ato6.FLUSH_RANK_HASHES;
 
+export const HASHES_OF_FIVE_ON_SIX = JSON.parse(JSON.stringify(baseHashRankingSeven));
+
 const subAssignHashesSeven = (target: hashRankingSeven, source: hashRankingSeven) => {
   for (let p in target) {
     //@ts-ignore
@@ -138,6 +141,27 @@ export const fastHashesCreators: gameTypesEvalFunction = {
   low9: () => {
     subAssignHashesSeven(HASHES_OF_SEVEN_LOW9, createRankOf7AceToFive_Low(HASHES_OF_FIVE_LOW9, rankCards_low9));
     FAST_HASH_DEFINED.low9 = true;
+  },
+};
+
+export const fastHashesCreators6: gameTypesEvalFunction = {
+  high: () => {
+    subAssignHashesSeven(HASHES_OF_FIVE_ON_SIX, createRankOf5On6Hashes(HASHES_OF_FIVE));
+  },
+  Ato5: () => {
+    subAssignHashesSeven(HASHES_OF_FIVE_ON_SIX, createRankOf5On6Hashes(HASHES_OF_FIVE_LOW_Ato5));
+  },
+  Ato6: () => {
+    subAssignHashesSeven(HASHES_OF_FIVE_ON_SIX, createRankOf5On6Hashes(HASHES_OF_FIVE_Ato6));
+  },
+  "2to7": () => {
+    subAssignHashesSeven(HASHES_OF_FIVE_ON_SIX, createRankOf5On6Hashes(HASHES_OF_FIVE, true));
+  },
+  low8: () => {
+    subAssignHashesSeven(HASHES_OF_FIVE_ON_SIX, createRankOf5On6Hashes(HASHES_OF_FIVE_LOW8));
+  },
+  low9: () => {
+    subAssignHashesSeven(HASHES_OF_FIVE_ON_SIX, createRankOf5On6Hashes(HASHES_OF_FIVE_LOW9));
   },
 };
 /**do not export rank of 7 hashes...just export a function wrapper that could return falsy

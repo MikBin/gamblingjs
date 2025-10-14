@@ -13,7 +13,7 @@ import * as FiveEvaluators from './pokerEvaluator5'
 import * as SevenEvaluators from './pokerEvaluator7'
 import * as SixEvaluators from './pokerEvaluator6'
 
-import { fastHashesCreators } from '../src/pokerHashes7'
+import { fastHashesCreators, fastHashesCreators6 } from '../src/pokerHashes7'
 
 export {
   handOfFiveEvalIndexed,
@@ -24,86 +24,258 @@ export {
 
 /**@TODO create a config module, if development build all hashes? or used to preconfigure the library??? */
 
-export const FIVE_CARD_POKER_EVAL = {
+/**
+ * @namespace PokerEvaluator
+ * @description Provides a comprehensive set of poker hand evaluation functions for various card counts and rule sets.
+ */
+export const PokerEvaluator = {
+  /**
+   * @description Contains poker hand evaluation functions for 5, 6, and 7-card hands under different rule sets.
+   */
   HandRank: {
+    /**
+     * @description Evaluation functions for 5-card hands.
+     */
     5: {
+      /**
+       * @description Evaluates a 5-card hand for high rank.
+       * @function
+       * @param {number[]} hand - An array of 5 card indices.
+       * @returns {number} The hand's rank.
+       */
       "high": FiveEvaluators.handOfFiveEvalIndexed,
+      /**
+       * @description Evaluates a 5-card hand for Hi-Low 8-or-better.
+       * @function
+       * @param {number[]} hand - An array of 5 card indices.
+       * @returns {hiLowRank} An object containing `hi` and `low` ranks.
+       */
       "low8": FiveEvaluators.handOfFiveEvalHiLow8Indexed,
+      /**
+       * @description Evaluates a 5-card hand for Hi-Low 9-or-better.
+       * @function
+       * @param {number[]} hand - An array of 5 card indices.
+       * @returns {hiLowRank} An object containing `hi` and `low` ranks.
+       */
       "low9": FiveEvaluators.handOfFiveEvalHiLow9Indexed,
+      /**
+       * @description Evaluates a 5-card hand for A-5 Lowball.
+       * @function
+       * @param {number[]} hand - An array of 5 card indices.
+       * @returns {number} The hand's rank.
+       */
       "Ato5": FiveEvaluators.handOfFiveEvalLow_Ato5Indexed,
+      /**
+       * @description Evaluates a 5-card hand for A-6 Lowball.
+       * @function
+       * @param {number[]} hand - An array of 5 card indices.
+       * @returns {number} The hand's rank.
+       */
       "Ato6": FiveEvaluators.handOfFiveEvalLow_Ato6Indexed,
+      /**
+       * @description Evaluates a 5-card hand for 2-7 Lowball.
+       * @function
+       * @param {number[]} hand - An array of 5 card indices.
+       * @returns {number} The hand's rank.
+       */
       "2to7": FiveEvaluators.handOfFiveEvalLowBall27Indexed
     },
+    /**
+     * @description Evaluation functions for 6-card hands.
+     */
     6: {
-      /**@TODO to be renamed with _  and looks same as 5 and 7 evaluators */
+      /**
+       * @description Evaluates a 6-card hand for high rank.
+       * @function
+       * @param {number[]} hand - An array of 6 card indices.
+       * @returns {number} The hand's rank.
+       */
       "high": SixEvaluators.handOfSixEvalIndexed,
+      /**
+       * @description Evaluates a 6-card hand for Hi-Low 8-or-better.
+       * @function
+       * @param {number[]} hand - An array of 6 card indices.
+       * @returns {hiLowRank} An object containing `hi` and `low` ranks.
+       */
       "low8": SixEvaluators.handOfSixEvalHiLow8Indexed,
+      /**
+       * @description Evaluates a 6-card hand for Hi-Low 9-or-better.
+       * @function
+       * @param {number[]} hand - An array of 6 card indices.
+       * @returns {hiLowRank} An object containing `hi` and `low` ranks.
+       */
       "low9": SixEvaluators.handOfSixEvalHiLow9Indexed,
+      /**
+       * @description Evaluates a 6-card hand for A-5 Lowball.
+       * @function
+       * @param {number[]} hand - An array of 6 card indices.
+       * @returns {number} The hand's rank.
+       */
       "Ato5": SixEvaluators.handOfSixEvalAto5Indexed,
+      /**
+       * @description Evaluates a 6-card hand for A-6 Lowball.
+       * @function
+       * @param {number[]} hand - An array of 6 card indices.
+       * @returns {number} The hand's rank.
+       */
       "Ato6": SixEvaluators.handOfSixEvalAto6Indexed,
+      /**
+       * @description Evaluates a 6-card hand for 2-7 Lowball.
+       * @function
+       * @param {number[]} hand - An array of 6 card indices.
+       * @returns {number} The hand's rank.
+       */
       "2to7": SixEvaluators.handOfSixEvalLowBall27Indexed
     },
+    /**
+     * @description Evaluation functions for 7-card hands.
+     */
     7: {
+      /**
+       * @description Evaluates a 7-card hand for high rank.
+       * @function
+       * @param {number[]} hand - An array of 7 card indices.
+       * @returns {number} The hand's rank.
+       */
       "high": SevenEvaluators._handOfSevenEvalIndexed,
+      /**
+       * @description Evaluates a 7-card hand for Hi-Low 8-or-better.
+       * @function
+       * @param {number[]} hand - An array of 7 card indices.
+       * @returns {hiLowRank} An object containing `hi` and `low` ranks.
+       */
       "low8": SevenEvaluators._handOfSevenEvalHiLow8Indexed,
+      /**
+       * @description Evaluates a 7-card hand for Hi-Low 9-or-better.
+       * @function
+       * @param {number[]} hand - An array of 7 card indices.
+       * @returns {hiLowRank} An object containing `hi` and `low` ranks.
+       */
       "low9": SevenEvaluators._handOfSevenEvalHiLow9Indexed,
+      /**
+       * @description Evaluates a 7-card hand for A-5 Lowball.
+       * @function
+       * @param {number[]} hand - An array of 7 card indices.
+       * @returns {number} The hand's rank.
+       */
       "Ato5": SevenEvaluators._handOfSevenEvalLow_Ato5Indexed,
+      /**
+       * @description Evaluates a 7-card hand for A-6 Lowball.
+       * @function
+       * @param {number[]} hand - An array of 7 card indices.
+       * @returns {number} The hand's rank.
+       */
       "Ato6": SevenEvaluators._handOfSevenEval_Ato6Indexed,
+      /**
+       * @description Evaluates a 7-card hand for 2-7 Lowball.
+       * @function
+       * @param {number[]} hand - An array of 7 card indices.
+       * @returns {number} The hand's rank.
+       */
       "2to7": SevenEvaluators._handOfSevenEvalLowBall27Indexed
     }
   },
+  /**
+   * @description Provides verbose hand evaluation, returning detailed information about the hand.
+   */
   HandRankVerbose: {
+    /**
+     * @description Provides verbose evaluation for 7-card hands.
+     */
     7: {
+      /**
+       * @description Evaluates a 7-card hand for high rank and returns detailed information.
+       * @function
+       * @param {number[]} hand - An array of 7 card indices.
+       * @returns {verboseHandInfo} An object with detailed hand information.
+       */
       "high": SevenEvaluators.handOfSevenEvalIndexed_Verbose
     }
-
   },
+  /**
+   * @description Dynamically loads pre-computed hash tables for faster 7-card hand evaluations.
+   */
   hashLoaders: {
+    /**
+     * @description Hash loaders for 6-card hands (currently not implemented).
+     */
     6: {
       "high": () => {
-        throw Error("method not yet implemented");
+        fastHashesCreators6.high();
+        PokerEvaluator.HandRank[6].high = SixEvaluators.handOfSixEvalIndexed;
       },
       "low8": () => {
-        throw Error("method not yet implemented");
+        fastHashesCreators6.low8();
+        PokerEvaluator.HandRank[6].low8 = SixEvaluators.handOfSixEvalHiLow8Indexed;
       },
       "low9": () => {
-        throw Error("method not yet implemented");
+        fastHashesCreators6.low9();
+        PokerEvaluator.HandRank[6].low9 = SixEvaluators.handOfSixEvalHiLow9Indexed;
       },
       "Ato5": () => {
-        throw Error("method not yet implemented");
+        fastHashesCreators6.Ato5();
+        PokerEvaluator.HandRank[6].Ato5 = SixEvaluators.handOfSixEvalAto5Indexed;
       },
       "Ato6": () => {
-        throw Error("method not yet implemented");
+        fastHashesCreators6.Ato6();
+        PokerEvaluator.HandRank[6].Ato6 = SixEvaluators.handOfSixEvalAto6Indexed;
       },
       "2to7": () => {
-        throw Error("method not yet implemented");
+        fastHashesCreators6["2to7"]();
+        PokerEvaluator.HandRank[6]["2to7"] = SixEvaluators.handOfSixEvalLowBall27Indexed;
       }
     },
+    /**
+     * @description Hash loaders for 7-card hands.
+     */
     7: {
+      /**
+       * @description Loads the hash table for 7-card high hand evaluation.
+       * @function
+       */
       "high": () => {
         fastHashesCreators.high();
-        FIVE_CARD_POKER_EVAL.HandRank[7].high = SevenEvaluators.handOfSevenEvalIndexed;
-        //FIVE_CARD_POKER_EVAL.HandRankVerbose[7].high = SevenEvaluators.handOfSevenEvalIndexed_Verbose
+        PokerEvaluator.HandRank[7].high = SevenEvaluators.handOfSevenEvalIndexed;
       },
+      /**
+       * @description Loads the hash table for 7-card Hi-Low 8-or-better evaluation.
+       * @function
+       */
       "low8": () => {
         fastHashesCreators.low8();
-        FIVE_CARD_POKER_EVAL.HandRank[7].low8 = SevenEvaluators.handOfSevenEvalHiLow8Indexed;
+        PokerEvaluator.HandRank[7].low8 = SevenEvaluators.handOfSevenEvalHiLow8Indexed;
       },
+      /**
+       * @description Loads the hash table for 7-card Hi-Low 9-or-better evaluation.
+       * @function
+       */
       "low9": () => {
         fastHashesCreators.low9();
-        FIVE_CARD_POKER_EVAL.HandRank[7].low9 = SevenEvaluators.handOfSevenEvalHiLow9Indexed;
+        PokerEvaluator.HandRank[7].low9 = SevenEvaluators.handOfSevenEvalHiLow9Indexed;
       },
+      /**
+       * @description Loads the hash table for 7-card A-5 Lowball evaluation.
+       * @function
+       */
       "Ato5": () => {
         fastHashesCreators.Ato5();
-        FIVE_CARD_POKER_EVAL.HandRank[7].Ato5 = SevenEvaluators.handOfSevenEvalLow_Ato5Indexed;
+        PokerEvaluator.HandRank[7].Ato5 = SevenEvaluators.handOfSevenEvalLow_Ato5Indexed;
       },
+      /**
+       * @description Loads the hash table for 7-card A-6 Lowball evaluation.
+       * @function
+       */
       "Ato6": () => {
         fastHashesCreators.Ato6();
-        FIVE_CARD_POKER_EVAL.HandRank[7].Ato6 = SevenEvaluators.handOfSevenEval_Ato6Indexed;
+        PokerEvaluator.HandRank[7].Ato6 = SevenEvaluators.handOfSevenEval_Ato6Indexed;
       },
+      /**
+       * @description Loads the hash table for 7-card 2-7 Lowball evaluation.
+       * @function
+       */
       "2to7": () => {
         fastHashesCreators["2to7"]();
-        FIVE_CARD_POKER_EVAL.HandRank[7]["2to7"] = SevenEvaluators.handOfSevenEvalLowBall27Indexed;
+        PokerEvaluator.HandRank[7]["2to7"] = SevenEvaluators.handOfSevenEvalLowBall27Indexed;
       }
     }
   }

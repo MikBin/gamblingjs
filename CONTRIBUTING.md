@@ -1,17 +1,36 @@
-We're really glad you're reading this, because we need volunteer developers to help this project come to fruition. 👏
+# Contributing to GamblingJS
 
-## Instructions
+First off, thank you for considering contributing to GamblingJS! It's people like you that make open source such a great community.
 
-These steps will guide you through contributing to this project:
+## Where to Start?
 
-- Fork the repo
-- Clone it and install dependencies
+If you're new to the project, a great place to start is by looking at our open issues. We try to keep them organized and tagged with labels like `good first issue` or `help wanted`.
 
-		git clone https://github.com/YOUR-USERNAME/typescript-library-starter
-		npm install
+## How to Contribute
 
-Keep in mind that after running `npm install` the git repo is reset. So a good way to cope with this is to have a copy of the folder to push the changes, and the other to try them.
+1.  **Fork the repository** and clone it to your local machine.
+2.  **Create a new branch** for your feature or bug fix: `git checkout -b your-branch-name`.
+3.  **Install dependencies** by running `npm install`.
+4.  **Make your changes** and ensure the code follows the existing style.
+5.  **Write tests** to cover your changes. We use Vitest for testing, and you can run the test suite with `npm run test`.
+6.  **Lint your code** by running `npm run lint`.
+7.  **Commit your changes** with a descriptive commit message.
+8.  **Push your branch** to your forked repository.
+9.  **Open a pull request** to the `main` branch of the official GamblingJS repository.
 
-Make and commit your changes. Make sure the commands npm run build and npm run test:prod are working.
+## Coding Guidelines
 
-Finally send a [GitHub Pull Request](https://github.com/alexjoverm/typescript-library-starter/compare?expand=1) with a clear list of what you've done (read more [about pull requests](https://help.github.com/articles/about-pull-requests/)). Make sure all of your commits are atomic (one feature per commit).
+*   **Follow the existing code style.** We use Prettier to enforce a consistent style.
+*   **Add JSDoc comments** to all new functions and classes.
+*   **Write clear and concise commit messages.**
+
+## Reporting Bugs
+
+If you find a bug, please open an issue and provide as much detail as possible, including:
+
+*   A clear and descriptive title.
+*   Steps to reproduce the bug.
+*   The expected behavior and what actually happened.
+*   Any relevant error messages or screenshots.
+
+Thank you for your contributions!
