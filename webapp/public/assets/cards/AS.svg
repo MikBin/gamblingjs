@@ -1,0 +1,8 @@
+<svg width="71" height="96" xmlns="http://www.w3.org/2000/svg">
+  <rect width="71" height="96" rx="4" fill="white" stroke="#333" stroke-width="1"/>
+  <text x="5" y="15" font-family="Arial" font-size="12" font-weight="bold" fill="black">A</text>
+  <text x="5" y="27" font-family="Arial" font-size="14" fill="red">♠</text>
+  <text x="66" y="85" font-family="Arial" font-size="12" font-weight="bold" fill="black" text-anchor="end">A</text>
+  <text x="66" y="73" font-family="Arial" font-size="14" fill="red" text-anchor="end">♠</text>
+  <text x="35.5" y="55" font-family="Arial" font-size="24" fill="red" text-anchor="middle">♠</text>
+</svg>
