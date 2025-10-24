@@ -41,9 +41,7 @@ export default defineConfig({
       output: {
         manualChunks: {
           vendor: ['vue', 'vue-router', 'pinia'],
-          ui: ['daisyui'],
-          // Separate gamblingjs core logic
-          poker: ['@gamblingjs']
+          ui: ['daisyui']
         },
         chunkFileNames: 'assets/js/[name]-[hash].js',
         entryFileNames: 'assets/js/[name]-[hash].js',
