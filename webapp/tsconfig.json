@@ -9,8 +9,9 @@
     "src/**/__tests__/*"
   ],
   "compilerOptions": {
-    "composite": true,
+    "composite": false,
     "baseUrl": ".",
+    "verbatimModuleSyntax": false,
     "paths": {
       "@/*": ["./src/*"],
       "@components/*": ["./src/components/*"],

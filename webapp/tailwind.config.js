@@ -18,6 +18,8 @@ export default {
           700: '#1d4ed8',
           800: '#1e40af',
           900: '#1e3a8a',
+          DEFAULT: '#3b82f6',
+          content: '#ffffff',
         },
         poker: {
           green: '#047857',

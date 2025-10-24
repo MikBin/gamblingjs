@@ -18,12 +18,12 @@ export function getCardFromIndex(index: number): Card {
   };
 }
 
-export function getCardImagePath(cardIndex: number, format: 'png' | 'svg' = 'svg'): string {
+export function getCardImagePath(cardIndex: number, format: 'png' | 'svg' = 'png'): string {
   const card = getCardFromIndex(cardIndex);
   const rankFile = card.rank === '10' ? 'T' : card.rank;
-  const suitFile = SUIT_NAMES[Math.floor(cardIndex / 13)].charAt(0).toUpperCase();
+  const suitFile = SUIT_NAMES[Math.floor(cardIndex / 13)].charAt(0).toLowerCase();
 
-  return `/assets/cards/${rankFile}${suitFile}.${format}`;
+  return `/assets/cards/${rankFile}${suitFile}-min.${format}`;
 }
 
 export function getCardBackPath(color: 'blue' | 'red' | 'green' = 'blue'): string {

@@ -99,11 +99,14 @@
 <script setup lang="ts">
 import { ref, computed, watch } from 'vue';
 import { usePokerStore } from '../stores/poker';
+import { usePokerEvaluator } from '../composables/usePokerEvaluator';
+import { useMonteCarlo } from '../composables/useMonteCarlo';
+import { useCardSelection } from '../composables/useCardSelection';
 import CardSelector from '../components/CardSelector.vue';
 import HandDisplay from '../components/HandDisplay.vue';
 import MonteCarloSimulator from '../components/MonteCarloSimulator.vue';
 import HandRankingDisplay from '../components/HandRankingDisplay.vue';
-import { getCardFromIndex, formatCardString } from '../utils/cardUtils';
+import { getCardFromIndex, formatCardString, getHandDescription, getHandStrengthPercentage } from '../utils/cardUtils';
 
 interface EvaluationResults {
   handRanking: {
@@ -135,15 +138,22 @@ interface EvaluationResults {
 // Store
 const pokerStore = usePokerStore();
 
+// Composables
+const cardSelection = useCardSelection();
+const pokerEvaluator = usePokerEvaluator();
+const monteCarlo = useMonteCarlo();
+
 // State
-const selectedCards = ref<number[]>([]);
-const pocketCards = ref<number[]>([]);
-const communityCards = ref<number[]>([]);
-const hideCards = ref(true);
-const revealFrom = ref(0);
 const gameVariant = ref('texas-holdem');
 const playerCount = ref(2);
 const evaluationResults = ref<EvaluationResults | null>(null);
+
+// Computed from composables
+const selectedCards = computed(() => cardSelection.allSelectedCards.value);
+const pocketCards = computed(() => cardSelection.selectedPocketCards.value);
+const communityCards = computed(() => cardSelection.selectedCommunityCards.value);
+const hideCards = computed(() => cardSelection.hideCards.value);
+const revealFrom = ref(0);
 
 // Computed
 const canEvaluate = computed(() => {
@@ -152,90 +162,93 @@ const canEvaluate = computed(() => {
 
 // Methods
 const handleCardSelection = (cards: number[]) => {
-  selectedCards.value = cards;
+  // Update card selection through composable
+  cardSelection.clearAllCards();
+  cards.forEach(card => {
+    if (cardSelection.canSelectPocketCard) {
+      cardSelection.selectPocketCard(card);
+    } else {
+      cardSelection.selectCommunityCard(card);
+    }
+  });
 };
 
 const handleCardSelectionConfirm = (cards: number[]) => {
   // Split cards into pocket and community based on game variant
+  cardSelection.clearAllCards();
+
   if (gameVariant.value === 'texas-holdem') {
-    pocketCards.value = cards.slice(0, 2);
-    communityCards.value = cards.slice(2);
+    cards.slice(0, 2).forEach(card => cardSelection.selectPocketCard(card));
+    cards.slice(2).forEach(card => cardSelection.selectCommunityCard(card));
   } else if (gameVariant.value === 'omaha') {
-    pocketCards.value = cards.slice(0, 4);
-    communityCards.value = cards.slice(4);
+    cards.slice(0, 4).forEach(card => cardSelection.selectPocketCard(card));
+    cards.slice(4).forEach(card => cardSelection.selectCommunityCard(card));
   } else {
     // Default to Texas Hold'em for other variants
-    pocketCards.value = cards.slice(0, 2);
-    communityCards.value = cards.slice(2);
+    cards.slice(0, 2).forEach(card => cardSelection.selectPocketCard(card));
+    cards.slice(2).forEach(card => cardSelection.selectCommunityCard(card));
   }
 
-  hideCards.value = true;
+  cardSelection.toggleHideCards();
   evaluationResults.value = null;
 };
 
 const handleRevealCards = () => {
-  hideCards.value = false;
+  cardSelection.revealCards();
 };
 
 const handleClearHand = () => {
-  pocketCards.value = [];
-  communityCards.value = [];
-  selectedCards.value = [];
-  hideCards.value = true;
+  cardSelection.clearAllCards();
   evaluationResults.value = null;
 };
 
-const handleEvaluateHand = () => {
+const handleEvaluateHand = async () => {
   if (!canEvaluate.value) return;
 
-  // This would integrate with the actual gamblingjs library
-  // For now, create mock evaluation results
-  const mockResults: EvaluationResults = {
-    handRanking: {
-      rank: 3,
-      name: 'Two Pair',
-      description: 'Two cards of the same rank plus three unrelated cards'
-    },
-    handStrength: {
-      percentage: 65,
-      rank: 5
-    },
-    detailedStats: {
-      highCard: 'Ace',
-      kickers: ['King', '7'],
-      outs: 9,
-      drawProbability: 0.18
-    },
-    comparison: {
-      players: [
-        {
-          name: 'You',
-          hand: pocketCards.value.map(c => formatCardString(c)).join(', ') +
-                 ' + ' +
-                 communityCards.value.map(c => formatCardString(c)).join(', '),
-          ranking: 3,
-          winPercentage: 42.5,
-          isCurrentPlayer: true
-        },
-        {
-          name: 'Player 1',
-          hand: 'A♠, K♥',
-          ranking: 2,
-          winPercentage: 35.2,
-          isCurrentPlayer: false
-        },
-        {
-          name: 'Player 2',
-          hand: 'Q♦, J♣',
-          ranking: 4,
-          winPercentage: 22.3,
-          isCurrentPlayer: false
-        }
-      ]
-    }
-  };
+  const allCards = [...pocketCards.value, ...communityCards.value];
 
-  evaluationResults.value = mockResults;
+  // Use the poker evaluator composable
+  const evaluation = await pokerEvaluator.evaluateHand(allCards);
+
+  if (evaluation) {
+    const handRank = evaluation.handRank;
+    const handStrength = getHandStrengthPercentage(handRank);
+
+    const results: EvaluationResults = {
+      handRanking: {
+        rank: handRank,
+        name: getHandDescription(handRank),
+        description: evaluation.handGroup || 'Poker hand'
+      },
+      handStrength: {
+        percentage: handStrength,
+        rank: handRank
+      },
+      detailedStats: {
+        highCard: evaluation.faces || 'Unknown',
+        kickers: [],
+        outs: 0,
+        drawProbability: 0
+      },
+      comparison: {
+        players: [
+          {
+            name: 'You',
+            hand: pocketCards.value.map(c => formatCardString(c)).join(', ') +
+                  ' + ' +
+                  communityCards.value.map(c => formatCardString(c)).join(', '),
+            ranking: handRank,
+            winPercentage: handStrength,
+            isCurrentPlayer: true
+          }
+        ]
+      }
+    };
+
+    evaluationResults.value = results;
+  } else {
+    console.error('Hand evaluation failed:', pokerEvaluator.error.value);
+  }
 };
 
 const handleSimulationComplete = (results: any) => {
@@ -264,10 +277,7 @@ const handleSaveResults = () => {
 };
 
 const resetGame = () => {
-  pocketCards.value = [];
-  communityCards.value = [];
-  selectedCards.value = [];
-  hideCards.value = true;
+  cardSelection.clearAllCards();
   evaluationResults.value = null;
 };
 
@@ -285,10 +295,10 @@ const randomizeHand = () => {
 watch(selectedCards, (newCards) => {
   if (newCards.length >= 2) {
     // Update pocket cards
-    pocketCards.value = newCards.slice(0, 2);
+    cardSelection.setPocketCards(newCards.slice(0, 2));
 
     // Update community cards
-    communityCards.value = newCards.slice(2);
+    cardSelection.setCommunityCards(newCards.slice(2));
   }
 }, { deep: true });
 </script>

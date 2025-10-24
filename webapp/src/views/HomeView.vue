@@ -151,7 +151,7 @@
 
 <style scoped>
 .hero {
-  background: linear-gradient(135deg, var(--fallback-b1, oklch(0.1 0.01 0.99)), var(--fallback-b2, oklch(0.1 0.01 0.98));
+  background: linear-gradient(135deg, var(--fallback-b1, oklch(0.1 0.01 0.99)), var(--fallback-b2, oklch(0.1 0.01 0.98)));
 }
 
 .hero-content {
