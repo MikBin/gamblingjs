@@ -62,7 +62,7 @@ import {
 } from './interfaces';
 import { handToCardsSymbols, filterWinningCards } from './routines';
 
-import * as kombinatoricsJs from 'kombinatoricsjs';
+import * as kombinatoricsJs from './lib/kombinatoricsjs/src/kombinatoricsjs';
 
 /** @function handOfSevenEval
  *

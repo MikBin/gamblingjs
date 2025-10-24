@@ -1,4 +1,4 @@
-import * as kombinatoricsJs from 'kombinatoricsjs';
+import * as kombinatoricsJs from './lib/kombinatoricsjs/src/kombinatoricsjs';
 import {
   bfBestOfFiveOnXindexed,
   handOfFiveEvalLowBall27Indexed,

@@ -29,7 +29,7 @@ import {
 
 import { filterWinningCards, getFlushSuitFromIndex } from './routines';
 
-import * as kombinatoricsJs from 'kombinatoricsjs';
+import * as kombinatoricsJs from './lib/kombinatoricsjs/src/kombinatoricsjs';
 
 /** @function handOfFiveEval
  *

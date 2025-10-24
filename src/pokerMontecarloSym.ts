@@ -1,4 +1,4 @@
-import { shuffle } from 'kombinatoricsjs';
+import { shuffle } from './lib/kombinatoricsjs/src/kombinatoricsjs';
 import {
   fullCardsDeckHash_5,
   fullCardsDeckHash_7,

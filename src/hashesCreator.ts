@@ -10,7 +10,7 @@ import {
   handRankToGroup,
 } from './routines';
 import * as ROUTINES from './routines';
-import * as kombinatoricsJs from 'kombinatoricsjs';
+import * as kombinatoricsJs from './lib/kombinatoricsjs/src/kombinatoricsjs';
 import { hashRanking, NumberMap, hashRankingSeven } from './interfaces';
 
 export const createRankOfFiveHashes = (): Readonly<hashRanking> => {

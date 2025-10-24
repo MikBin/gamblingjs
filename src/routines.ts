@@ -1,4 +1,4 @@
-import * as kombinatoricsJs from 'kombinatoricsjs';
+import * as kombinatoricsJs from './lib/kombinatoricsjs/src/kombinatoricsjs';
 import { hashRanking, NumberMap } from './interfaces';
 import * as CONSTANTS from './constants';
 

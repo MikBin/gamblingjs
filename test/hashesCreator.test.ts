@@ -1,4 +1,4 @@
-import * as kombinatoricsJs from 'kombinatoricsjs';
+import * as kombinatoricsJs from '../src/lib/kombinatoricsjs/src/kombinatoricsjs';
 import {
   createRankOfFiveHashes,
   createRankOf5On7Hashes,
