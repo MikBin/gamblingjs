@@ -1,4 +1,4 @@
-/// <reference types="d:/projects/gamblingjs/webapp/node_modules/.vue-global-types/vue_3.5_0.d.ts" />
+/// <reference types="d:/projects/gamblingjs/webapp/node_modules/.vue-global-types/vue_3.3_0.d.ts" />
 import { ref, onMounted } from 'vue';
 const mobileMenuOpen = ref(false);
 const toggleMobileMenu = () => {

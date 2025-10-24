@@ -1,4 +1,4 @@
-/// <reference types="d:/projects/gamblingjs/webapp/node_modules/.vue-global-types/vue_3.5_0.d.ts" />
+/// <reference types="d:/projects/gamblingjs/webapp/node_modules/.vue-global-types/vue_3.3_0.d.ts" />
 // Home view is primarily presentational - no additional logic needed
 debugger; /* PartiallyEnd: #3632/scriptSetup.vue */
 const __VLS_ctx = {};

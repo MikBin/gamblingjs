@@ -1,3 +1,4 @@
+import { describe, it, expect } from 'vitest';
 import {
   handOfFiveEval,
   handOfFiveEvalIndexed,
@@ -276,8 +277,8 @@ describe('testing LowBall27: ', () => {
 });
 
 describe('test hand info: ', () => {
-  /**@TODO one assertion for each test case 
-   * extend test to all hand groups 
+  /**@TODO one assertion for each test case
+   * extend test to all hand groups
   */
   it('should get some infos: ', () => {
     expect(getHandInfo(2345)).toBeInstanceOf(Object);

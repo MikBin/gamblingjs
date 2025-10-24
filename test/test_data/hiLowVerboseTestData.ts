@@ -1,4 +1,19 @@
-export const TEST_DATA = {
+import { HiLowVerboseHandInfo } from '../../src/interfaces';
+
+interface TestCase {
+  inputs: {
+    5: number[];
+    6: number[];
+    7: number[];
+  };
+  output: HiLowVerboseHandInfo;
+}
+
+interface TestData {
+  low8: TestCase[];
+}
+
+export const TEST_DATA: TestData = {
   "low8": [
     {
       inputs: {

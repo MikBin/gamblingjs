@@ -131,11 +131,11 @@
               <h3 class="text-lg font-medium mb-2">CardSelector Component</h3>
               <div class="bg-base-200 p-3 rounded text-sm font-mono">
                 <pre><CardSelector
-  v-model="selectedCards"
-  :max-selection="7"
-  @selection-change="handleCardSelection"
-  @confirm="handleCardSelectionConfirm"
-/></pre>
+   v-model="selectedCards"
+   :max-selection="7"
+   @selection-change="handleCardSelection"
+   @confirm="handleCardSelectionConfirm"
+ /></pre>
               </div>
             </div>
 
@@ -143,12 +143,12 @@
               <h3 class="text-lg font-medium mb-2">HandDisplay Component</h3>
               <div class="bg-base-200 p-3 rounded text-sm font-mono">
                 <pre><HandDisplay
-  :pocket-cards="pocketCards"
-  :community-cards="communityCards"
-  :hide-pocket-cards="hideCards"
-  @reveal="handleRevealCards"
-  @evaluate="handleEvaluateHand"
-/></pre>
+   :pocket-cards="pocketCards"
+   :community-cards="communityCards"
+   :hide-pocket-cards="hideCards"
+   @reveal="handleRevealCards"
+   @evaluate="handleEvaluateHand"
+ /></pre>
               </div>
             </div>
 
@@ -156,12 +156,12 @@
               <h3 class="text-lg font-medium mb-2">MonteCarloSimulator Component</h3>
               <div class="bg-base-200 p-3 rounded text-sm font-mono">
                 <pre><MonteCarloSimulator
-  :pocket-cards="pocketCards"
-  :community-cards="communityCards"
-  :simulation-count="1000"
-  :opponent-count="2"
-  @complete="handleSimulationComplete"
-/></pre>
+   :pocket-cards="pocketCards"
+   :community-cards="communityCards"
+   :simulation-count="1000"
+   :opponent-count="2"
+   @complete="handleSimulationComplete"
+ /></pre>
               </div>
             </div>
           </div>
@@ -188,8 +188,20 @@
 </template>
 
 <script setup lang="ts">
-// Documentation view is primarily static content
-// No additional logic needed
+import { ref } from 'vue';
+
+// Documentation view is primarily static content - no reactive data needed
+// These variables are used in the template examples but don't exist in this component
+const selectedCards = ref([] as number[]);
+const pocketCards = ref([] as number[]);
+const communityCards = ref([] as number[]);
+const hideCards = ref(false);
+
+const handleCardSelection = () => {};
+const handleCardSelectionConfirm = () => {};
+const handleRevealCards = () => {};
+const handleEvaluateHand = () => {};
+const handleSimulationComplete = () => {};
 </script>
 
 <style scoped>

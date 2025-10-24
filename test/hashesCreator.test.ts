@@ -1,3 +1,4 @@
+import { describe, it, expect } from 'vitest';
 import * as kombinatoricsJs from '../src/lib/kombinatoricsjs/src/kombinatoricsjs';
 import {
   createRankOfFiveHashes,
@@ -13,7 +14,7 @@ import {
   getDoubleBellyBusterDrawsHands
 } from '../src/hashesCreator';
 import * as CONSTANTS from '../src/constants';
-import { hashRanking, hashRankingSeven } from '../src/interfaces'
+import { hashRanking, hashRankingSeven } from '../src/interfaces';
 
 /**something wrong in length and max rank value---> @TODO verify */
 describe('testing rank of 5 and 7 hashes creator', () => {
@@ -127,20 +128,20 @@ describe('testing hash of low Ato5: ', () => {
     expect(HASHES_OF_LOW8_on5.rankingInfos.length).toBe(56);
   });
 
-  let HASHES_OF_LOW9_on5;
-  it('low8 hash 56 hands', () => {
+  let HASHES_OF_LOW9_on5: hashRanking;
+  it('low9 hash 126 hands', () => {
     expect((HASHES_OF_LOW9_on5 = createRankOf5AceToFive_Low9())).toBeTruthy();
     expect(HASHES_OF_LOW9_on5.rankingInfos.length).toBe(126);
   });
 
   it('creates all ace to five ranking: ', () => {
-    let HASHES_OF_LOW_on5;
+    let HASHES_OF_LOW_on5: hashRanking;
     expect((HASHES_OF_LOW_on5 = createRankOf5AceToFive_Full())).toBeTruthy();
     expect(HASHES_OF_LOW_on5.rankingInfos.length).toBe(6175);
   });
 
   it('creates hash low8 for 7 cards hand', () => {
-    let HASHES_OF_LOW_on7;
+    let HASHES_OF_LOW_on7: hashRanking;
     expect(
       (HASHES_OF_LOW_on7 = createRankOf7AceToFive_Low(HASHES_OF_LOW8_on5, CONSTANTS.rankCards))
     ).toBeTruthy();
@@ -149,7 +150,7 @@ describe('testing hash of low Ato5: ', () => {
 
 describe('testing hash of low ace to six', () => {
   it('should create hashes for low ace to six', () => {
-    let HASHESATo6;
+    let HASHESATo6: hashRanking;
     expect((HASHESATo6 = createRankOf5AceToSix_Full())).toBeTruthy();
     expect(HASHESATo6.rankingInfos.length).toBe(7462);
     expect(Object.keys(HASHESATo6.HASHES).length).toBe(6175);

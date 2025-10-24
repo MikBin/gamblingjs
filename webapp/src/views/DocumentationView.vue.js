@@ -1,5 +1,21 @@
+/// <reference types="d:/projects/gamblingjs/webapp/node_modules/.vue-global-types/vue_3.3_0.d.ts" />
+import { ref } from 'vue';
+// Documentation view is primarily static content - no reactive data needed
+// These variables are used in the template examples but don't exist in this component
+const selectedCards = ref([]);
+const pocketCards = ref([]);
+const communityCards = ref([]);
+const hideCards = ref(false);
+const handleCardSelection = () => { };
+const handleCardSelectionConfirm = () => { };
+const handleRevealCards = () => { };
+const handleEvaluateHand = () => { };
+const handleSimulationComplete = () => { };
 debugger; /* PartiallyEnd: #3632/scriptSetup.vue */
-const __VLS_ctx = {};
+const __VLS_ctx = {
+    ...{},
+    ...{},
+};
 let __VLS_elements;
 let __VLS_components;
 let __VLS_directives;

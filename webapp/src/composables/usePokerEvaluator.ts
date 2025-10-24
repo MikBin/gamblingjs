@@ -1,4 +1,4 @@
-import { ref, computed, readonly } from 'vue';
+import { ref, readonly } from 'vue';
 import { FIVE_CARD_POKER_EVAL } from '../../../src/gamblingjs';
 import type { verboseHandInfo } from '../../../src/interfaces';
 
@@ -9,7 +9,6 @@ export interface PokerEvaluatorOptions {
 
 export const usePokerEvaluator = (options: PokerEvaluatorOptions = {}) => {
   const {
-    gameVariant = 'texas-holdem',
     evaluationType = 'high'
   } = options;
 

@@ -1,39 +1,63 @@
-import resolve from 'rollup-plugin-node-resolve'
-import commonjs from 'rollup-plugin-commonjs'
-import sourceMaps from 'rollup-plugin-sourcemaps'
-import camelCase from 'lodash.camelcase'
-import typescript from 'rollup-plugin-typescript2'
-import json from 'rollup-plugin-json'
-import { readFileSync } from 'fs'
+import resolve from '@rollup/plugin-node-resolve';
+import commonjs from '@rollup/plugin-commonjs';
+import sourceMaps from 'rollup-plugin-sourcemaps';
+import camelCase from 'lodash.camelcase';
+import typescript from 'rollup-plugin-typescript2';
+import json from '@rollup/plugin-json';
+import { readFileSync } from 'fs';
 
-const pkg = JSON.parse(readFileSync('./package.json', 'utf8'))
-
-const libraryName = 'gamblingjs'
+const pkg = JSON.parse(readFileSync('./package.json', 'utf8'));
+const libraryName = 'gamblingjs';
 
 export default {
   input: `src/index.ts`,
   output: [
-    { file: pkg.main, name: camelCase(libraryName), format: 'umd', sourcemap: true },
-    { file: pkg.module, format: 'es', sourcemap: true },
+    {
+      file: pkg.main,
+      name: camelCase(libraryName),
+      format: 'umd',
+      sourcemap: true,
+      exports: 'named'
+    },
+    {
+      file: pkg.module,
+      format: 'es',
+      sourcemap: true
+    },
   ],
-  // Indicate here external modules you don't wanna include in your bundle (i.e.: 'lodash')
-  external: [],
+  external: ['kombinatoricsjs'], // External dependency
   watch: {
     include: 'src/**',
   },
   plugins: [
-    // Allow json resolution
     json(),
-    // Compile TypeScript files
-    typescript({ useTsconfigDeclarationDir: true }),
-    // Allow bundling cjs modules (unlike webpack, rollup doesn't understand cjs)
-    commonjs(),
-    // Allow node_modules resolution, so you can use 'external' to control
-    // which external modules to include in the bundle
-    // https://github.com/rollup/rollup-plugin-node-resolve#usage
-    resolve(),
-
-    // Resolve source maps to the original source
+    typescript({
+      useTsconfigDeclarationDir: true,
+      typescript: require('typescript'),
+      cacheRoot: './node_modules/.cache/rts2_cache',
+      clean: true, // Clean cache automatically
+      rollupCommonJSResolveHack: false,
+      exclude: ['**/__tests__/**', '**/*.test.ts'],
+      check: true,
+      verbosity: 2,
+      // Specific to gamblingjs project
+      include: ['src/**/*'],
+      exclude: ['src/**/*.test.ts', 'src/**/*.spec.ts']
+    }),
+    commonjs({
+      include: /node_modules/,
+      exclude: ['esm']
+    }),
+    resolve({
+      browser: true,
+      preferBuiltins: false,
+      extensions: ['.js', '.ts', '.json']
+    }),
     sourceMaps(),
   ],
-}
+  treeshake: {
+    moduleSideEffects: false,
+    propertyReadSideEffects: false,
+    unknownGlobalSideEffects: false
+  }
+};

@@ -1,3 +1,4 @@
+/// <reference types="d:/projects/gamblingjs/webapp/node_modules/.vue-global-types/vue_3.3_0.d.ts" />
 import { computed } from 'vue';
 import Card from './Card.vue';
 const props = withDefaults(defineProps(), {
@@ -306,8 +307,7 @@ if (__VLS_ctx.showActions) {
 /** @type {__VLS_StyleScopedClasses['btn']} */ ;
 /** @type {__VLS_StyleScopedClasses['btn-success']} */ ;
 const __VLS_export = (await import('vue')).defineComponent({
-    __typeEmits: {},
-    __typeProps: {},
+    emits: {},
     props: {},
 });
 export default {};

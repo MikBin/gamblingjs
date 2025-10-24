@@ -1,4 +1,4 @@
-/// <reference types="d:/projects/gamblingjs/webapp/node_modules/.vue-global-types/vue_3.5_0.d.ts" />
+/// <reference types="d:/projects/gamblingjs/webapp/node_modules/.vue-global-types/vue_3.3_0.d.ts" />
 import { computed, ref, watch } from 'vue';
 import Card from './Card.vue';
 import { getAvailableCards, validateCardSelection } from '../utils/cardUtils';
@@ -273,8 +273,7 @@ if (__VLS_ctx.validationError) {
 /** @type {__VLS_StyleScopedClasses['h-6']} */ ;
 /** @type {__VLS_StyleScopedClasses['w-6']} */ ;
 const __VLS_export = (await import('vue')).defineComponent({
-    __typeEmits: {},
-    __typeProps: {},
+    emits: {},
     props: {},
 });
 export default {};

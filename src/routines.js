@@ -34,7 +34,7 @@ export const getVectorSum = (v) => {
     return s;
 };
 export const getFlushSuit7 = (v) => {
-    if (v.length != 7) {
+    if (v.length !== 7) {
         return -1;
     }
     let t = v[0];
@@ -56,7 +56,7 @@ export const getFlushSuit7 = (v) => {
     return t;
 };
 export const checkStraight5on7 = (arr) => {
-    if (arr.length != 7) {
+    if (arr.length !== 7) {
         return false;
     }
     let c = 0;

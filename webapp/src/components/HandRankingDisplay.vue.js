@@ -1,4 +1,4 @@
-/// <reference types="d:/projects/gamblingjs/webapp/node_modules/.vue-global-types/vue_3.5_0.d.ts" />
+/// <reference types="d:/projects/gamblingjs/webapp/node_modules/.vue-global-types/vue_3.3_0.d.ts" />
 const props = defineProps();
 const emit = defineEmits();
 // Helper methods
@@ -381,7 +381,7 @@ __VLS_asFunctionalElement(__VLS_elements.button, __VLS_elements.button)({
 /** @type {__VLS_StyleScopedClasses['btn']} */ ;
 /** @type {__VLS_StyleScopedClasses['btn-primary']} */ ;
 const __VLS_export = (await import('vue')).defineComponent({
-    __typeEmits: {},
-    __typeProps: {},
+    emits: {},
+    props: {},
 });
 export default {};

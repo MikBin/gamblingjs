@@ -1,19 +1,15 @@
+/// <reference types="d:/projects/gamblingjs/webapp/node_modules/.vue-global-types/vue_3.3_0.d.ts" />
 import { ref, computed, watch } from 'vue';
-import { usePokerStore } from '../stores/poker';
 import { usePokerEvaluator } from '../composables/usePokerEvaluator';
-import { useMonteCarlo } from '../composables/useMonteCarlo';
 import { useCardSelection } from '../composables/useCardSelection';
 import CardSelector from '../components/CardSelector.vue';
 import HandDisplay from '../components/HandDisplay.vue';
 import MonteCarloSimulator from '../components/MonteCarloSimulator.vue';
 import HandRankingDisplay from '../components/HandRankingDisplay.vue';
 import { formatCardString, getHandDescription, getHandStrengthPercentage } from '../utils/cardUtils';
-// Store
-const pokerStore = usePokerStore();
 // Composables
 const cardSelection = useCardSelection();
 const pokerEvaluator = usePokerEvaluator();
-const monteCarlo = useMonteCarlo();
 // State
 const gameVariant = ref('texas-holdem');
 const playerCount = ref(2);
@@ -210,8 +206,8 @@ const __VLS_8 = __VLS_asFunctionalComponent(HandDisplay, new HandDisplay({
     ...{ 'onReveal': {} },
     ...{ 'onClear': {} },
     ...{ 'onEvaluate': {} },
-    pocketCards: (__VLS_ctx.pocketCards),
-    communityCards: (__VLS_ctx.communityCards),
+    pocketCards: ([...__VLS_ctx.pocketCards]),
+    communityCards: ([...__VLS_ctx.communityCards]),
     handLabel: "Your Hand",
     hidePocketCards: (__VLS_ctx.hideCards),
     revealFrom: (__VLS_ctx.revealFrom),
@@ -220,8 +216,8 @@ const __VLS_9 = __VLS_8({
     ...{ 'onReveal': {} },
     ...{ 'onClear': {} },
     ...{ 'onEvaluate': {} },
-    pocketCards: (__VLS_ctx.pocketCards),
-    communityCards: (__VLS_ctx.communityCards),
+    pocketCards: ([...__VLS_ctx.pocketCards]),
+    communityCards: ([...__VLS_ctx.communityCards]),
     handLabel: "Your Hand",
     hidePocketCards: (__VLS_ctx.hideCards),
     revealFrom: (__VLS_ctx.revealFrom),
@@ -245,14 +241,14 @@ __VLS_asFunctionalElement(__VLS_elements.div, __VLS_elements.div)({
 const __VLS_17 = __VLS_asFunctionalComponent(MonteCarloSimulator, new MonteCarloSimulator({
     ...{ 'onComplete': {} },
     ...{ 'onProgress': {} },
-    pocketCards: (__VLS_ctx.pocketCards),
-    communityCards: (__VLS_ctx.communityCards),
+    pocketCards: ([...__VLS_ctx.pocketCards]),
+    communityCards: ([...__VLS_ctx.communityCards]),
 }));
 const __VLS_18 = __VLS_17({
     ...{ 'onComplete': {} },
     ...{ 'onProgress': {} },
-    pocketCards: (__VLS_ctx.pocketCards),
-    communityCards: (__VLS_ctx.communityCards),
+    pocketCards: ([...__VLS_ctx.pocketCards]),
+    communityCards: ([...__VLS_ctx.communityCards]),
 }, ...__VLS_functionalComponentArgsRest(__VLS_17));
 let __VLS_20;
 let __VLS_21;

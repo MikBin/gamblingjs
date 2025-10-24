@@ -17,8 +17,8 @@
         <!-- Middle Column - Hand Display -->
         <div class="lg:col-span-1">
           <HandDisplay
-            :pocket-cards="pocketCards"
-            :community-cards="communityCards"
+            :pocket-cards="[...pocketCards]"
+            :community-cards="[...communityCards]"
             hand-label="Your Hand"
             :hide-pocket-cards="hideCards"
             :reveal-from="revealFrom"
@@ -32,8 +32,8 @@
         <div class="lg:col-span-1 space-y-6">
           <!-- Monte Carlo Simulation -->
           <MonteCarloSimulator
-            :pocket-cards="pocketCards"
-            :community-cards="communityCards"
+            :pocket-cards="[...pocketCards]"
+            :community-cards="[...communityCards]"
             @complete="handleSimulationComplete"
             @progress="handleSimulationProgress"
           />
@@ -98,15 +98,13 @@
 
 <script setup lang="ts">
 import { ref, computed, watch } from 'vue';
-import { usePokerStore } from '../stores/poker';
 import { usePokerEvaluator } from '../composables/usePokerEvaluator';
-import { useMonteCarlo } from '../composables/useMonteCarlo';
 import { useCardSelection } from '../composables/useCardSelection';
 import CardSelector from '../components/CardSelector.vue';
 import HandDisplay from '../components/HandDisplay.vue';
 import MonteCarloSimulator from '../components/MonteCarloSimulator.vue';
 import HandRankingDisplay from '../components/HandRankingDisplay.vue';
-import { getCardFromIndex, formatCardString, getHandDescription, getHandStrengthPercentage } from '../utils/cardUtils';
+import { formatCardString, getHandDescription, getHandStrengthPercentage } from '../utils/cardUtils';
 
 interface EvaluationResults {
   handRanking: {
@@ -135,13 +133,9 @@ interface EvaluationResults {
   } | null;
 }
 
-// Store
-const pokerStore = usePokerStore();
-
 // Composables
 const cardSelection = useCardSelection();
 const pokerEvaluator = usePokerEvaluator();
-const monteCarlo = useMonteCarlo();
 
 // State
 const gameVariant = ref('texas-holdem');

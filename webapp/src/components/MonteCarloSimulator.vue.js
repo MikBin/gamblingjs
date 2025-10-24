@@ -1,3 +1,4 @@
+/// <reference types="d:/projects/gamblingjs/webapp/node_modules/.vue-global-types/vue_3.3_0.d.ts" />
 import { ref, computed } from 'vue';
 const props = defineProps();
 const emit = defineEmits();
@@ -537,7 +538,7 @@ if (__VLS_ctx.error) {
 /** @type {__VLS_StyleScopedClasses['h-6']} */ ;
 /** @type {__VLS_StyleScopedClasses['w-6']} */ ;
 const __VLS_export = (await import('vue')).defineComponent({
-    __typeEmits: {},
-    __typeProps: {},
+    emits: {},
+    props: {},
 });
 export default {};

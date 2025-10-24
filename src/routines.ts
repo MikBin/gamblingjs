@@ -31,21 +31,21 @@ export const getVectorSum = (v: number[]): number => {
   const l: number = v.length;
   let s: number = 0;
   for (let i: number = 0; i < l; i++) {
-    s += v[i];
+    s += v[i]!;
   }
   return s;
 };
 
 export const getFlushSuit7 = (v: number[]): number => {
-  if (v.length != 7) {
+  if (v.length !== 7) {
     return -1;
   }
-  let t: number = v[0];
+  let t: number = v[0]!;
   let c: number = 0;
   let i: number = 1;
   while (i < 7) {
     if (t !== v[i]) {
-      t = v[i];
+      t = v[i]!;
       c = 0;
     } else {
       c++;
@@ -58,7 +58,7 @@ export const getFlushSuit7 = (v: number[]): number => {
 };
 
 export const checkStraight5on7 = (arr: number[]): boolean => {
-  if (arr.length != 7) {
+  if (arr.length !== 7) {
     return false;
   }
   let c: number = 0;

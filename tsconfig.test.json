@@ -1,0 +1,44 @@
+{
+  "extends": "./tsconfig.json",
+  "compilerOptions": {
+    // Test Environment Settings
+    "target": "ES2020",
+    "module": "ESNext",
+    "moduleResolution": "node",
+    "types": ["vitest/globals", "node"],
+
+    // Relaxed Type Checking for Tests
+    "strict": true,
+    "noImplicitAny": false,
+    "strictNullChecks": true,
+    "noUnusedLocals": false,
+    "noUnusedParameters": false,
+
+    // Source Maps for Test Debugging
+    "sourceMap": true,
+    "inlineSourceMap": false,
+
+    // Output Configuration
+    "outDir": "./dist-test",
+    "rootDir": "./",
+
+    // Test-Specific Settings
+    "allowJs": true,
+    "checkJs": false,
+    "esModuleInterop": true,
+    "allowSyntheticDefaultImports": true,
+    "skipLibCheck": true,
+    "forceConsistentCasingInFileNames": true
+  },
+  "include": [
+    "src/**/*",
+    "src/**/*.ts",
+    "test/**/*",
+    "test/**/*.ts"
+  ],
+  "exclude": [
+    "node_modules",
+    "dist",
+    "dist-test"
+  ]
+}

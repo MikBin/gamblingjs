@@ -16,8 +16,7 @@ export interface Card {
 export const useCardSelection = (options: CardSelectionOptions = {}) => {
   const {
     maxPocketCards = 2,
-    maxCommunityCards = 5,
-    allowDuplicates = false
+    maxCommunityCards = 5
   } = options;
 
   const selectedPocketCards = ref<number[]>([]);

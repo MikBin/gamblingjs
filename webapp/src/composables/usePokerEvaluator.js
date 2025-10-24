@@ -1,7 +1,7 @@
 import { ref, readonly } from 'vue';
 import { FIVE_CARD_POKER_EVAL } from '../../../src/gamblingjs';
 export const usePokerEvaluator = (options = {}) => {
-    const { gameVariant = 'texas-holdem', evaluationType = 'high' } = options;
+    const { evaluationType = 'high' } = options;
     const isEvaluating = ref(false);
     const lastEvaluation = ref(null);
     const error = ref(null);

@@ -94,8 +94,7 @@ else {
 /** @type {__VLS_StyleScopedClasses['object-cover']} */ ;
 /** @type {__VLS_StyleScopedClasses['rounded-lg']} */ ;
 const __VLS_export = (await import('vue')).defineComponent({
-    __typeEmits: {},
-    __typeProps: {},
+    emits: {},
     props: {},
 });
 export default {};

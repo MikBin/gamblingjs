@@ -1,6 +1,6 @@
 import { ref, computed, readonly } from 'vue';
 export const useCardSelection = (options = {}) => {
-    const { maxPocketCards = 2, maxCommunityCards = 5, allowDuplicates = false } = options;
+    const { maxPocketCards = 2, maxCommunityCards = 5 } = options;
     const selectedPocketCards = ref([]);
     const selectedCommunityCards = ref([]);
     const hideCards = ref(false);
