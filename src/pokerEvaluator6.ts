@@ -1,4 +1,3 @@
-
 import * as kombinatoricsJs from 'kombinatoricsjs';
 import {
   bfBestOfFiveOnXindexed,
@@ -8,14 +7,10 @@ import {
   handOfFiveEvalHiLow9Indexed,
   handOfFiveEvalHiLow8Indexed,
   bestFiveOnXHiLowIndexed,
-  getHandInfo5onX
-} from './pokerEvaluator5'
+  getHandInfo5onX,
+} from './pokerEvaluator5';
 
-import {
-  fullCardsDeckHash_5,
-  FLUSH_MASK,
-  HIGH_MAX_RANK
-} from './constants';
+import { fullCardsDeckHash_5, FLUSH_MASK, HIGH_MAX_RANK } from './constants';
 import {
   handInfo,
   hiLowRank,
@@ -23,7 +18,7 @@ import {
   singleRankFiveCardHandEvalFn,
   hiLowRankFiveCardHandEvalFn,
   hashRanking,
-  verboseHandInfo
+  verboseHandInfo,
 } from './interfaces';
 
 /** @function handOfSixEvalIndexed
@@ -81,61 +76,61 @@ export const handOfSixEvalHiLow9Indexed = (...hand: number[]): hiLowRank => {
 };
 
 /**
- * 
+ *
  * VERBOSE
- * 
+ *
  */
 
 /** @function _handOfSixEvalIndexed_Verbose
-*
-* @param {Array:Number[]} array of 6 cards making up an hand
-* @returns {verboseHandInfo} hand info about the winning subgroup of 5 cards
-*/
+ *
+ * @param {Array:Number[]} array of 6 cards making up an hand
+ * @returns {verboseHandInfo} hand info about the winning subgroup of 5 cards
+ */
 export const _handOfSixEvalIndexed_Verbose = (hand: number[]): verboseHandInfo => {
-  return getHandInfo5onX(hand, "high");
+  return getHandInfo5onX(hand, 'high');
 };
 
 /** @function _handOfSixEvalLowBall27Indexed_Verbose
-*
-* @param {Array:Number[]} array of 6 cards making up an hand
-* @returns {verboseHandInfo} hand info about the winning subgroup of 5 cards
-*/
+ *
+ * @param {Array:Number[]} array of 6 cards making up an hand
+ * @returns {verboseHandInfo} hand info about the winning subgroup of 5 cards
+ */
 export const _handOfSixEvalLowBall27Indexed_Verbose = (hand: number[]): verboseHandInfo => {
-  return getHandInfo5onX(hand, "2to7");
+  return getHandInfo5onX(hand, '2to7');
 };
 
 /** @function _handOfSixEvalAto5Indexed_Verbose
-*
-* @param {Array:Number[]} array of 6 cards making up an hand
-* @returns {verboseHandInfo} hand info about the winning subgroup of 5 cards
-*/
+ *
+ * @param {Array:Number[]} array of 6 cards making up an hand
+ * @returns {verboseHandInfo} hand info about the winning subgroup of 5 cards
+ */
 export const _handOfSixEvalAto5Indexed_Verbose = (hand: number[]): verboseHandInfo => {
-  return getHandInfo5onX(hand, "Ato5");
+  return getHandInfo5onX(hand, 'Ato5');
 };
 
 /** @function _handOfSixEvalAto6Indexed_Verbose
-*
-* @param {Array:Number[]} array of 6 cards making up an hand
-* @returns {verboseHandInfo} hand info about the winning subgroup of 5 cards
-*/
+ *
+ * @param {Array:Number[]} array of 6 cards making up an hand
+ * @returns {verboseHandInfo} hand info about the winning subgroup of 5 cards
+ */
 export const _handOfSixEvalAto6Indexed_Verbose = (hand: number[]): verboseHandInfo => {
-  return getHandInfo5onX(hand, "Ato6");
+  return getHandInfo5onX(hand, 'Ato6');
 };
 
 /** @function _handOfSixEvalLow8_Verbose
-*
-* @param {Array:Number[]} array of 6 cards making up an hand
-* @returns {verboseHandInfo} hand info about the winning subgroup of 5 cards
-*/
+ *
+ * @param {Array:Number[]} array of 6 cards making up an hand
+ * @returns {verboseHandInfo} hand info about the winning subgroup of 5 cards
+ */
 export const _handOfSixEvalLow8_Verbose = (hand: number[]): verboseHandInfo => {
-  return getHandInfo5onX(hand, "low8");
+  return getHandInfo5onX(hand, 'low8');
 };
 
 /** @function _handOfSixEvalLow9_Verbose
-*
-* @param {Array:Number[]} array of 6 cards making up an hand
-* @returns {verboseHandInfo} hand info about the winning subgroup of 5 cards
-*/
+ *
+ * @param {Array:Number[]} array of 6 cards making up an hand
+ * @returns {verboseHandInfo} hand info about the winning subgroup of 5 cards
+ */
 export const _handOfSixEvalLow9_Verbose = (hand: number[]): verboseHandInfo => {
-  return getHandInfo5onX(hand, "low9");
+  return getHandInfo5onX(hand, 'low9');
 };

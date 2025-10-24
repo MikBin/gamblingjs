@@ -17,7 +17,7 @@ import {
   FLUSH_CHECK_SEVEN_ATO6,
   FLUSH_RANK_SEVEN_ATO6,
   HASH_RANK_SEVEN_ATO6,
-  FAST_HASH_DEFINED
+  FAST_HASH_DEFINED,
 } from './pokerHashes7';
 
 import {
@@ -25,14 +25,18 @@ import {
   HASHES_OF_FIVE,
   HASHES_OF_FIVE_Ato6,
   HASHES_OF_FIVE_LOW_Ato5,
-  HASHES_OF_FIVE_LOW8
-} from './pokerHashes5'
+  HASHES_OF_FIVE_LOW8,
+} from './pokerHashes5';
 
 import {
-  bfBestOfFiveOnXindexed, handOfFiveEvalLowBall27Indexed,
-  handOfFiveEvalLow_Ato5Indexed, handOfFiveEvalLow_Ato6Indexed,
-  bestFiveOnXHiLowIndexed, handOfFiveEvalHiLow8Indexed, handOfFiveEvalHiLow9Indexed
-} from './pokerEvaluator5'
+  bfBestOfFiveOnXindexed,
+  handOfFiveEvalLowBall27Indexed,
+  handOfFiveEvalLow_Ato5Indexed,
+  handOfFiveEvalLow_Ato6Indexed,
+  bestFiveOnXHiLowIndexed,
+  handOfFiveEvalHiLow8Indexed,
+  handOfFiveEvalHiLow9Indexed,
+} from './pokerEvaluator5';
 
 import {
   fullCardsDeckHash_5,
@@ -43,7 +47,7 @@ import {
   rankCards_low8,
   rankCards_low9,
   rankCards_low,
-  HIGH_MAX_RANK
+  HIGH_MAX_RANK,
 } from './constants';
 import {
   handInfo,
@@ -54,11 +58,11 @@ import {
   hiLowRankFiveCardHandEvalFn,
   MultiNumberMap,
   hashRankingSeven,
-  hashRanking
+  hashRanking,
 } from './interfaces';
 import { handToCardsSymbols, filterWinningCards } from './routines';
 
-import * as kombinatoricsJs from 'kombinatoricsjs'
+import * as kombinatoricsJs from 'kombinatoricsjs';
 
 /** @function handOfSevenEval
  *
@@ -72,11 +76,11 @@ export const handOfSevenEval = (
   c4: number,
   c5: number,
   c6: number,
-  c7: number
+  c7: number,
 ): number => {
-  let keySum: number = c1 + c2 + c3 + c4 + c5 + c6 + c7;
+  const keySum: number = c1 + c2 + c3 + c4 + c5 + c6 + c7;
   let handRank: number = 0;
-  let flush_check_key: number = FLUSH_CHECK_SEVEN[keySum & FLUSH_MASK];
+  const flush_check_key: number = FLUSH_CHECK_SEVEN[keySum & FLUSH_MASK];
   if (flush_check_key >= 0) {
     /**no full house or quads possible ---> can return flush_rank */
     let flushyCardsCounter = 0;
@@ -132,11 +136,11 @@ export const handOfSevenEvalLowBall27 = (
   c4: number,
   c5: number,
   c6: number,
-  c7: number
+  c7: number,
 ): number => {
-  let keySum: number = c1 + c2 + c3 + c4 + c5 + c6 + c7;
+  const keySum: number = c1 + c2 + c3 + c4 + c5 + c6 + c7;
   let handRank: number = 0;
-  let flush_check_key: number = FLUSH_CHECK_SEVEN_LOWBALL27[keySum & FLUSH_MASK];
+  const flush_check_key: number = FLUSH_CHECK_SEVEN_LOWBALL27[keySum & FLUSH_MASK];
   if (flush_check_key >= 0) {
     /**only seven card flush possible in lowball 2-7. in case of 6 or 5 flushy cards any high card or pair would be a better hand */
     handRank = FLUSH_RANK_SEVEN_LOWBALL27[7][keySum >>> 9];
@@ -158,7 +162,7 @@ export const handOfSevenEvalLowBall27Indexed = (
   c4: number,
   c5: number,
   c6: number,
-  c7: number
+  c7: number,
 ): number => {
   return handOfSevenEvalLowBall27(
     fullCardsDeckHash_7[c1],
@@ -167,7 +171,7 @@ export const handOfSevenEvalLowBall27Indexed = (
     fullCardsDeckHash_7[c4],
     fullCardsDeckHash_7[c5],
     fullCardsDeckHash_7[c6],
-    fullCardsDeckHash_7[c7]
+    fullCardsDeckHash_7[c7],
   );
 };
 
@@ -183,11 +187,11 @@ export const handOfSevenEval_Ato6 = (
   c4: number,
   c5: number,
   c6: number,
-  c7: number
+  c7: number,
 ): number => {
-  let keySum: number = c1 + c2 + c3 + c4 + c5 + c6 + c7;
+  const keySum: number = c1 + c2 + c3 + c4 + c5 + c6 + c7;
   let handRank: number = 0;
-  let flush_check_key: number = FLUSH_CHECK_SEVEN_ATO6[keySum & FLUSH_MASK];
+  const flush_check_key: number = FLUSH_CHECK_SEVEN_ATO6[keySum & FLUSH_MASK];
   if (flush_check_key >= 0) {
     handRank = FLUSH_RANK_SEVEN_ATO6[keySum >>> 9];
   } else {
@@ -209,7 +213,7 @@ export const handOfSevenEval_Ato6Indexed = (
   c4: number,
   c5: number,
   c6: number,
-  c7: number
+  c7: number,
 ): number => {
   return handOfSevenEval_Ato6(
     fullCardsDeckHash_7[c1],
@@ -218,7 +222,7 @@ export const handOfSevenEval_Ato6Indexed = (
     fullCardsDeckHash_7[c4],
     fullCardsDeckHash_7[c5],
     fullCardsDeckHash_7[c6],
-    fullCardsDeckHash_7[c7]
+    fullCardsDeckHash_7[c7],
   );
 };
 
@@ -236,16 +240,16 @@ export const handOfSevenEvalHiLow = (
   c4: number,
   c5: number,
   c6: number,
-  c7: number
+  c7: number,
 ): hiLowRank => {
-  let keySum: number = c1 + c2 + c3 + c4 + c5 + c6 + c7;
-  let rankKey: number = keySum >>> 9;
-  let low = LOW_RANK_HASH[rankKey];
-  let bothRank: hiLowRank = {
+  const keySum: number = c1 + c2 + c3 + c4 + c5 + c6 + c7;
+  const rankKey: number = keySum >>> 9;
+  const low = LOW_RANK_HASH[rankKey];
+  const bothRank: hiLowRank = {
     hi: 0,
-    low: isNaN(low) ? -1 : low
+    low: isNaN(low) ? -1 : low,
   };
-  let flush_check_key: number = FLUSH_CHECK_SEVEN[keySum & FLUSH_MASK];
+  const flush_check_key: number = FLUSH_CHECK_SEVEN[keySum & FLUSH_MASK];
   if (flush_check_key >= 0) {
     let flushyCardsCounter: number = 0;
 
@@ -299,11 +303,11 @@ export const handOfSevenEvalLow_Ato5 = (
   c4: number,
   c5: number,
   c6: number,
-  c7: number
+  c7: number,
 ): number => {
-  let keySum: number = c1 + c2 + c3 + c4 + c5 + c6 + c7;
-  let rankKey: number = keySum >>> 9;
-  let rank = HASH_RANK_SEVEN_LOW_Ato5[rankKey];
+  const keySum: number = c1 + c2 + c3 + c4 + c5 + c6 + c7;
+  const rankKey: number = keySum >>> 9;
+  const rank = HASH_RANK_SEVEN_LOW_Ato5[rankKey];
   return rank;
 };
 
@@ -320,7 +324,7 @@ export const handOfSevenEvalLow_Ato5Indexed = (
   c4: number,
   c5: number,
   c6: number,
-  c7: number
+  c7: number,
 ): number => {
   return handOfSevenEvalLow_Ato5(
     fullCardsDeckHash_7[c1],
@@ -329,7 +333,7 @@ export const handOfSevenEvalLow_Ato5Indexed = (
     fullCardsDeckHash_7[c4],
     fullCardsDeckHash_7[c5],
     fullCardsDeckHash_7[c6],
-    fullCardsDeckHash_7[c7]
+    fullCardsDeckHash_7[c7],
   );
 };
 
@@ -346,7 +350,7 @@ export const handOfSevenEvalHiLow8 = (
   c4: number,
   c5: number,
   c6: number,
-  c7: number
+  c7: number,
 ): hiLowRank => {
   return handOfSevenEvalHiLow(HASH_RANK_SEVEN_LOW8, c1, c2, c3, c4, c5, c6, c7);
 };
@@ -364,7 +368,7 @@ export const handOfSevenEvalHiLow8Indexed = (
   c4: number,
   c5: number,
   c6: number,
-  c7: number
+  c7: number,
 ): hiLowRank => {
   return handOfSevenEvalHiLow8(
     fullCardsDeckHash_7[c1],
@@ -373,7 +377,7 @@ export const handOfSevenEvalHiLow8Indexed = (
     fullCardsDeckHash_7[c4],
     fullCardsDeckHash_7[c5],
     fullCardsDeckHash_7[c6],
-    fullCardsDeckHash_7[c7]
+    fullCardsDeckHash_7[c7],
   );
 };
 
@@ -390,7 +394,7 @@ export const handOfSevenEvalHiLow9 = (
   c4: number,
   c5: number,
   c6: number,
-  c7: number
+  c7: number,
 ): hiLowRank => {
   return handOfSevenEvalHiLow(HASH_RANK_SEVEN_LOW9, c1, c2, c3, c4, c5, c6, c7);
 };
@@ -408,7 +412,7 @@ export const handOfSevenEvalHiLow9Indexed = (
   c4: number,
   c5: number,
   c6: number,
-  c7: number
+  c7: number,
 ): hiLowRank => {
   return handOfSevenEvalHiLow9(
     fullCardsDeckHash_7[c1],
@@ -417,7 +421,7 @@ export const handOfSevenEvalHiLow9Indexed = (
     fullCardsDeckHash_7[c4],
     fullCardsDeckHash_7[c5],
     fullCardsDeckHash_7[c6],
-    fullCardsDeckHash_7[c7]
+    fullCardsDeckHash_7[c7],
   );
 };
 
@@ -433,7 +437,7 @@ export const handOfSevenEvalIndexed = (
   c4: number,
   c5: number,
   c6: number,
-  c7: number
+  c7: number,
 ): number => {
   return handOfSevenEval(
     fullCardsDeckHash_7[c1],
@@ -442,11 +446,11 @@ export const handOfSevenEvalIndexed = (
     fullCardsDeckHash_7[c4],
     fullCardsDeckHash_7[c5],
     fullCardsDeckHash_7[c6],
-    fullCardsDeckHash_7[c7]
+    fullCardsDeckHash_7[c7],
   );
 };
 
-/** @function handOfSevenEval_Verbose 
+/** @function handOfSevenEval_Verbose
  *
  * @param {Number} c1...c7 cards hash from CONSTANTS.fullCardsDeckHash_7
  * @returns {verboseHandInfo} verbose information about best hand of 5 cards on seven
@@ -462,16 +466,16 @@ export const handOfSevenEval_Verbose = (
   SEVEN_EVAL_HASH: hashRankingSeven = HASHES_OF_FIVE_ON_SEVEN,
   FIVE_EVAL_HASH: hashRanking = HASHES_OF_FIVE,
   USE_MULTI_FLUSH_RANK: boolean = true,
-  INVERTED: boolean = false
+  INVERTED: boolean = false,
 ): verboseHandInfo => {
-  let _FLUSH_CHECK_SEVEN = SEVEN_EVAL_HASH.FLUSH_CHECK_KEYS;
-  let _FLUSH_RANK_SEVEN = USE_MULTI_FLUSH_RANK
+  const _FLUSH_CHECK_SEVEN = SEVEN_EVAL_HASH.FLUSH_CHECK_KEYS;
+  const _FLUSH_RANK_SEVEN = USE_MULTI_FLUSH_RANK
     ? SEVEN_EVAL_HASH.MULTI_FLUSH_RANK_HASHES
     : SEVEN_EVAL_HASH.FLUSH_RANK_HASHES;
-  let _HASH_RANK_SEVEN = SEVEN_EVAL_HASH.HASHES;
-  let keySum: number = c1 + c2 + c3 + c4 + c5 + c6 + c7;
+  const _HASH_RANK_SEVEN = SEVEN_EVAL_HASH.HASHES;
+  const keySum: number = c1 + c2 + c3 + c4 + c5 + c6 + c7;
   let handRank: number = 0;
-  let flush_check_key: number = _FLUSH_CHECK_SEVEN[keySum & FLUSH_MASK];
+  const flush_check_key: number = _FLUSH_CHECK_SEVEN[keySum & FLUSH_MASK];
   let flushRankKey = 0;
   let handVector = [c1, c2, c3, c4, c5, c6, c7];
   if (flush_check_key >= 0) {
@@ -479,17 +483,18 @@ export const handOfSevenEval_Verbose = (
       return (c & FLUSH_MASK) == flush_check_key;
     });
 
-    handVector.forEach(c => (flushRankKey += c));
+    handVector.forEach((c) => (flushRankKey += c));
 
     handRank = USE_MULTI_FLUSH_RANK
-      //@ts-ignore
-      ? _FLUSH_RANK_SEVEN[handVector.length][flushRankKey >>> 9] : _FLUSH_RANK_SEVEN[flushRankKey >>> 9];
+      ? //@ts-ignore
+        _FLUSH_RANK_SEVEN[handVector.length][flushRankKey >>> 9]
+      : _FLUSH_RANK_SEVEN[flushRankKey >>> 9];
   } else {
     handRank = _HASH_RANK_SEVEN[keySum >>> 9];
     flushRankKey = -1;
   }
 
-  let handIndexes = handVector.map(c => cardHashToDescription_7[c]);
+  const handIndexes = handVector.map((c) => cardHashToDescription_7[c]);
   /**NB if undefined hand rank prepare for unqualified information */
   if (handRank !== 0 && !handRank) {
     return {
@@ -498,10 +503,10 @@ export const handOfSevenEval_Verbose = (
       faces: handToCardsSymbols(<number[]>handIndexes),
       handGroup: 'unqualified',
       winningCards: [],
-      flushSuit: 'unqualified'
+      flushSuit: 'unqualified',
     };
   }
-  let wHand = FIVE_EVAL_HASH.rankingInfos[INVERTED ? HIGH_MAX_RANK - handRank : handRank].hand;
+  const wHand = FIVE_EVAL_HASH.rankingInfos[INVERTED ? HIGH_MAX_RANK - handRank : handRank].hand;
 
   return {
     handRank: handRank,
@@ -513,7 +518,7 @@ export const handOfSevenEval_Verbose = (
     /**in low8 or 9 there could be more than 5 cards ex AAA2345--->apply procedure to remove duplicates when highliting cards
      * by taking the first of each rank encountered (starting from communitaire cards)
      */
-    flushSuit: flushRankKey > -1 ? flushHashToName[flush_check_key] : 'no flush'
+    flushSuit: flushRankKey > -1 ? flushHashToName[flush_check_key] : 'no flush',
   };
 };
 
@@ -524,7 +529,7 @@ export const handOfSevenEvalLowBall27Indexed_Verbose = (
   c4: number,
   c5: number,
   c6: number,
-  c7: number
+  c7: number,
 ): verboseHandInfo => {
   return handOfSevenEval_Verbose(
     fullCardsDeckHash_7[c1],
@@ -537,7 +542,7 @@ export const handOfSevenEvalLowBall27Indexed_Verbose = (
     HASHES_OF_FIVE_ON_SEVEN_LOWBALL27,
     HASHES_OF_FIVE,
     true,
-    true
+    true,
   );
 };
 
@@ -548,7 +553,7 @@ export const handOfSevenEvalAto6Indexed_Verbose = (
   c4: number,
   c5: number,
   c6: number,
-  c7: number
+  c7: number,
 ): verboseHandInfo => {
   return handOfSevenEval_Verbose(
     fullCardsDeckHash_7[c1],
@@ -560,7 +565,7 @@ export const handOfSevenEvalAto6Indexed_Verbose = (
     fullCardsDeckHash_7[c7],
     HASHES_OF_SEVEN_LOW_Ato6,
     HASHES_OF_FIVE_Ato6,
-    false
+    false,
   );
 };
 
@@ -579,7 +584,7 @@ export const handOfSevenEvalIndexed_Verbose = (
   c7: number,
   SEVEN_EVAL_HASH: hashRankingSeven = HASHES_OF_FIVE_ON_SEVEN,
   FIVE_EVAL_HASH: hashRanking = HASHES_OF_FIVE,
-  USE_MULTI_FLUSH_RANK: boolean = true
+  USE_MULTI_FLUSH_RANK: boolean = true,
 ): verboseHandInfo => {
   return handOfSevenEval_Verbose(
     fullCardsDeckHash_7[c1],
@@ -591,7 +596,7 @@ export const handOfSevenEvalIndexed_Verbose = (
     fullCardsDeckHash_7[c7],
     SEVEN_EVAL_HASH,
     FIVE_EVAL_HASH,
-    USE_MULTI_FLUSH_RANK
+    USE_MULTI_FLUSH_RANK,
   );
 };
 
@@ -602,7 +607,7 @@ export const handOfSevenEvalAto5Indexed_Verbose = (
   c4: number,
   c5: number,
   c6: number,
-  c7: number
+  c7: number,
 ): verboseHandInfo => {
   return handOfSevenEval_Verbose(
     fullCardsDeckHash_7[c1],
@@ -614,7 +619,7 @@ export const handOfSevenEvalAto5Indexed_Verbose = (
     fullCardsDeckHash_7[c7],
     HASHES_OF_SEVEN_LOW_Ato5,
     HASHES_OF_FIVE_LOW_Ato5,
-    false
+    false,
   );
 };
 
@@ -625,7 +630,7 @@ export const handOfSevenEvalLow8Indexed_Verbose = (
   c4: number,
   c5: number,
   c6: number,
-  c7: number
+  c7: number,
 ): verboseHandInfo => {
   return handOfSevenEval_Verbose(
     fullCardsDeckHash_7[c1],
@@ -637,7 +642,7 @@ export const handOfSevenEvalLow8Indexed_Verbose = (
     fullCardsDeckHash_7[c7],
     HASHES_OF_SEVEN_LOW8,
     HASHES_OF_FIVE_LOW8,
-    false
+    false,
   );
 };
 
@@ -648,7 +653,7 @@ export const handOfSevenEvalLow9Indexed_Verbose = (
   c4: number,
   c5: number,
   c6: number,
-  c7: number
+  c7: number,
 ): verboseHandInfo => {
   return handOfSevenEval_Verbose(
     fullCardsDeckHash_7[c1],
@@ -660,15 +665,15 @@ export const handOfSevenEvalLow9Indexed_Verbose = (
     fullCardsDeckHash_7[c7],
     HASHES_OF_SEVEN_LOW9,
     HASHES_OF_FIVE_LOW9,
-    false
+    false,
   );
 };
 
-/** 
- * 
+/**
+ *
  * slow brute force versions
- * 
- * 
+ *
+ *
  *  */
 
 /** @function _handOfSevenEvalIndexed

@@ -11,15 +11,10 @@ import {
   HASHES_OF_FIVE_LOW_Ato5,
   HASHES_OF_FIVE_Ato6,
   HASHES_OF_FIVE_LOW8,
-  HASHES_OF_FIVE_LOW9
+  HASHES_OF_FIVE_LOW9,
 } from './pokerHashes5';
 
-import {
-  fullCardsDeckHash_5,
-  FLUSH_MASK,
-  HIGH_MAX_RANK,
-  gameType
-} from './constants';
+import { fullCardsDeckHash_5, FLUSH_MASK, HIGH_MAX_RANK, gameType } from './constants';
 import {
   hiLowRank,
   NumberMap,
@@ -29,12 +24,12 @@ import {
   gameTypesEvalFunction,
   verboseHandInfo,
   HiLowVerboseHandInfo,
-  handInfo
+  handInfo,
 } from './interfaces';
 
-import { filterWinningCards, getFlushSuitFromIndex } from './routines'
+import { filterWinningCards, getFlushSuitFromIndex } from './routines';
 
-import * as kombinatoricsJs from 'kombinatoricsjs'
+import * as kombinatoricsJs from 'kombinatoricsjs';
 
 /** @function handOfFiveEval
  *
@@ -46,11 +41,11 @@ export const handOfFiveEval: singleRankFiveCardHandEvalFn = (
   c2: number,
   c3: number,
   c4: number,
-  c5: number
+  c5: number,
 ): number => {
-  let keySum: number = c1 + c2 + c3 + c4 + c5;
-  let rankKey: number = keySum >>> 9;
-  let flush_check_key: number = FLUSH_CHECK_FIVE[keySum & FLUSH_MASK];
+  const keySum: number = c1 + c2 + c3 + c4 + c5;
+  const rankKey: number = keySum >>> 9;
+  const flush_check_key: number = FLUSH_CHECK_FIVE[keySum & FLUSH_MASK];
   if (flush_check_key >= 0) {
     return FLUSH_RANK_FIVE[rankKey];
   }
@@ -70,16 +65,16 @@ export const handOfFiveEvalHiLow = (
   c2: number,
   c3: number,
   c4: number,
-  c5: number
+  c5: number,
 ): hiLowRank => {
-  let keySum: number = c1 + c2 + c3 + c4 + c5;
-  let rankKey: number = keySum >>> 9;
-  let low = LOW_RANK_HASH[rankKey];
-  let bothRank: hiLowRank = {
+  const keySum: number = c1 + c2 + c3 + c4 + c5;
+  const rankKey: number = keySum >>> 9;
+  const low = LOW_RANK_HASH[rankKey];
+  const bothRank: hiLowRank = {
     hi: 0,
-    low: isNaN(low) ? -1 : low
+    low: isNaN(low) ? -1 : low,
   };
-  let flush_check_key: number = FLUSH_CHECK_FIVE[keySum & FLUSH_MASK];
+  const flush_check_key: number = FLUSH_CHECK_FIVE[keySum & FLUSH_MASK];
   if (flush_check_key >= 0) {
     bothRank.hi = FLUSH_RANK_FIVE[rankKey];
   } else {
@@ -99,7 +94,7 @@ export const handOfFiveEvalHiLow8: hiLowRankFiveCardHandEvalFn = (
   c2: number,
   c3: number,
   c4: number,
-  c5: number
+  c5: number,
 ): hiLowRank => {
   return handOfFiveEvalHiLow(HASH_RANK_FIVE_LOW8, c1, c2, c3, c4, c5);
 };
@@ -109,14 +104,14 @@ export const handOfFiveEvalHiLow8Indexed: hiLowRankFiveCardHandEvalFn = (
   c2: number,
   c3: number,
   c4: number,
-  c5: number
+  c5: number,
 ): hiLowRank => {
   return handOfFiveEvalHiLow8(
     fullCardsDeckHash_5[c1],
     fullCardsDeckHash_5[c2],
     fullCardsDeckHash_5[c3],
     fullCardsDeckHash_5[c4],
-    fullCardsDeckHash_5[c5]
+    fullCardsDeckHash_5[c5],
   );
 };
 
@@ -131,7 +126,7 @@ export const handOfFiveEvalHiLow9: hiLowRankFiveCardHandEvalFn = (
   c2: number,
   c3: number,
   c4: number,
-  c5: number
+  c5: number,
 ): hiLowRank => {
   return handOfFiveEvalHiLow(HASH_RANK_FIVE_LOW9, c1, c2, c3, c4, c5);
 };
@@ -141,14 +136,14 @@ export const handOfFiveEvalHiLow9Indexed: hiLowRankFiveCardHandEvalFn = (
   c2: number,
   c3: number,
   c4: number,
-  c5: number
+  c5: number,
 ): hiLowRank => {
   return handOfFiveEvalHiLow9(
     fullCardsDeckHash_5[c1],
     fullCardsDeckHash_5[c2],
     fullCardsDeckHash_5[c3],
     fullCardsDeckHash_5[c4],
-    fullCardsDeckHash_5[c5]
+    fullCardsDeckHash_5[c5],
   );
 };
 
@@ -162,11 +157,11 @@ export const handOfFiveEvalLow_Ato5: singleRankFiveCardHandEvalFn = (
   c2: number,
   c3: number,
   c4: number,
-  c5: number
+  c5: number,
 ): number => {
-  let keySum: number = c1 + c2 + c3 + c4 + c5;
-  let rankKey: number = keySum >>> 9;
-  let rank = HASH_RANK_FIVE_LOW_Ato5[rankKey];
+  const keySum: number = c1 + c2 + c3 + c4 + c5;
+  const rankKey: number = keySum >>> 9;
+  const rank = HASH_RANK_FIVE_LOW_Ato5[rankKey];
   return rank;
 };
 
@@ -180,14 +175,14 @@ export const handOfFiveEvalLow_Ato5Indexed: singleRankFiveCardHandEvalFn = (
   c2: number,
   c3: number,
   c4: number,
-  c5: number
+  c5: number,
 ): number => {
   return handOfFiveEvalLow_Ato5(
     fullCardsDeckHash_5[c1],
     fullCardsDeckHash_5[c2],
     fullCardsDeckHash_5[c3],
     fullCardsDeckHash_5[c4],
-    fullCardsDeckHash_5[c5]
+    fullCardsDeckHash_5[c5],
   );
 };
 
@@ -196,11 +191,11 @@ export const handOfFiveEvalLow_Ato6: singleRankFiveCardHandEvalFn = (
   c2: number,
   c3: number,
   c4: number,
-  c5: number
+  c5: number,
 ): number => {
-  let keySum: number = c1 + c2 + c3 + c4 + c5;
-  let rankKey: number = keySum >>> 9;
-  let flush_check_key: number = FLUSH_CHECK_FIVE[keySum & FLUSH_MASK];
+  const keySum: number = c1 + c2 + c3 + c4 + c5;
+  const rankKey: number = keySum >>> 9;
+  const flush_check_key: number = FLUSH_CHECK_FIVE[keySum & FLUSH_MASK];
   if (flush_check_key >= 0) {
     return FLUSH_RANK_FIVE_ATO6[rankKey];
   }
@@ -213,14 +208,14 @@ export const handOfFiveEvalLow_Ato6Indexed: singleRankFiveCardHandEvalFn = (
   c2: number,
   c3: number,
   c4: number,
-  c5: number
+  c5: number,
 ): number => {
   return handOfFiveEvalLow_Ato6(
     fullCardsDeckHash_5[c1],
     fullCardsDeckHash_5[c2],
     fullCardsDeckHash_5[c3],
     fullCardsDeckHash_5[c4],
-    fullCardsDeckHash_5[c5]
+    fullCardsDeckHash_5[c5],
   );
 };
 
@@ -234,7 +229,7 @@ export const handOfFiveEvalLowBall27: singleRankFiveCardHandEvalFn = (
   c2: number,
   c3: number,
   c4: number,
-  c5: number
+  c5: number,
 ): number => {
   return HIGH_MAX_RANK - handOfFiveEval(c1, c2, c3, c4, c5);
 };
@@ -249,7 +244,7 @@ export const handOfFiveEvalLowBall27Indexed: singleRankFiveCardHandEvalFn = (
   c2: number,
   c3: number,
   c4: number,
-  c5: number
+  c5: number,
 ): number => {
   return HIGH_MAX_RANK - handOfFiveEvalIndexed(c1, c2, c3, c4, c5);
 };
@@ -264,32 +259,34 @@ export const handOfFiveEvalIndexed: singleRankFiveCardHandEvalFn = (
   c2: number,
   c3: number,
   c4: number,
-  c5: number
+  c5: number,
 ): number => {
   return handOfFiveEval(
     fullCardsDeckHash_5[c1],
     fullCardsDeckHash_5[c2],
     fullCardsDeckHash_5[c3],
     fullCardsDeckHash_5[c4],
-    fullCardsDeckHash_5[c5]
+    fullCardsDeckHash_5[c5],
   );
 };
 
 /** @function getHandInfo
-*
-* @param {Number} hand rank
-* @returns {handInfo} object containing hand info
-*/
+ *
+ * @param {Number} hand rank
+ * @returns {handInfo} object containing hand info
+ */
 export const getHandInfo = (
   rank: number,
   HASHES: hashRanking = HASHES_OF_FIVE,
-  INVERTED: boolean = false
+  INVERTED: boolean = false,
 ): handInfo => {
-  return HASHES.rankingInfos[INVERTED ? HIGH_MAX_RANK - rank : rank] || {
-    hand: [],
-    faces: '',
-    handGroup: 'unqualified'
-  };
+  return (
+    HASHES.rankingInfos[INVERTED ? HIGH_MAX_RANK - rank : rank] || {
+      hand: [],
+      faces: '',
+      handGroup: 'unqualified',
+    }
+  );
 };
 
 /** @function getHandInfo27
@@ -329,23 +326,23 @@ export const getHandInfoAto5 = (rank: number): handInfo => {
 };
 
 /** @function getHandInfoAto6
-*
-* @param {Number} hand rank
-* @returns {handInfo} object containing hand info
-*/
+ *
+ * @param {Number} hand rank
+ * @returns {handInfo} object containing hand info
+ */
 export const getHandInfoAto6 = (rank: number): handInfo => {
   return getHandInfo(rank, HASHES_OF_FIVE_Ato6);
 };
 
 /** @function bfBestOfFiveOnX  @TODO move on routines or create helpersfunction.ts
-*
-* @param {Array:Number[]} hand array of 6 or more cards making up an hand
-* @param {Function} evalFn evaluator defaults to hand of 5 high only
-* @returns {Number} hand ranking ( the best one on all combinations of input card in group of 5)
-*/
+ *
+ * @param {Array:Number[]} hand array of 6 or more cards making up an hand
+ * @param {Function} evalFn evaluator defaults to hand of 5 high only
+ * @returns {Number} hand ranking ( the best one on all combinations of input card in group of 5)
+ */
 export const bfBestOfFiveOnX = (hand: number[], evalFn: Function = handOfFiveEval) => {
   //@ts-ignore
-  return Math.max(...kombinatoricsJs.combinations(hand, 5).map(h => evalFn(...h)));
+  return Math.max(...kombinatoricsJs.combinations(hand, 5).map((h) => evalFn(...h)));
 };
 
 /** @function bfBestOfFiveOnXindexed
@@ -356,22 +353,19 @@ export const bfBestOfFiveOnX = (hand: number[], evalFn: Function = handOfFiveEva
  */
 export const bfBestOfFiveOnXindexed = (
   hand: number[],
-  evalFn: Function = handOfFiveEvalIndexed
+  evalFn: Function = handOfFiveEvalIndexed,
 ) => {
   //@ts-ignore
-  return Math.max(...kombinatoricsJs.combinations(hand, 5).map(h => evalFn(...h)));
+  return Math.max(...kombinatoricsJs.combinations(hand, 5).map((h) => evalFn(...h)));
 };
 
-export const bestFiveOnXHiLowIndexed = (
-  evalFn: Function,
-  hand: number[]
-): hiLowRank => {
-  let res = { hi: -1, low: -1 };
+export const bestFiveOnXHiLowIndexed = (evalFn: Function, hand: number[]): hiLowRank => {
+  const res = { hi: -1, low: -1 };
   //@ts-ignore
-  let all = kombinatoricsJs
+  const all = kombinatoricsJs
     .combinations(hand, 5)
     //@ts-ignore
-    .map(hand => evalFn(...hand));
+    .map((hand) => evalFn(...hand));
   all.forEach((R, i) => {
     R.hi > res.hi ? (res.hi = R.hi) : null;
     R.low > res.low ? (res.low = R.low) : null;
@@ -381,35 +375,35 @@ export const bestFiveOnXHiLowIndexed = (
 
 /**to be used in generic verbose eval function  */
 const evaluatorByGameType: gameTypesEvalFunction = {
-  "high": handOfFiveEvalIndexed,
-  "low8": handOfFiveEvalHiLow8Indexed,
-  "low9": handOfFiveEvalHiLow9Indexed,
-  "Ato5": handOfFiveEvalLow_Ato5Indexed,
-  "Ato6": handOfFiveEvalLow_Ato6Indexed,
-  "2to7": handOfFiveEvalLowBall27Indexed
+  high: handOfFiveEvalIndexed,
+  low8: handOfFiveEvalHiLow8Indexed,
+  low9: handOfFiveEvalHiLow9Indexed,
+  Ato5: handOfFiveEvalLow_Ato5Indexed,
+  Ato6: handOfFiveEvalLow_Ato6Indexed,
+  '2to7': handOfFiveEvalLowBall27Indexed,
 };
 
 const evaluatorInfoByGameType: gameTypesEvalFunction = {
-  "high": getHandInfo,
-  "low8": getHandInfoLow8,
-  "low9": getHandInfoLow9,
-  "Ato5": getHandInfoAto5,
-  "Ato6": getHandInfoAto6,
-  "2to7": getHandInfo27
+  high: getHandInfo,
+  low8: getHandInfoLow8,
+  low9: getHandInfoLow9,
+  Ato5: getHandInfoAto5,
+  Ato6: getHandInfoAto6,
+  '2to7': getHandInfo27,
 };
 
-/** @function getHandInfo5onX  
-* @param {Array:Number[]} hand array of 6 or more cards making up an hand
-* @returns {verboseHandInfo} info of best 5 cards hand
-*/
+/** @function getHandInfo5onX
+ * @param {Array:Number[]} hand array of 6 or more cards making up an hand
+ * @returns {verboseHandInfo} info of best 5 cards hand
+ */
 export const getHandInfo5onX = (hand: number[], gameType: string): verboseHandInfo => {
-
-  let combinations: number[][] = kombinatoricsJs.combinations(hand, 5);
-  let evalFn: Function = evaluatorByGameType[gameType];
-  let rank: number = Math.max(...combinations.map(H => evalFn(...H)));
-  let handInfo: handInfo = evaluatorInfoByGameType[gameType](rank);
-  let winningCards: number[] = filterWinningCards(hand, handInfo.hand);
-  let flushSuit: string = handInfo.handGroup == "flush" ? getFlushSuitFromIndex(winningCards[0]) : "no flush";
+  const combinations: number[][] = kombinatoricsJs.combinations(hand, 5);
+  const evalFn: Function = evaluatorByGameType[gameType];
+  const rank: number = Math.max(...combinations.map((H) => evalFn(...H)));
+  const handInfo: handInfo = evaluatorInfoByGameType[gameType](rank);
+  const winningCards: number[] = filterWinningCards(hand, handInfo.hand);
+  const flushSuit: string =
+    handInfo.handGroup == 'flush' ? getFlushSuitFromIndex(winningCards[0]) : 'no flush';
 
   return {
     handRank: rank,
@@ -417,25 +411,25 @@ export const getHandInfo5onX = (hand: number[], gameType: string): verboseHandIn
     faces: handInfo.faces,
     handGroup: handInfo.handGroup,
     winningCards: winningCards,
-    flushSuit: flushSuit
-  }
+    flushSuit: flushSuit,
+  };
 };
 
-/** @function getHandInfo5onXHiLow  
-* @param {Array:Number[]} hand array of 6 or more cards making up an hand
-* @returns {verboseHandInfo} info of best 5 cards hand
-*/
+/** @function getHandInfo5onXHiLow
+ * @param {Array:Number[]} hand array of 6 or more cards making up an hand
+ * @returns {verboseHandInfo} info of best 5 cards hand
+ */
 export const getHandInfo5onXHiLow = (hand: number[], gameType: string): HiLowVerboseHandInfo => {
+  const evalFn: Function = evaluatorByGameType[gameType];
+  const ranks: hiLowRank = bestFiveOnXHiLowIndexed(evalFn, hand);
 
-  let evalFn: Function = evaluatorByGameType[gameType];
-  let ranks: hiLowRank = bestFiveOnXHiLowIndexed(evalFn, hand);
+  const handInfoLow: handInfo = evaluatorInfoByGameType[gameType](ranks.low);
+  const winningCardsLow: number[] = filterWinningCards(hand, handInfoLow.hand);
 
-  let handInfoLow: handInfo = evaluatorInfoByGameType[gameType](ranks.low);
-  let winningCardsLow: number[] = filterWinningCards(hand, handInfoLow.hand);
-
-  let handInfoHi: handInfo = evaluatorInfoByGameType["high"](ranks.hi);
-  let winningCardsHi: number[] = filterWinningCards(hand, handInfoHi.hand);
-  let flushSuit: string = handInfoHi.handGroup == "flush" ? getFlushSuitFromIndex(winningCardsHi[0]) : "no flush";
+  const handInfoHi: handInfo = evaluatorInfoByGameType['high'](ranks.hi);
+  const winningCardsHi: number[] = filterWinningCards(hand, handInfoHi.hand);
+  const flushSuit: string =
+    handInfoHi.handGroup == 'flush' ? getFlushSuitFromIndex(winningCardsHi[0]) : 'no flush';
 
   return {
     hi: {
@@ -444,7 +438,7 @@ export const getHandInfo5onXHiLow = (hand: number[], gameType: string): HiLowVer
       faces: handInfoHi.faces,
       handGroup: handInfoHi.handGroup,
       winningCards: winningCardsHi,
-      flushSuit: flushSuit
+      flushSuit: flushSuit,
     },
     low: {
       handRank: ranks.low,
@@ -452,7 +446,7 @@ export const getHandInfo5onXHiLow = (hand: number[], gameType: string): HiLowVer
       faces: handInfoLow.faces,
       handGroup: handInfoLow.handGroup,
       winningCards: winningCardsLow,
-      flushSuit: "no flush"
-    }
-  }
+      flushSuit: 'no flush',
+    },
+  };
 };

@@ -24,7 +24,27 @@
     ]
   },
   "include": [
-    "src",
-    "test"
+    "src/index.ts",
+    "src/core/*.ts",
+    "src/variants/*.ts",
+    "src/utils/*.ts",
+    "src/gamblingjs.ts",
+    "src/constants.ts",
+    "src/hashesCreator.ts",
+    "src/interfaces.ts",
+    "src/pokerEvaluator5.ts",
+    "src/pokerEvaluator6.ts",
+    "src/pokerEvaluator7.ts",
+    "src/pokerEvaluatorTwoSets.ts",
+    "src/pokerHashes5.ts",
+    "src/pokerHashes7.ts",
+    "src/pokerMontecarloSym.ts",
+    "src/routines.ts"
+  ],
+  "exclude": [
+    "test",
+    "dist",
+    "node_modules",
+    "src/pokerEvaluatorOmaha.ts"
   ]
 }

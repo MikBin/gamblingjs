@@ -4,8 +4,9 @@ import sourceMaps from 'rollup-plugin-sourcemaps'
 import camelCase from 'lodash.camelcase'
 import typescript from 'rollup-plugin-typescript2'
 import json from 'rollup-plugin-json'
+import { readFileSync } from 'fs'
 
-const pkg = require('./package.json')
+const pkg = JSON.parse(readFileSync('./package.json', 'utf8'))
 
 const libraryName = 'gamblingjs'
 

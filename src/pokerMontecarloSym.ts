@@ -5,7 +5,7 @@ import {
   handRankingGroupNames,
   flushHashToName,
   cardHashToDescription_7,
-  handsRankingDelimiter_5cards
+  handsRankingDelimiter_5cards,
 } from './constants';
 import { handInfo, verboseHandInfo, handCategoryDistribution } from './interfaces';
 import { getDiffDeck7 } from './routines';
@@ -22,9 +22,9 @@ export const categoryByRankingValue = (rank: number): string => {
 /** @TODO compute total runs using combinations formula */
 export const getPartialHandStatsIndexed_7 = (
   partialHand: number[],
-  totalRuns: number = DEFAULT_N_RUNS
+  totalRuns: number = DEFAULT_N_RUNS,
 ): handCategoryDistribution => {
-  let stats: handCategoryDistribution = {
+  const stats: handCategoryDistribution = {
     'high card': 0,
     'one pair': 0,
     'two pair': 0,
@@ -34,11 +34,11 @@ export const getPartialHandStatsIndexed_7 = (
     'full house': 0,
     'four of a kind': 0,
     'straight flush': 0,
-    average: 0
+    average: 0,
   };
-  let pHand = partialHand.map(c => fullCardsDeckHash_7[c]);
+  const pHand = partialHand.map((c) => fullCardsDeckHash_7[c]);
 
-  let partialDeck = getDiffDeck7(pHand);
+  const partialDeck = getDiffDeck7(pHand);
   const L: number = partialDeck.length;
   const missingCardsLength: number = 7 - partialHand.length;
   const fullHand = pHand.slice();
@@ -54,7 +54,7 @@ export const getPartialHandStatsIndexed_7 = (
       fullHand[pHand.length + t] = partialDeck[j];
       if (t === missingCardsLength) {
         //@ts-ignore
-        let rank = handOfSevenEval(...fullHand);
+        const rank = handOfSevenEval(...fullHand);
         stats.average += rank;
         stats[categoryByRankingValue(rank)]++;
         t = 0;
@@ -66,7 +66,7 @@ export const getPartialHandStatsIndexed_7 = (
     }
   }
 
-  for (let p in stats) {
+  for (const p in stats) {
     stats[p] /= totalHandComputed;
   }
 
