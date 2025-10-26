@@ -37,16 +37,16 @@
     <div class="flex gap-2 mt-4">
       <button
         v-if="selectedCards.length > 0"
-        @click="clearSelection"
         class="btn btn-outline btn-error"
+        @click="clearSelection"
       >
         Clear Selection
       </button>
       <button
         v-if="selectedCards.length > 0"
-        @click="confirmSelection"
         class="btn btn-primary"
         :disabled="!isValidSelection"
+        @click="confirmSelection"
       >
         Confirm ({{ selectedCards.length }} cards)
       </button>

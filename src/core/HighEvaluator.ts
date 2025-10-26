@@ -17,10 +17,10 @@ export class HighEvaluator extends BaseEvaluator {
   evaluate(hand: number[]): number {
     if (hand.length === 5) {
       this.validateHand(hand, 5);
-      return handOfFiveEvalIndexed(hand[0], hand[1], hand[2], hand[3], hand[4]);
+      return handOfFiveEvalIndexed(hand[0]!, hand[1]!, hand[2]!, hand[3]!, hand[4]!);
     } else if (hand.length === 7) {
       this.validateHand(hand, 7);
-      return handOfSevenEvalIndexed(hand[0], hand[1], hand[2], hand[3], hand[4], hand[5], hand[6]);
+      return handOfSevenEvalIndexed(hand[0]!, hand[1]!, hand[2]!, hand[3]!, hand[4]!, hand[5]!, hand[6]!);
     } else {
       throw new Error('HighEvaluator only supports 5-card and 7-card hands');
     }
@@ -34,6 +34,6 @@ export class HighEvaluator extends BaseEvaluator {
    */
   evaluateVerbose(hand: number[]): verboseHandInfo {
     this.validateHand(hand, 7);
-    return handOfSevenEvalIndexed_Verbose(hand[0], hand[1], hand[2], hand[3], hand[4], hand[5], hand[6]);
+    return handOfSevenEvalIndexed_Verbose(hand[0]!, hand[1]!, hand[2]!, hand[3]!, hand[4]!, hand[5]!, hand[6]!);
   }
 }

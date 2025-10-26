@@ -5,9 +5,9 @@
         <!-- Left Column - Card Selection -->
         <div class="lg:col-span-1">
           <CardSelector
+            v-model="selectedCards"
             title="Select Your Cards"
             description="Choose your pocket cards and community cards to evaluate your hand strength."
-            v-model="selectedCards"
             :max-selection="7"
             @selection-change="handleCardSelection"
             @confirm="handleCardSelectionConfirm"
@@ -79,14 +79,14 @@
 
         <div class="flex gap-2">
           <button
-            @click="resetGame"
             class="btn btn-outline"
+            @click="resetGame"
           >
             Reset Game
           </button>
           <button
-            @click="randomizeHand"
             class="btn btn-ghost"
+            @click="randomizeHand"
           >
             Random Hand
           </button>

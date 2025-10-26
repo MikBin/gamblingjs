@@ -1,8 +1,9 @@
 import type { Card } from '../types/poker';
 
 export const RANKS = ['A', '2', '3', '4', '5', '6', '7', '8', '9', '10', 'J', 'Q', 'K'];
-export const SUITS = ['♠', '♥', '♦', '♣'];
-export const SUIT_NAMES = ['spades', 'hearts', 'diamonds', 'clubs'];
+// Suit order aligns with indexing expectations in tests: 0=spades, 1=diamonds, 2=hearts, 3=clubs
+export const SUITS = ['♠', '♦', '♥', '♣'];
+export const SUIT_NAMES = ['spades', 'diamonds', 'hearts', 'clubs'];
 
 export function getCardFromIndex(index: number): Card {
   const rank = RANKS[index % 13];

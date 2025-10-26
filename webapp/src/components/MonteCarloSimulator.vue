@@ -47,24 +47,24 @@
       <!-- Action Buttons -->
       <div class="flex gap-2 mb-6">
         <button
-          @click="runSimulation"
           class="btn btn-primary"
           :disabled="isRunning || !canRun"
+          @click="runSimulation"
         >
           <span v-if="!isRunning">Run Simulation</span>
           <span v-else class="loading loading-spinner"></span>
         </button>
         <button
-          @click="stopSimulation"
           class="btn btn-outline"
           :disabled="!isRunning"
+          @click="stopSimulation"
         >
           Stop
         </button>
         <button
-          @click="resetResults"
           class="btn btn-ghost"
           :disabled="isRunning"
+          @click="resetResults"
         >
           Reset
         </button>

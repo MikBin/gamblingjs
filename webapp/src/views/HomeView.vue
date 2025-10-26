@@ -4,7 +4,7 @@
       <!-- Hero Section -->
       <div class="max-w-4xl mx-auto px-4">
         <h1 class="text-4xl md:text-6xl font-bold text-base-content mb-6">
-          Poker Hand Evaluator
+          Poker Evaluator
         </h1>
         <p class="text-lg md:text-xl text-base-content/80 mb-8 max-w-3xl mx-auto">
           A modern, interactive poker hand evaluator built with Vue.js 3 and DaisyUI.

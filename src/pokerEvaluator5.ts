@@ -45,12 +45,12 @@ export const handOfFiveEval: singleRankFiveCardHandEvalFn = (
 ): number => {
   const keySum: number = c1 + c2 + c3 + c4 + c5;
   const rankKey: number = keySum >>> 9;
-  const flush_check_key: number = FLUSH_CHECK_FIVE[keySum & FLUSH_MASK];
+  const flush_check_key: number = FLUSH_CHECK_FIVE[keySum & FLUSH_MASK] ?? -1;
   if (flush_check_key >= 0) {
-    return FLUSH_RANK_FIVE[rankKey];
+    return FLUSH_RANK_FIVE[rankKey]!;
   }
 
-  return HASH_RANK_FIVE[rankKey];
+  return HASH_RANK_FIVE[rankKey]!;
 };
 
 /** @function handOfFiveEvalHiLow
@@ -74,11 +74,11 @@ export const handOfFiveEvalHiLow = (
     hi: 0,
     low: isNaN(low) ? -1 : low,
   };
-  const flush_check_key: number = FLUSH_CHECK_FIVE[keySum & FLUSH_MASK];
+  const flush_check_key: number = FLUSH_CHECK_FIVE[keySum & FLUSH_MASK] ?? -1;
   if (flush_check_key >= 0) {
-    bothRank.hi = FLUSH_RANK_FIVE[rankKey];
+    bothRank.hi = FLUSH_RANK_FIVE[rankKey]!;
   } else {
-    bothRank.hi = HASH_RANK_FIVE[rankKey];
+    bothRank.hi = HASH_RANK_FIVE[rankKey]!;
   }
   return bothRank;
 };
@@ -107,11 +107,11 @@ export const handOfFiveEvalHiLow8Indexed: hiLowRankFiveCardHandEvalFn = (
   c5: number,
 ): hiLowRank => {
   return handOfFiveEvalHiLow8(
-    fullCardsDeckHash_5[c1],
-    fullCardsDeckHash_5[c2],
-    fullCardsDeckHash_5[c3],
-    fullCardsDeckHash_5[c4],
-    fullCardsDeckHash_5[c5],
+    fullCardsDeckHash_5[c1]!,
+    fullCardsDeckHash_5[c2]!,
+    fullCardsDeckHash_5[c3]!,
+    fullCardsDeckHash_5[c4]!,
+    fullCardsDeckHash_5[c5]!,
   );
 };
 
@@ -161,7 +161,7 @@ export const handOfFiveEvalLow_Ato5: singleRankFiveCardHandEvalFn = (
 ): number => {
   const keySum: number = c1 + c2 + c3 + c4 + c5;
   const rankKey: number = keySum >>> 9;
-  const rank = HASH_RANK_FIVE_LOW_Ato5[rankKey];
+  const rank = HASH_RANK_FIVE_LOW_Ato5[rankKey]!;
   return rank;
 };
 
@@ -178,11 +178,11 @@ export const handOfFiveEvalLow_Ato5Indexed: singleRankFiveCardHandEvalFn = (
   c5: number,
 ): number => {
   return handOfFiveEvalLow_Ato5(
-    fullCardsDeckHash_5[c1],
-    fullCardsDeckHash_5[c2],
-    fullCardsDeckHash_5[c3],
-    fullCardsDeckHash_5[c4],
-    fullCardsDeckHash_5[c5],
+    fullCardsDeckHash_5[c1]!,
+    fullCardsDeckHash_5[c2]!,
+    fullCardsDeckHash_5[c3]!,
+    fullCardsDeckHash_5[c4]!,
+    fullCardsDeckHash_5[c5]!,
   );
 };
 
@@ -195,12 +195,12 @@ export const handOfFiveEvalLow_Ato6: singleRankFiveCardHandEvalFn = (
 ): number => {
   const keySum: number = c1 + c2 + c3 + c4 + c5;
   const rankKey: number = keySum >>> 9;
-  const flush_check_key: number = FLUSH_CHECK_FIVE[keySum & FLUSH_MASK];
+  const flush_check_key: number = FLUSH_CHECK_FIVE[keySum & FLUSH_MASK] ?? -1;
   if (flush_check_key >= 0) {
-    return FLUSH_RANK_FIVE_ATO6[rankKey];
+    return FLUSH_RANK_FIVE_ATO6[rankKey]!;
   }
 
-  return HASH_RANK_FIVE_ATO6[rankKey];
+  return HASH_RANK_FIVE_ATO6[rankKey]!;
 };
 
 export const handOfFiveEvalLow_Ato6Indexed: singleRankFiveCardHandEvalFn = (
@@ -211,11 +211,13 @@ export const handOfFiveEvalLow_Ato6Indexed: singleRankFiveCardHandEvalFn = (
   c5: number,
 ): number => {
   return handOfFiveEvalLow_Ato6(
-    fullCardsDeckHash_5[c1],
-    fullCardsDeckHash_5[c2],
-    fullCardsDeckHash_5[c3],
-    fullCardsDeckHash_5[c4],
-    fullCardsDeckHash_5[c5],
+    fullCardsDeckHash_5[c1]!,
+    fullCardsDeckHash_5[c2]!,
+
+    fullCardsDeckHash_5[c3]!,
+
+    fullCardsDeckHash_5[c4]!,
+    fullCardsDeckHash_5[c5]!,
   );
 };
 
@@ -262,11 +264,11 @@ export const handOfFiveEvalIndexed: singleRankFiveCardHandEvalFn = (
   c5: number,
 ): number => {
   return handOfFiveEval(
-    fullCardsDeckHash_5[c1],
-    fullCardsDeckHash_5[c2],
-    fullCardsDeckHash_5[c3],
-    fullCardsDeckHash_5[c4],
-    fullCardsDeckHash_5[c5],
+    fullCardsDeckHash_5[c1]!,
+    fullCardsDeckHash_5[c2]!,
+    fullCardsDeckHash_5[c3]!,
+    fullCardsDeckHash_5[c4]!,
+    fullCardsDeckHash_5[c5]!,
   );
 };
 

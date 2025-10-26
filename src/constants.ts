@@ -112,8 +112,8 @@ for (let i: number = 0; i < 52; i++) {
   deckOfFlushes[i] = flushHash[i % 13]!;
   deckOfSuits[i] = suitsHash[~~(i / 13)]!;
 
-  const card5 = (fullCardsDeckHash_5[i] = (deckOfRanks_5[i] << 9) + deckOfSuits[i]);
-  const card7 = (fullCardsDeckHash_7[i] = (deckOfRanks_7[i] << 9) + deckOfSuits[i]);
+  const card5 = (fullCardsDeckHash_5[i] = ((deckOfRanks_5[i]!) << 9) + (deckOfSuits[i]!));
+  const card7 = (fullCardsDeckHash_7[i] = ((deckOfRanks_7[i]!) << 9) + (deckOfSuits[i]!));
   cardHashToDescription_5[card5] = i;
   cardHashToDescription_7[card7] = i;
 }

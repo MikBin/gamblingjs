@@ -102,14 +102,14 @@
       <!-- Action Buttons -->
       <div class="flex gap-2 mt-6">
         <button
-          @click="shareResults"
           class="btn btn-outline"
+          @click="shareResults"
         >
           Share Results
         </button>
         <button
-          @click="saveResults"
           class="btn btn-primary"
+          @click="saveResults"
         >
           Save Evaluation
         </button>

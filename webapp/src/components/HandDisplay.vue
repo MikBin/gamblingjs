@@ -45,8 +45,8 @@
         <h4 class="text-md font-medium mb-2">Turn</h4>
         <div class="flex gap-2 justify-center">
           <Card
-            :card-index="communityCards[3]"
             :key="`turn`"
+            :card-index="communityCards[3]"
             :size="cardSize"
             :is-disabled="disabled"
           />
@@ -58,8 +58,8 @@
         <h4 class="text-md font-medium mb-2">River</h4>
         <div class="flex gap-2 justify-center">
           <Card
-            :card-index="communityCards[4]"
             :key="`river`"
+            :card-index="communityCards[4]"
             :size="cardSize"
             :is-disabled="disabled"
           />
@@ -71,23 +71,23 @@
     <div v-if="showActions" class="flex gap-2 justify-center mt-6">
       <button
         v-if="canReveal"
-        @click="revealCards"
         class="btn btn-primary"
+        @click="revealCards"
       >
         Reveal Cards
       </button>
       <button
         v-if="canClear"
-        @click="clearHand"
         class="btn btn-outline"
+        @click="clearHand"
       >
         Clear Hand
       </button>
       <button
         v-if="canEvaluate"
-        @click="evaluateHand"
         class="btn btn-success"
         :disabled="!canEvaluateNow"
+        @click="evaluateHand"
       >
         Evaluate Hand
       </button>

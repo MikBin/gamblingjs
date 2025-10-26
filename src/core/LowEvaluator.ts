@@ -34,10 +34,10 @@ export class LowAto5Evaluator extends LowEvaluator {
   evaluate(hand: number[]): number {
     if (hand.length === 5) {
       this.validateHand(hand, 5);
-      return handOfFiveEvalLow_Ato5Indexed(hand[0], hand[1], hand[2], hand[3], hand[4]);
+      return handOfFiveEvalLow_Ato5Indexed(hand[0]!, hand[1]!, hand[2]!, hand[3]!, hand[4]!);
     } else if (hand.length === 7) {
       this.validateHand(hand, 7);
-      return handOfSevenEvalLow_Ato5Indexed(hand[0], hand[1], hand[2], hand[3], hand[4], hand[5], hand[6]);
+      return handOfSevenEvalLow_Ato5Indexed(hand[0]!, hand[1]!, hand[2]!, hand[3]!, hand[4]!, hand[5]!, hand[6]!);
     } else {
       throw new Error('LowAto5Evaluator only supports 5-card and 7-card hands');
     }
@@ -66,11 +66,11 @@ export class Low8Evaluator extends LowEvaluator {
   evaluate(hand: number[]): number {
     if (hand.length === 5) {
       this.validateHand(hand, 5);
-      const result = handOfFiveEvalHiLow8Indexed(hand[0], hand[1], hand[2], hand[3], hand[4]);
+      const result = handOfFiveEvalHiLow8Indexed(hand[0]!, hand[1]!, hand[2]!, hand[3]!, hand[4]!);
       return result.low;
     } else if (hand.length === 7) {
       this.validateHand(hand, 7);
-      const result = _handOfSevenEvalHiLow8Indexed(...hand);
+      const result = _handOfSevenEvalHiLow8Indexed(...hand as [number, number, number, number, number, number, number]);
       return result.low;
     } else {
       throw new Error('Low8Evaluator only supports 5-card and 7-card hands');
@@ -79,7 +79,7 @@ export class Low8Evaluator extends LowEvaluator {
 
   evaluateVerbose(hand: number[]): verboseHandInfo {
     this.validateHand(hand, 7);
-    return handOfSevenEvalLow8Indexed_Verbose(hand[0], hand[1], hand[2], hand[3], hand[4], hand[5], hand[6]);
+    return handOfSevenEvalLow8Indexed_Verbose(hand[0]!, hand[1]!, hand[2]!, hand[3]!, hand[4]!, hand[5]!, hand[6]!);
   }
 
   protected qualifiesForLow(hand: number[]): boolean {
@@ -100,11 +100,11 @@ export class Low9Evaluator extends LowEvaluator {
   evaluate(hand: number[]): number {
     if (hand.length === 5) {
       this.validateHand(hand, 5);
-      const result = handOfFiveEvalHiLow9Indexed(hand[0], hand[1], hand[2], hand[3], hand[4]);
+      const result = handOfFiveEvalHiLow9Indexed(hand[0]!, hand[1]!, hand[2]!, hand[3]!, hand[4]!);
       return result.low;
     } else if (hand.length === 7) {
       this.validateHand(hand, 7);
-      const result = _handOfSevenEvalHiLow9Indexed(...hand);
+      const result = _handOfSevenEvalHiLow9Indexed(...hand as [number, number, number, number, number, number, number]);
       return result.low;
     } else {
       throw new Error('Low9Evaluator only supports 5-card and 7-card hands');
@@ -113,7 +113,7 @@ export class Low9Evaluator extends LowEvaluator {
 
   evaluateVerbose(hand: number[]): verboseHandInfo {
     this.validateHand(hand, 7);
-    return handOfSevenEvalLow9Indexed_Verbose(hand[0], hand[1], hand[2], hand[3], hand[4], hand[5], hand[6]);
+    return handOfSevenEvalLow9Indexed_Verbose(hand[0]!, hand[1]!, hand[2]!, hand[3]!, hand[4]!, hand[5]!, hand[6]!);
   }
 
   protected qualifiesForLow(hand: number[]): boolean {

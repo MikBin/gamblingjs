@@ -1,11 +1,11 @@
 <template>
   <div
     :class="cardClasses"
-    @click="handleClick"
     :aria-label="cardAriaLabel"
     :tabindex="isDisabled ? -1 : 0"
-    @keydown.enter="handleClick"
     class="card-container"
+    @click="handleClick"
+    @keydown.enter="handleClick"
   >
     <img
       v-if="!isFaceDown"

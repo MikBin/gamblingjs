@@ -49,7 +49,7 @@ export const useMonteCarlo = (options: MonteCarloOptions = {}) => {
     try {
       // Run simulation in chunks to allow UI updates
       const chunkSize = Math.max(100, Math.floor(runs / 100));
-      let completedRuns = 0;
+      const completedRuns = 0;
 
       const result = await new Promise<handCategoryDistribution>((resolve, reject) => {
         const runChunk = () => {
