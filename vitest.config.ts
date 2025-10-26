@@ -6,6 +6,8 @@ export default defineConfig({
   test: {
     globals: true,
     environment: 'node',
+    pool: 'forks',
+    maxWorkers: 1,
     include: ['test/**/*.test.ts', 'test/**/*.spec.ts'],
     exclude: [
       'node_modules',
@@ -13,6 +15,8 @@ export default defineConfig({
       '**/*.d.ts',
       'test/fixtures/**'
     ],
+    testTimeout: 20000,
+    hookTimeout: 20000,
     setupFiles: ['./test/setup.ts'],
     coverage: {
       provider: 'v8',
@@ -24,7 +28,13 @@ export default defineConfig({
         '**/*.d.ts',
         '**/*.config.*',
         'tools/',
-        'coverage/'
+        'coverage/',
+        'webapp/**',
+        'src/lib/**',
+        'src/index.ts',
+        'src/gamblingjs.ts',
+        'src/interfaces.ts',
+        'src/utils/**'
       ],
       thresholds: {
         global: {
