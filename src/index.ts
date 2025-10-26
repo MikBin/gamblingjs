@@ -12,6 +12,21 @@ export { TexasHoldemEvaluator } from './variants/TexasHoldem';
 export * from './utils/CardUtils';
 export * from './utils/ValidationUtils';
 
+// Export Poker Table module
+export { PokerTable } from './poker-table/PokerTable';
+export { LocalDealer, RemoteDealer, createStandardDeck } from './poker-table/deck';
+export type {
+  TableConfig,
+  GameRotation,
+  GameInRotation,
+  BlindsStructure,
+  TournamentStructure,
+  CashStructure,
+  BlindLevel,
+  Player,
+} from './poker-table/types';
+export { GameId, LimitType } from './poker-table/types';
+
 // Export types and interfaces
 export type {
   verboseHandInfo,
