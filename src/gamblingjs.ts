@@ -9,6 +9,7 @@ import * as SevenEvaluators from './pokerEvaluator7';
 import * as SixEvaluators from './pokerEvaluator6';
 
 import { fastHashesCreators } from '../src/pokerHashes7';
+import { fastHashesCreators6 } from '../src/pokerHashes6';
 
 export { handOfFiveEvalIndexed, getHandInfo, handOfSixEvalIndexed, getPartialHandStatsIndexed_7 };
 
@@ -50,22 +51,28 @@ export const FIVE_CARD_POKER_EVAL = {
   hashLoaders: {
     6: {
       high: () => {
-        throw Error('method not yet implemented');
+        fastHashesCreators6.high();
+        FIVE_CARD_POKER_EVAL.HandRank[6].high = SixEvaluators.handOfSixEvalIndexed;
       },
       low8: () => {
-        throw Error('method not yet implemented');
+        fastHashesCreators6.low8();
+        FIVE_CARD_POKER_EVAL.HandRank[6].low8 = SixEvaluators.handOfSixEvalHiLow8Indexed;
       },
       low9: () => {
-        throw Error('method not yet implemented');
+        fastHashesCreators6.low9();
+        FIVE_CARD_POKER_EVAL.HandRank[6].low9 = SixEvaluators.handOfSixEvalHiLow9Indexed;
       },
       Ato5: () => {
-        throw Error('method not yet implemented');
+        fastHashesCreators6.Ato5();
+        FIVE_CARD_POKER_EVAL.HandRank[6].Ato5 = SixEvaluators.handOfSixEvalAto5Indexed;
       },
       Ato6: () => {
-        throw Error('method not yet implemented');
+        fastHashesCreators6.Ato6();
+        FIVE_CARD_POKER_EVAL.HandRank[6].Ato6 = SixEvaluators.handOfSixEvalAto6Indexed;
       },
       '2to7': () => {
-        throw Error('method not yet implemented');
+        fastHashesCreators6['2to7']();
+        FIVE_CARD_POKER_EVAL.HandRank[6]['2to7'] = SixEvaluators.handOfSixEvalLowBall27Indexed;
       },
     },
     7: {
