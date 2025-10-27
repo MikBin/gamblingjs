@@ -15,6 +15,9 @@ export * from './utils/ValidationUtils';
 // Export Poker Table module
 export { PokerTable } from './poker-table/PokerTable';
 export { LocalDealer, RemoteDealer, createStandardDeck } from './poker-table/deck';
+export { TableAnalytics } from './poker-table/analytics';
+export { BasePlayer, PLAYER_PRESETS, createPlayer } from './poker-table/player';
+export type { PlayerAgent, PlayerProfileConfig, PlayerPreset } from './poker-table/player';
 export type {
   TableConfig,
   GameRotation,
@@ -24,6 +27,15 @@ export type {
   CashStructure,
   BlindLevel,
   Player,
+  AnalyticsOptions,
+  ActionType,
+  HistoryEvent,
+  PlayerStats,
+  PlayerCategory,
+  PositionLabel,
+  AllowedAction,
+  ActionDecision,
+  HandContext,
 } from './poker-table/types';
 export { GameId, LimitType } from './poker-table/types';
 

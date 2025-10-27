@@ -120,3 +120,88 @@ export interface HandStateSnapshot {
   players: Pick<Player, 'id' | 'seat' | 'chips' | 'folded' | 'allIn' | 'holeCards'>[];
   pot: number;
 }
+
+// --- Agent interaction types ---
+export type AllowedAction = 'fold' | 'check' | 'call' | 'bet' | 'raise';
+
+export interface ActionDecision {
+  action: AllowedAction;
+  amount?: number; // required for bet/raise; chips to put in now
+}
+
+export interface HandContext {
+  handNumber: number;
+  street: StreetName | null;
+  position?: PositionLabel;
+  buttonSeat: number;
+  player: Pick<Player, 'id' | 'seat' | 'chips' | 'holeCards'>;
+  communityCards: number[];
+  pot: number;
+  // betting state (supplied by controller)
+  allowedActions: AllowedAction[];
+  toCall: number;      // chips needed to call
+  minRaise?: number;   // minimum raise amount (increment)
+  maxBet?: number;     // optional cap for fixed/limit
+}
+
+// --- Analytics types ---
+export type ActionType = 'fold' | 'check' | 'call' | 'bet' | 'raise' | 'blind' | 'ante' | 'bring-in';
+
+export type PositionLabel = 'BTN' | 'SB' | 'BB' | 'UTG' | 'EP' | 'MP' | 'HJ' | 'CO';
+
+export interface HistoryEvent {
+  ts: number;
+  handNumber: number;
+  street: StreetName | null;
+  action: ActionType;
+  playerId?: string;
+  seat?: number;
+  amount?: number;
+  position?: PositionLabel;
+  note?: string;
+}
+
+export interface PositionStats {
+  appearances: number;
+  vpip: number; // voluntarily put chips in pot preflop/first action on street
+  raises: number;
+  calls: number;
+  bets: number;
+}
+
+export interface BetStatsSummary {
+  count: number;
+  avg: number;
+  std: number;
+}
+
+export interface PlayerStats {
+  playerId: string;
+  totalHands: number;
+  totalActions: number;
+  raises: number;
+  calls: number;
+  bets: number;
+  folds: number;
+  checks: number;
+  vpipHands: number; // hands where player voluntarily contributed preflop/first street
+  byPosition: Partial<Record<PositionLabel, PositionStats>>;
+  betSizes: BetStatsSummary; // across bet+raise amounts
+}
+
+export type PlayerCategory = 'nit' | 'tight-passive' | 'TAG' | 'LAG' | 'loose-passive' | 'unknown';
+
+export interface AnalyticsOptions {
+  enabled: boolean;
+  persistPath?: string; // optional JSON file path to store history
+  categorize?: {
+    // VPIP thresholds
+    vpipNitMax?: number;            // default 0.12
+    vpipTightMax?: number;          // default 0.20
+    vpipLooseMin?: number;          // default 0.32
+    // Aggression threshold (raises / (raises + calls))
+    aggressionAggressiveMin?: number; // default 0.50
+    // Sample size control
+    minHandsForCategory?: number;   // default 50
+  };
+}

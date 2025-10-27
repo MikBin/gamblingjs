@@ -14,7 +14,12 @@ import {
   StreetName,
   TableConfig,
   Player,
+  AnalyticsOptions,
+  PositionLabel,
 } from './types';
+import { TableAnalytics } from './analytics';
+import type { AllowedAction, ActionDecision, HandContext } from './types';
+import type { PlayerAgent } from './player';
 
 // Built-in lightweight definitions sufficient to drive dealing logic
 const GAME_DEFINITIONS: Record<string, GameDefinition> = {
@@ -117,8 +122,10 @@ const GAME_DEFINITIONS: Record<string, GameDefinition> = {
 };
 
 export interface TableStateOptions {
-  // When true, table won\'t shuffle/deal; external actor (e.g., server) drives it
+  // When true, table won't shuffle/deal; external actor (e.g., server) drives it
   passiveDealing?: boolean;
+  // Feature flag for analytics/history recording
+  analytics?: Partial<AnalyticsOptions> | boolean;
 }
 
 export class PokerTable {
@@ -137,6 +144,8 @@ export class PokerTable {
   private street: StreetName | null = null;
 
   private options: TableStateOptions;
+  private analytics?: TableAnalytics;
+  private agents: Map<string, PlayerAgent> = new Map();
 
   constructor(config: TableConfig, dealer: Dealer, options: TableStateOptions = {}) {
     if (config.maxSeats < 2) throw new Error('maxSeats must be at least 2');
@@ -148,6 +157,12 @@ export class PokerTable {
     this.seats = new Array(config.maxSeats).fill(null);
     this.buttonSeat = config.dealerButtonSeat ?? 0;
     this.options = options;
+
+    // Initialize analytics if enabled
+    const analyticsOpt = options.analytics;
+    if (analyticsOpt && typeof analyticsOpt === 'object' ? analyticsOpt.enabled !== false : !!analyticsOpt) {
+      this.analytics = new TableAnalytics(typeof analyticsOpt === 'object' ? analyticsOpt : { enabled: true });
+    }
   }
 
   // --- Seat management ---
@@ -218,11 +233,22 @@ export class PokerTable {
     this.dealer.initDeck();
     if (!this.options.passiveDealing) this.dealer.shuffle();
 
+    // Notify analytics of hand start prior to forced bets
+    if (this.analytics) this.analytics.onHandStart(this.getSnapshot());
+
     // Antes / blinds
     this.collectAntesAndBlinds();
 
     // Deal opening cards
     this.dealOpeningCards();
+
+    // Notify agents of hand start with context
+    for (const p of this.seats) {
+      if (!p) continue;
+      const agent = this.agents.get(p.id);
+      if (!agent) continue;
+      agent.onHandStart(this.buildContext(p.id, []));
+    }
   }
 
   private collectAntesAndBlinds(): void {
@@ -231,24 +257,35 @@ export class PokerTable {
 
     // Collect antes first (if any)
     if (ante && ante > 0) {
-      this.forEachActivePlayerFrom(this.buttonSeat + 1, (p) => this.chargeChips(p, ante));
+      this.forEachActivePlayerFrom(this.buttonSeat + 1, (p) => {
+        this.chargeChips(p, ante);
+        this.analytics?.recordForced(p.id, p.seat, 'ante', ante, undefined);
+      });
     }
 
     // Cash-style blinds for games that use them
     if (this.currentGameDef.usesBlinds) {
       const { smallBlind, bigBlind } = structure;
-      const sbSeat = this.nextOccupiedSeat(this.buttonSeat);
-      const bbSeat = this.nextOccupiedSeat(sbSeat);
+      const sbSeat = this.nextOccupiedSeat(this.buttonSeat + 1);
+      const bbSeat = this.nextOccupiedSeat(sbSeat + 1);
       const sb = this.seats[sbSeat]!;
       const bb = this.seats[bbSeat]!;
-      if (smallBlind) this.chargeChips(sb, smallBlind);
-      if (bigBlind) this.chargeChips(bb, bigBlind);
+      if (smallBlind) {
+        this.chargeChips(sb, smallBlind);
+        this.analytics?.recordForced(sb.id, sb.seat, 'blind', smallBlind, 'SB');
+      }
+      if (bigBlind) {
+        this.chargeChips(bb, bigBlind);
+        this.analytics?.recordForced(bb.id, bb.seat, 'blind', bigBlind, 'BB');
+      }
     } else {
       // Stud bring-in, if configured
       const bringIn = (structure as CashStructure['blinds']).bringIn;
       if (bringIn && bringIn > 0) {
         const bringInSeat = this.nextOccupiedSeat(this.buttonSeat + 1);
-        this.chargeChips(this.seats[bringInSeat]!, bringIn);
+        const p = this.seats[bringInSeat]!;
+        this.chargeChips(p, bringIn);
+        this.analytics?.recordForced(p.id, p.seat, 'bring-in', bringIn, undefined);
       }
     }
   }
@@ -267,8 +304,8 @@ export class PokerTable {
       const idx = Math.min(Math.floor((this.handNumber - 1) / base.advanceEvery), base.levels.length - 1);
       level = base.levels[idx]!;
     }
-    // startingLevelId support
-    if (base.startingLevelId) {
+    // startingLevelId applies only to the first hand baseline
+    if (base.startingLevelId && this.handNumber <= 1) {
       const found = base.levels.find((l) => l.id === base.startingLevelId);
       if (found) level = found;
     }
@@ -325,22 +362,30 @@ export class PokerTable {
         this.dealer.burn(1);
         this.communityCards.push(...this.dealer.deal(3));
         this.street = 'flop';
+        this.analytics?.onStreetChange(this.street);
+        this.notifyAgentsStreet();
         return;
       }
       if (this.street === 'flop') {
         this.dealer.burn(1);
         this.communityCards.push(...this.dealer.deal(1));
         this.street = 'turn';
+        this.analytics?.onStreetChange(this.street);
+        this.notifyAgentsStreet();
         return;
       }
       if (this.street === 'turn') {
         this.dealer.burn(1);
         this.communityCards.push(...this.dealer.deal(1));
         this.street = 'river';
+        this.analytics?.onStreetChange(this.street);
+        this.notifyAgentsStreet();
         return;
       }
       if (this.street === 'river') {
         this.street = 'showdown';
+        this.analytics?.onStreetChange(this.street);
+        this.notifyAgentsStreet();
         return;
       }
     } else if (def.drawRounds) {
@@ -348,20 +393,28 @@ export class PokerTable {
       const order: StreetName[] = def.drawRounds.map((r) => r.street);
       if (this.street === 'deal') {
         this.street = order[0] ?? 'showdown';
+        this.analytics?.onStreetChange(this.street);
+        this.notifyAgentsStreet();
         return;
       }
       const idx = order.indexOf(this.street as StreetName);
       if (idx >= 0 && idx < order.length - 1) {
         this.street = order[idx + 1]!;
+        this.analytics?.onStreetChange(this.street);
+        this.notifyAgentsStreet();
         return;
       }
       this.street = 'showdown';
+      this.analytics?.onStreetChange(this.street);
+      this.notifyAgentsStreet();
       return;
     } else if (def.studStreets) {
       const idx = def.studStreets.indexOf(this.street as StreetName);
       if (idx < 0) {
         // from initial deal to third street already handled
         this.street = def.studStreets[0] ?? 'showdown';
+        this.analytics?.onStreetChange(this.street);
+        this.notifyAgentsStreet();
         return;
       }
       if (idx < def.studStreets.length - 1) {
@@ -370,9 +423,13 @@ export class PokerTable {
           p.holeCards.push(this.dealer.dealCard());
         });
         this.street = def.studStreets[idx + 1]!;
+        this.analytics?.onStreetChange(this.street);
+        this.notifyAgentsStreet();
         return;
       }
       this.street = 'showdown';
+      this.analytics?.onStreetChange(this.street);
+      this.notifyAgentsStreet();
       return;
     }
 
@@ -394,7 +451,7 @@ export class PokerTable {
   }
 
   moveButton(): void {
-    this.buttonSeat = this.nextOccupiedSeat(this.buttonSeat);
+    this.buttonSeat = this.nextOccupiedSeat(this.buttonSeat + 1);
   }
 
   // --- Iteration helpers ---
@@ -407,6 +464,82 @@ export class PokerTable {
       idx = this.normalizeSeat(idx + 1);
       if (idx === start) break;
     }
+  }
+
+  // --- Public analytics helpers ---
+  recordAction(playerId: string, action: 'fold' | 'check' | 'call' | 'bet' | 'raise', amount?: number): void {
+    this.analytics?.recordAction(playerId, action, amount);
+  }
+
+  getPlayerStats(playerId: string) {
+    return this.analytics?.getPlayerStats(playerId);
+  }
+
+  getPlayerCategory(playerId: string) {
+    return this.analytics?.getPlayerCategory(playerId);
+  }
+
+  getHandHistory() {
+    return this.analytics?.getHistory() ?? [];
+  }
+
+  // --- Agent registration and decision requests ---
+  registerAgent(playerId: string, agent: PlayerAgent) {
+    this.agents.set(playerId, agent);
+  }
+  unregisterAgent(playerId: string) {
+    this.agents.delete(playerId);
+  }
+
+  requestAction(playerId: string, allowed: AllowedAction[], toCall: number, minRaise?: number, maxBet?: number): ActionDecision {
+    const agent = this.agents.get(playerId);
+    if (!agent) throw new Error(`No agent registered for ${playerId}`);
+    const ctx = this.buildContext(playerId, allowed, toCall, minRaise, maxBet);
+    return agent.decideAction(ctx);
+  }
+
+  private notifyAgentsStreet() {
+    for (const p of this.seats) {
+      if (!p) continue;
+      const agent = this.agents.get(p.id);
+      if (!agent) continue;
+      agent.onStreetChange(this.buildContext(p.id, []));
+    }
+  }
+
+  private buildContext(playerId: string, allowed: AllowedAction[], toCall: number = 0, minRaise?: number, maxBet?: number): HandContext {
+    const snap = this.getSnapshot();
+    const player = snap.players.find((pl) => pl.id === playerId);
+    if (!player) throw new Error('player not seated');
+    const position = this.computePositionLabel(playerId);
+    const ctx: any = {
+      handNumber: snap.handNumber,
+      street: snap.street,
+      position,
+      buttonSeat: snap.buttonSeat,
+      player,
+      communityCards: snap.communityCards,
+      pot: snap.pot,
+      allowedActions: allowed,
+      toCall,
+    };
+    if (minRaise !== undefined) ctx.minRaise = minRaise;
+    if (maxBet !== undefined) ctx.maxBet = maxBet;
+    return ctx as HandContext;
+  }
+
+  private computePositionLabel(playerId: string) {
+    // Derive position labels simplified: reuse analytics if present
+    const p = this.seats.find((pl) => pl?.id === playerId) as Player | undefined;
+    if (!p) return undefined;
+    const active: Player[] = this.seats.filter((pl): pl is Player => !!pl && !pl.sittingOut).map((pl) => pl!);
+    const ordered = active
+      .slice()
+      .sort((a, b) => this.normalizeSeat(a.seat - this.buttonSeat) - this.normalizeSeat(b.seat - this.buttonSeat));
+    const idx = ordered.findIndex((pl) => pl.id === playerId);
+    const labels = ['BTN', 'SB', 'BB', 'UTG', 'EP', 'MP', 'HJ', 'CO'] as const;
+    const label = labels[Math.min(idx, labels.length - 1)];
+    return label as any;
   }
 
   private nextOccupiedSeat(fromSeat: number): number {
