@@ -360,7 +360,7 @@ export const getHandInfoAto6 = (rank: number): handInfo => {
  */
 export const bfBestOfFiveOnX = (hand: number[], evalFn: Function = handOfFiveEval) => {
   //@ts-ignore
-  return Math.max(...kombinatoricsJs.kombinatoricsJs.combinations(hand, 5).map((h) => evalFn(...h)));
+  return Math.max(...combinations(hand, 5).map((h) => evalFn(...h)));
 };
 
 /** @function bfBestOfFiveOnXindexed
@@ -374,14 +374,13 @@ export const bfBestOfFiveOnXindexed = (
   evalFn: Function = handOfFiveEvalIndexed,
 ) => {
   //@ts-ignore
-  return Math.max(...kombinatoricsJs.kombinatoricsJs.combinations(hand, 5).map((h) => evalFn(...h)));
+  return Math.max(...combinations(hand, 5).map((h) => evalFn(...h)));
 };
 
 export const bestFiveOnXHiLowIndexed = (evalFn: Function, hand: number[]): hiLowRank => {
   const res = { hi: -1, low: -1 };
   //@ts-ignore
-  const all = kombinatoricsJs
-    .kombinatoricsJs.combinations(hand, 5)
+  const all = combinations(hand, 5)
     //@ts-ignore
     .map((hand) => evalFn(...hand));
   all.forEach((R, i) => {
@@ -415,7 +414,7 @@ const evaluatorInfoByGameType: gameTypesEvalFunction = {
  * @returns {verboseHandInfo} info of best 5 cards hand
  */
 export const getHandInfo5onX = (hand: number[], gameType: string): verboseHandInfo => {
-  const allCombinations: number[][] = kombinatoricsJs.combinations(hand, 5);
+  const allCombinations: number[][] = combinations(hand, 5);
   const evalFn: Function = evaluatorByGameType[gameType];
   const rank: number = Math.max(...allCombinations.map((H) => evalFn(...H)));
   const handInfo: handInfo = evaluatorInfoByGameType[gameType](rank);

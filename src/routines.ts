@@ -471,14 +471,12 @@ const applySuitTemplate = (hand: number[], template: number[]) => {
 export const allFourCardsHands = () => {
   const shiftedRanks = new Array(13).fill(0).map((v, i) => i);
 
-  const ALL: number[][] = kombinatoricsJs
-    .kombinatoricsJs.multiCombinations(shiftedRanks, 4, 4)
+  const ALL: number[][] = multiCombinations(shiftedRanks, 4, 4)
     .map((hand) => hand.sort());
 
   const noReps: number[][] = multiCombinations(shiftedRanks, 4, 1);
 
-  const twoPairs: number[][] = kombinatoricsJs
-    .kombinatoricsJs.multiCombinations(shiftedRanks, 2, 1)
+  const twoPairs: number[][] = multiCombinations(shiftedRanks, 2, 1)
     .map((c) => [c[0], c[0], c[1], c[1]]);
 
   const tempOnePair: number[][] = multiCombinations(shiftedRanks, 3, 1);
@@ -555,7 +553,7 @@ export const allFourCardsHands = () => {
    */
 };
 
-//console.log("permmutation repetition", kombinatoricsJs.permutationsMultiSets([13, 13, 0, 0]));
+//console.log("permmutation repetition", permutationsMultiSets([13, 13, 0, 0]));
 
 //allTwoCardsHands();
 //allFourCardsHands();
