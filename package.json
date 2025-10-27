@@ -1,6 +1,7 @@
 {
   "name": "gamblingjs",
   "version": "0.0.1",
+  "type": "module",
   "description": "",
   "keywords": [
     "poker",
@@ -53,6 +54,7 @@
     "commit": "git-cz",
     "semantic-release": "semantic-release",
     "semantic-release-prepare": "ts-node tools/semantic-release-prepare",
+    "simulate:starting-hands": "tsx tools/simulate-starting-hands.ts --runs=5000 --games=texas-holdem,omaha,omaha-hi-low8,stud,stud-hi-low8 --output=out",
     "precommit": "lint-staged"
   },
   "lint-staged": {
@@ -69,6 +71,10 @@
   "prettier": {
     "semi": true,
     "singleQuote": true
+  },
+  "ts-node": {
+    "esm": true,
+    "experimentalSpecifierResolution": "node"
   },
   "commitlint": {
     "extends": [
@@ -112,6 +118,7 @@
     "tslint": "^6.1.3",
     "tslint-config-prettier": "^1.18.0",
     "tslint-config-standard": "^9.0.0",
+    "tsx": "^4.20.6",
     "typedoc": "^0.28.14",
     "typescript": "^5.9.3",
     "vitest": "^3.2.4"

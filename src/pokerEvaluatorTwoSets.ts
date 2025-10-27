@@ -1,6 +1,41 @@
-import * as kombinatoricsJs from './lib/kombinatoricsjs/src/kombinatoricsjs';
+// Fallback combinatorics functions for demo
+const combinations = (arr: any[], k: number): any[][] => {
+  if (k > arr.length || k <= 0) return [];
+  if (k === arr.length) return [arr];
+  if (k === 1) return arr.map(el => [el]);
+  
+  const result: any[][] = [];
+  for (let i = 0; i <= arr.length - k; i++) {
+    const head = arr[i];
+    const tailCombinations = combinations(arr.slice(i + 1), k - 1);
+    for (const tail of tailCombinations) {
+      result.push([head, ...tail]);
+    }
+  }
+  return result;
+};
 
-import { fullCardsDeckHash_5 } from './constants';
+const crossProduct = (list: any[], k: number): any[][] => {
+  if (k < 1) return [list];
+  let crossProdList: any[][] = new Array(Math.pow(list.length, k));
+  let l: number = crossProdList.length;
+  let ln: number = list.length;
+
+  for (let i: number = 0; i < l; ++i) {
+    let tmpList: any[][] = [];
+    let N: number = i;
+    for (let j = k - 1; j >= 0; --j) {
+      let digit: number = N % ln;
+      N = Math.floor(N / ln);
+      tmpList[j] = list[digit];
+    }
+    crossProdList[i] = tmpList;
+  }
+  return crossProdList;
+};
+// import * as kombinatoricsJs from './lib/kombinatoricsjs/src/kombinatoricsjs.js';
+
+import { fullCardsDeckHash_5 } from './constants.js';
 import {
   handInfo,
   verboseHandInfo,
@@ -11,8 +46,8 @@ import {
   MultiNumberMap,
   hashRankingSeven,
   hashRanking,
-} from './interfaces';
-import { handToCardsSymbols, filterWinningCards } from './routines';
+} from './interfaces.js';
+import { handToCardsSymbols, filterWinningCards } from './routines.js';
 import {
   handOfFiveEval,
   handOfFiveEvalHiLow8,
@@ -20,7 +55,7 @@ import {
   handOfFiveEvalLow_Ato5,
   handOfFiveEvalLow_Ato6,
   handOfFiveEvalLowBall27,
-} from './pokerEvaluator5';
+} from './pokerEvaluator5.js';
 
 /** @function bfBestOfFiveFromTwoSets  @TODO make verbose version
  *
@@ -40,8 +75,8 @@ export const bfBestOfFiveFromTwoSets = (
   if (nA + nB !== 5) {
     throw new RangeError('sum of nA+nB parameters MUST be 5');
   }
-  const setACombinations: number[][] = kombinatoricsJs.combinations(handSetA, nA);
-  const setBCombinations: number[][] = kombinatoricsJs.combinations(handSetB, nB);
+  const setACombinations: number[][] = combinations(handSetA, nA);
+  const setBCombinations: number[][] = combinations(handSetB, nB);
   let maxRank: number = 0;
   setACombinations.forEach((handA, idxA) => {
     setBCombinations.forEach((handB, idxB) => {
@@ -64,8 +99,8 @@ export const bfBestOfFiveFromTwoSetsHiLow = (
   if (nA + nB !== 5) {
     throw new RangeError('sum of nA+nB parameters MUST be 5');
   }
-  const setACombinations: number[][] = kombinatoricsJs.combinations(handSetA, nA);
-  const setBCombinations: number[][] = kombinatoricsJs.combinations(handSetB, nB);
+  const setACombinations: number[][] = combinations(handSetA, nA);
+  const setBCombinations: number[][] = combinations(handSetB, nB);
   const maxRank: hiLowRank = { hi: 0, low: -1 };
   setACombinations.forEach((handA, idxA) => {
     setBCombinations.forEach((handB, idxB) => {

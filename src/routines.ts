@@ -1,4 +1,71 @@
-import * as kombinatoricsJs from './lib/kombinatoricsjs/src/kombinatoricsjs';
+// Fallback combinatorics functions for demo
+const multiCombinations = (arr: any[], k: number, rep: number): any[][] => {
+  // When rep = 1, this is just regular combinations
+  if (rep === 1) {
+    return combinations(arr, k);
+  }
+  
+  // For other cases, generate combinations with repetition
+  if (k <= 0) return [[]];
+  if (arr.length === 0) return [];
+  
+  const result: any[][] = [];
+  
+  function generateCombos(remaining: number, currentCombo: any[], startIndex: number) {
+    if (remaining === 0) {
+      result.push([...currentCombo]);
+      return;
+    }
+    
+    for (let i = startIndex; i < arr.length; i++) {
+      for (let count = 1; count <= Math.min(rep, remaining); count++) {
+        const newCombo = [...currentCombo, ...Array(count).fill(arr[i])];
+        generateCombos(remaining - count, newCombo, i + 1);
+      }
+    }
+  }
+  
+  generateCombos(k, [], 0);
+  return result;
+};
+
+const combinations = (arr: any[], k: number): any[][] => {
+  // Simple combinations implementation
+  if (k > arr.length || k <= 0) return [];
+  if (k === arr.length) return [arr];
+  if (k === 1) return arr.map(el => [el]);
+  
+  const result: any[][] = [];
+  for (let i = 0; i <= arr.length - k; i++) {
+    const head = arr[i];
+    const tailCombinations = combinations(arr.slice(i + 1), k - 1);
+    for (const tail of tailCombinations) {
+      result.push([head, ...tail]);
+    }
+  }
+  return result;
+};
+
+const crossProduct = (list: any[], k: number): any[][] => {
+  if (k < 1) return [list];
+  let crossProdList: any[][] = new Array(Math.pow(list.length, k));
+  let l: number = crossProdList.length;
+  let ln: number = list.length;
+
+  for (let i: number = 0; i < l; ++i) {
+    let tmpList: any[][] = [];
+    let N: number = i;
+    for (let j = k - 1; j >= 0; --j) {
+      let digit: number = N % ln;
+      N = Math.floor(N / ln);
+      tmpList[j] = list[digit];
+    }
+    crossProdList[i] = tmpList;
+  }
+  return crossProdList;
+};
+
+// import * as kombinatoricsJs from './lib/kombinatoricsjs/src/kombinatoricsjs.js';
 import { hashRanking, NumberMap } from './interfaces';
 import * as CONSTANTS from './constants';
 
@@ -84,7 +151,7 @@ export const checkStraight5on7 = (arr: number[]): boolean => {
 };
 
 export const singlePairsList = (startSet: number[]): number[][] => {
-  const toAdd = kombinatoricsJs.multiCombinations(startSet, 3, 1);
+  const toAdd = multiCombinations(startSet, 3, 1);
   const singlePairs = [];
   for (let i = 0; i < startSet.length; ++i) {
     for (let j = 0; j < toAdd.length; ++j) {
@@ -105,7 +172,7 @@ export const internalDoublePairsSort = (a: number[], b: number[]): number => {
 };
 
 export const sortedPairsToAdd = (startSet: number[]): number[][] => {
-  const _toAdd = kombinatoricsJs.multiCombinations(startSet, 2, 1);
+  const _toAdd = multiCombinations(startSet, 2, 1);
 
   _toAdd.forEach((pair) => {
     /* istanbul ignore next */
@@ -120,7 +187,7 @@ export const sortedPairsToAdd = (startSet: number[]): number[][] => {
 
 export const doublePairsList = (startSet: number[], isLow: boolean = false): number[][] => {
   const toAdd = isLow
-    ? kombinatoricsJs.multiCombinations(startSet, 2, 1)
+    ? multiCombinations(startSet, 2, 1)
     : sortedPairsToAdd(startSet);
   const doublePairs = [];
 
@@ -136,7 +203,7 @@ export const doublePairsList = (startSet: number[], isLow: boolean = false): num
 
 export const trisList = (startSet: number[], isLow: boolean = false): number[][] => {
   const toAdd = isLow
-    ? kombinatoricsJs.multiCombinations(startSet, 2, 1)
+    ? multiCombinations(startSet, 2, 1)
     : sortedPairsToAdd(startSet);
   const tris = [];
   for (let i = 0; i < startSet.length; ++i) {
@@ -150,14 +217,14 @@ export const trisList = (startSet: number[], isLow: boolean = false): number[][]
 };
 
 export const fullHouseList = (startSet: number[]): number[][] => {
-  const fullHouses = kombinatoricsJs.crossProduct(startSet, 2).filter((p) => p[0] !== p[1]);
+  const fullHouses = crossProduct(startSet, 2).filter((p) => p[0] !== p[1]);
   return fullHouses.map((hand, idx) => {
     return [hand[0], hand[0], hand[0], hand[1], hand[1]];
   });
 };
 
 export const quadsList = (startSet: number[]): number[][] => {
-  const quads = kombinatoricsJs.crossProduct(startSet, 2).filter((p) => p[0] !== p[1]);
+  const quads = crossProduct(startSet, 2).filter((p) => p[0] !== p[1]);
   return quads.map((hand) => {
     return [hand[0], hand[0], hand[0], hand[0], hand[1]];
   });
@@ -199,7 +266,7 @@ export const _rankOfHand = (hand: number[], rankHash: NumberMap) => {
   return rankHash[getVectorSum(hand)];
 };
 export const _rankOf5onX = (hand: number[], rankHash: NumberMap, INVERTED: boolean = false) => {
-  const comb = kombinatoricsJs.combinations(hand, 5);
+  const comb = combinations(hand, 5);
   let max = 0;
   comb.forEach((h) => {
     const s = getVectorSum(h);
@@ -349,13 +416,13 @@ export const fillRankFlushes = (h: number[], rankingObject: hashRanking): hashRa
 };
 
 export const allTwoCardsHands = () => {
-  const allRanksOff: number[][] = kombinatoricsJs.multiCombinations(
+  const allRanksOff: number[][] = multiCombinations(
     CONSTANTS.ranksHashOn7.map((r) => r << 9),
     2,
     2,
   );
   for (let i = 0; i < allRanksOff.length; i++) allRanksOff[i][1]++; //settings different suit for the second rank
-  const allRanksSuited: number[][] = kombinatoricsJs.multiCombinations(
+  const allRanksSuited: number[][] = multiCombinations(
     CONSTANTS.ranksHashOn7.map((r) => r << 9),
     2,
     1,
@@ -405,16 +472,16 @@ export const allFourCardsHands = () => {
   const shiftedRanks = new Array(13).fill(0).map((v, i) => i);
 
   const ALL: number[][] = kombinatoricsJs
-    .multiCombinations(shiftedRanks, 4, 4)
+    .kombinatoricsJs.multiCombinations(shiftedRanks, 4, 4)
     .map((hand) => hand.sort());
 
-  const noReps: number[][] = kombinatoricsJs.multiCombinations(shiftedRanks, 4, 1);
+  const noReps: number[][] = multiCombinations(shiftedRanks, 4, 1);
 
   const twoPairs: number[][] = kombinatoricsJs
-    .multiCombinations(shiftedRanks, 2, 1)
+    .kombinatoricsJs.multiCombinations(shiftedRanks, 2, 1)
     .map((c) => [c[0], c[0], c[1], c[1]]);
 
-  const tempOnePair: number[][] = kombinatoricsJs.multiCombinations(shiftedRanks, 3, 1);
+  const tempOnePair: number[][] = multiCombinations(shiftedRanks, 3, 1);
 
   const onePair: number[][] = tempOnePair
     .map((c) => [c[0], c[0], c[1], c[2]])
@@ -424,7 +491,7 @@ export const allFourCardsHands = () => {
     );
   //pair is always the firs two cards
 
-  const tempTriple = kombinatoricsJs.multiCombinations(shiftedRanks, 2, 1);
+  const tempTriple = multiCombinations(shiftedRanks, 2, 1);
   const triple: number[][] = tempTriple
     .map((c) => [c[0], c[0], c[0], c[1]])
     .concat(tempTriple.map((c) => [c[1], c[1], c[1], c[0]]));
@@ -490,5 +557,5 @@ export const allFourCardsHands = () => {
 
 //console.log("permmutation repetition", kombinatoricsJs.permutationsMultiSets([13, 13, 0, 0]));
 
-allTwoCardsHands();
-allFourCardsHands();
+//allTwoCardsHands();
+//allFourCardsHands();

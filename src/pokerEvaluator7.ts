@@ -18,7 +18,7 @@ import {
   FLUSH_RANK_SEVEN_ATO6,
   HASH_RANK_SEVEN_ATO6,
   FAST_HASH_DEFINED,
-} from './pokerHashes7';
+} from './pokerHashes7.js';
 
 import {
   HASHES_OF_FIVE_LOW9,
@@ -26,7 +26,7 @@ import {
   HASHES_OF_FIVE_Ato6,
   HASHES_OF_FIVE_LOW_Ato5,
   HASHES_OF_FIVE_LOW8,
-} from './pokerHashes5';
+} from './pokerHashes5.js';
 
 import {
   bfBestOfFiveOnXindexed,
@@ -36,7 +36,7 @@ import {
   bestFiveOnXHiLowIndexed,
   handOfFiveEvalHiLow8Indexed,
   handOfFiveEvalHiLow9Indexed,
-} from './pokerEvaluator5';
+} from './pokerEvaluator5.js';
 
 import {
   fullCardsDeckHash_5,
@@ -48,7 +48,7 @@ import {
   rankCards_low9,
   rankCards_low,
   HIGH_MAX_RANK,
-} from './constants';
+} from './constants.js';
 import {
   handInfo,
   verboseHandInfo,
@@ -59,10 +59,10 @@ import {
   MultiNumberMap,
   hashRankingSeven,
   hashRanking,
-} from './interfaces';
-import { handToCardsSymbols, filterWinningCards } from './routines';
+} from './interfaces.js';
+import { handToCardsSymbols, filterWinningCards } from './routines.js';
 
-import * as kombinatoricsJs from './lib/kombinatoricsjs/src/kombinatoricsjs';
+// import * as kombinatoricsJs from './lib/kombinatoricsjs/src/kombinatoricsjs.js';
 
 /** @function handOfSevenEval
  *

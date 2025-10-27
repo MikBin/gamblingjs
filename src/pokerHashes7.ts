@@ -2,16 +2,16 @@ import {
   createRankOf5On7Hashes,
   createRankOf7AceToSix_Low,
   createRankOf7AceToFive_Low,
-} from './hashesCreator';
+} from './hashesCreator.js';
 import {
   HASHES_OF_FIVE,
   HASHES_OF_FIVE_LOW8,
   HASHES_OF_FIVE_LOW9,
   HASHES_OF_FIVE_LOW_Ato5,
   HASHES_OF_FIVE_Ato6,
-} from './pokerHashes5';
-import { rankCards_low, rankCards_low8, rankCards_low9, gameType } from './constants';
-import { hashRankingSeven, gameTypesBool, gameTypesEvalFunction } from './interfaces';
+} from './pokerHashes5.js';
+import { rankCards_low, rankCards_low8, rankCards_low9, gameType } from './constants.js';
+import { hashRankingSeven, gameTypesBool, gameTypesEvalFunction } from './interfaces.js';
 
 const baseHashRankingSeven: hashRankingSeven = {
   HASHES: {},
