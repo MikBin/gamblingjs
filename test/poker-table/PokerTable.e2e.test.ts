@@ -1,6 +1,7 @@
 import { describe, it, expect, beforeEach } from 'vitest';
 import { PokerTable } from '../../src/poker-table/PokerTable';
 import { GameId, LimitType, type TableConfig, type AllowedAction } from '../../src/poker-table/types';
+import { PokerEvaluator, GameVariant } from '../../src';
 import type { Dealer } from '../../src/poker-table/deck';
 import type { PlayerAgent } from '../../src/poker-table/player';
 
@@ -141,6 +142,15 @@ describe('PokerTable E2E - deterministic cash and SNG flows', () => {
 
     table.nextStreet(); // showdown
     expect(table.getSnapshot().street).toBe('showdown');
+
+    // Showdown winner calculation (deterministic deck yields a board flush -> 3-way tie)
+    const final = table.getSnapshot();
+    const board = final.communityCards;
+    const r0 = PokerEvaluator.evaluate7Cards([...p0.holeCards, ...board], GameVariant.HIGH);
+    const r1 = PokerEvaluator.evaluate7Cards([...p1.holeCards, ...board], GameVariant.HIGH);
+    const r2 = PokerEvaluator.evaluate7Cards([...p2.holeCards, ...board], GameVariant.HIGH);
+    expect(r0).toBe(r1);
+    expect(r1).toBe(r2);
 
     // Basic analytics sanity
     const stats1 = table.getPlayerStats('p1');
