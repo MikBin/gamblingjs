@@ -1,3 +1,4 @@
+import { describe, it, expect, beforeAll } from 'vitest';
 import { getPartialHandStatsIndexed_7, categoryByRankingValue } from '../src/pokerMontecarloSym';
 import { fastHashesCreators } from '../src/pokerHashes7'
 beforeAll(() => {

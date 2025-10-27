@@ -11,3 +11,10 @@ compiled
 docs
 *.map
 dist
+# Ensure no transpiled artifacts live under source trees
+src/**/*.js
+src/**/*.d.ts
+webapp/src/**/*.js
+webapp/src/**/*.d.ts
+# Vendor build outputs inside vendored libs
+src/lib/kombinatoricsjs/dist
