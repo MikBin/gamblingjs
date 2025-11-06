@@ -158,12 +158,13 @@ interface Props {
 }
 
 interface Emits {
-  (e: 'share'): void;
-  (e: 'save'): void;
+  (_e: 'share'): void;
+  (_e: 'save'): void;
 }
 
-const props = defineProps<Props>();
 const emit = defineEmits<Emits>();
+
+const props = defineProps<Props>();
 
 // Helper methods
 const getRankingBadgeClass = (rank: number) => {

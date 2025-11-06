@@ -9,7 +9,7 @@
           :key="`pocket-${index}`"
           class="relative"
         >
-          <Card
+          <PokerCard
             :card-index="card"
             :is-face-down="hidePocketCards && index >= revealFrom"
             :size="cardSize"
@@ -30,7 +30,7 @@
       <div v-if="communityCards.length >= 3" class="mb-4">
         <h4 class="text-md font-medium mb-2">Flop</h4>
         <div class="flex gap-2 justify-center">
-          <Card
+          <PokerCard
             v-for="(card, index) in communityCards.slice(0, 3)"
             :key="`flop-${index}`"
             :card-index="card"
@@ -44,7 +44,7 @@
       <div v-if="communityCards.length >= 4" class="mb-4">
         <h4 class="text-md font-medium mb-2">Turn</h4>
         <div class="flex gap-2 justify-center">
-          <Card
+          <PokerCard
             :key="`turn`"
             :card-index="communityCards[3]"
             :size="cardSize"
@@ -57,7 +57,7 @@
       <div v-if="communityCards.length >= 5" class="mb-4">
         <h4 class="text-md font-medium mb-2">River</h4>
         <div class="flex gap-2 justify-center">
-          <Card
+          <PokerCard
             :key="`river`"
             :card-index="communityCards[4]"
             :size="cardSize"
@@ -97,7 +97,7 @@
 
 <script setup lang="ts">
 import { computed } from 'vue';
-import Card from './Card.vue';
+import PokerCard from './PokerCard.vue';
 
 interface Props {
   pocketCards?: number[];
@@ -113,10 +113,12 @@ interface Props {
 }
 
 interface Emits {
-  (e: 'reveal'): void;
-  (e: 'clear'): void;
-  (e: 'evaluate'): void;
+  (_e: 'reveal'): void;
+  (_e: 'clear'): void;
+  (_e: 'evaluate'): void;
 }
+
+const emit = defineEmits<Emits>();
 
 const props = withDefaults(defineProps<Props>(), {
   pocketCards: () => [],
@@ -131,7 +133,6 @@ const props = withDefaults(defineProps<Props>(), {
   showActions: true
 });
 
-const emit = defineEmits<Emits>();
 
 // Computed properties for action buttons
 const canReveal = computed(() => {

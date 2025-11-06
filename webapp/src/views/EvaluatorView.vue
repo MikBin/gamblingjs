@@ -245,7 +245,17 @@ const handleEvaluateHand = async () => {
   }
 };
 
-const handleSimulationComplete = (results: any) => {
+interface SimulationResults {
+  winProbability: number;
+  tieProbability: number;
+  lossProbability: number;
+  handStrength: number;
+  expectedValue: number;
+  outs?: number;
+  potOdds?: number;
+}
+
+const handleSimulationComplete = (results: SimulationResults) => {
   // Update evaluation results with simulation data
   if (evaluationResults.value) {
     evaluationResults.value.detailedStats = {

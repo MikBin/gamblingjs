@@ -1,10 +1,10 @@
 // Local type definitions for now - will integrate with gamblingjs later
 export enum GameVariant {
-  HIGH = 'high',
-  LOW_A_TO_5 = 'low-a-to-5',
-  LOW_8_OR_BETTER = 'low-8-or-better',
-  LOW_9_OR_BETTER = 'low-9-or-better',
-  TEXAS_HOLDEM = 'texas-holdem'
+  // HIGH = 'high',
+  // LOW_A_TO_5 = 'low-a-to-5',
+  // LOW_8_OR_BETTER = 'low-8-or-better',
+  // LOW_9_OR_BETTER = 'low-9-or-better',
+  // TEXAS_HOLDEM = 'texas-holdem'
 }
 
 export interface verboseHandInfo {
