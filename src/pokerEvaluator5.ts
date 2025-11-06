@@ -28,23 +28,8 @@ import {
 } from './interfaces';
 
 import { filterWinningCards, getFlushSuitFromIndex } from './routines';
+import { combinations } from 'kombinatoricsjs';
 
-// Simple fallback combinations function
-const combinations = (arr: any[], k: number): any[][] => {
-  if (k > arr.length || k <= 0) return [];
-  if (k === arr.length) return [arr];
-  if (k === 1) return arr.map(el => [el]);
-  
-  const result: any[][] = [];
-  for (let i = 0; i <= arr.length - k; i++) {
-    const head = arr[i];
-    const tailCombinations = combinations(arr.slice(i + 1), k - 1);
-    for (const tail of tailCombinations) {
-      result.push([head, ...tail]);
-    }
-  }
-  return result;
-};
 // import * as kombinatoricsJs from './lib/kombinatoricsjs/src/kombinatoricsjs.js';
 
 /** @function handOfFiveEval
