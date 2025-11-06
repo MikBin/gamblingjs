@@ -45,6 +45,7 @@
     "test:watch": "vitest watch",
     "test:coverage": "vitest run --coverage",
     "test:ui": "vitest --ui",
+    "test:perf": "vitest run --config vitest.perf.config.ts",
     "test:debug": "node --inspect-brk node_modules/.bin/vitest run",
     "dev": "npm run build:watch",
     "prepublishOnly": "npm run build:prod",
