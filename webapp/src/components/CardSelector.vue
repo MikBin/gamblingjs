@@ -7,7 +7,7 @@
 
     <!-- Card Grid -->
     <div class="grid grid-cols-4 sm:grid-cols-6 md:grid-cols-8 lg:grid-cols-13 gap-2 mb-6">
-      <Card
+      <PokerCard
         v-for="cardIndex in availableCards"
         :key="cardIndex"
         :card-index="cardIndex"
@@ -22,7 +22,7 @@
     <div v-if="selectedCards.length > 0" class="mb-4">
       <h4 class="text-md font-medium mb-2">Selected Cards:</h4>
       <div class="flex flex-wrap gap-2">
-        <Card
+        <PokerCard
           v-for="cardIndex in selectedCards"
           :key="`selected-${cardIndex}`"
           :card-index="cardIndex"
@@ -64,7 +64,7 @@
 
 <script setup lang="ts">
 import { computed, ref, watch } from 'vue';
-import Card from './Card.vue';
+import PokerCard from './PokerCard.vue';
 import { getAvailableCards, validateCardSelection } from '../utils/cardUtils';
 
 interface Props {
@@ -78,11 +78,13 @@ interface Props {
 }
 
 interface Emits {
-  (e: 'update:modelValue', cards: number[]): void;
-  (e: 'selection-change', cards: number[]): void;
-  (e: 'confirm', cards: number[]): void;
-  (e: 'clear'): void;
+  (_e: 'update:modelValue', _cards: number[]): void;
+  (_e: 'selection-change', _cards: number[]): void;
+  (_e: 'confirm', _cards: number[]): void;
+  (_e: 'clear'): void;
 }
+
+const emit = defineEmits<Emits>();
 
 const props = withDefaults(defineProps<Props>(), {
   title: 'Select Cards',
@@ -94,7 +96,6 @@ const props = withDefaults(defineProps<Props>(), {
   autoValidate: true
 });
 
-const emit = defineEmits<Emits>();
 
 const selectedCards = ref<number[]>([...props.modelValue]);
 const validationError = ref<string>('');
@@ -109,8 +110,14 @@ const isValidSelection = computed(() => {
   if (!props.autoValidate) return true;
 
   const validation = validateCardSelection(selectedCards.value);
-  validationError.value = validation.error || '';
   return validation.isValid;
+});
+
+watch(selectedCards, (newSelection) => {
+  if (props.autoValidate) {
+    const validation = validateCardSelection(newSelection);
+    validationError.value = validation.error || '';
+  }
 });
 
 // Handle card click

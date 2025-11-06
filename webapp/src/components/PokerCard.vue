@@ -24,19 +24,18 @@
 </template>
 
 <script setup lang="ts">
+/* eslint-disable no-unused-vars */
 import { computed } from 'vue';
 import { getCardFromIndex, getCardImagePath, getCardBackPath, formatCardString } from '../utils/cardUtils';
 
-interface Props {
+const props = withDefaults(defineProps<{
   cardIndex: number;
   isSelected?: boolean;
   isFaceDown?: boolean;
   isDisabled?: boolean;
   size?: 'small' | 'medium' | 'large';
   onClick?: (cardIndex: number) => void;
-}
-
-const props = withDefaults(defineProps<Props>(), {
+}>(), {
   isSelected: false,
   isFaceDown: false,
   isDisabled: false,

@@ -185,12 +185,13 @@ interface Props {
 }
 
 interface Emits {
-  (e: 'complete', results: SimulationResults): void;
-  (e: 'progress', progress: number): void;
+  (_e: 'complete', _results: SimulationResults): void;
+  (_e: 'progress', _progress: number): void;
 }
 
-const props = defineProps<Props>();
 const emit = defineEmits<Emits>();
+
+const props = defineProps<Props>();
 
 // State
 const simulationCount = ref(1000);
