@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import * as kombinatoricsJs from '../src/lib/kombinatoricsjs/src/kombinatoricsjs';
+import * as kombinatoricsJs from 'kombinatoricsjs';
 import {
   createRankOfFiveHashes,
   createRankOf5On7Hashes,
