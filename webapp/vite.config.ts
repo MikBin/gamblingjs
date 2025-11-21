@@ -22,7 +22,8 @@ export default defineConfig({
       '@views': resolve(__dirname, 'src/views'),
       '@assets': resolve(__dirname, 'src/assets'),
       // Link to main library
-      '@gamblingjs': resolve(__dirname, '../src/index.ts')
+      '@gamblingjs': resolve(__dirname, '../src/index.ts'),
+      'kombinatoricsjs': resolve(__dirname, '../src/lib/kombinatoricsjs/src/kombinatoricsjs.ts')
     },
     extensions: ['.ts', '.js', '.vue', '.json']
   },
