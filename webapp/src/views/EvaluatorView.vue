@@ -37,7 +37,7 @@
            :can-run="canRunSim"
            :is-simulating="monteCarlo.isSimulating.value"
            :results="monteCarlo.simulationResult.value"
-           :error="monteCarlo.simulationError.value"
+           :error="monteCarlo.simulationError.value || undefined"
            @run="handleRunSim"
          />
       </div>
