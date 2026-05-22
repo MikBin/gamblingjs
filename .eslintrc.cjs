@@ -35,6 +35,7 @@ module.exports = {
     '@typescript-eslint/prefer-as-const': 'off',
     '@typescript-eslint/prefer-includes': 'off',
     '@typescript-eslint/prefer-string-starts-ends-with': 'off',
+    '@typescript-eslint/no-require-imports': 'off',
 
     // General JavaScript rules
     'prefer-const': 'off',
