@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import * as kombinatoricsJs from 'kombinatoricsjs';
+import { multiCombinations } from '../src/routines';
 import {
   createRankOfFiveHashes,
   createRankOf5On7Hashes,
@@ -28,7 +28,7 @@ describe('testing rank of 5 and 7 hashes creator', () => {
 
   it('has no missings ranking values', () => {
     let found = 0;
-    kombinatoricsJs.multiCombinations(CONSTANTS.ranksHashOn5, 5, 4).forEach((h, i) => {
+    multiCombinations(CONSTANTS.ranksHashOn5, 5, 4).forEach((h, i) => {
       let k = h[0] + h[1] + h[2] + h[3] + h[4];
       if (!isNaN(HASHES_OF_FIVE.HASHES[k])) {
         found++;
@@ -41,7 +41,7 @@ describe('testing rank of 5 and 7 hashes creator', () => {
 
   it('has no missings flush ranking values', () => {
     let found = 0;
-    kombinatoricsJs.multiCombinations(CONSTANTS.ranksHashOn5, 5, 1).forEach((h, i) => {
+    multiCombinations(CONSTANTS.ranksHashOn5, 5, 1).forEach((h, i) => {
       let k = h[0] + h[1] + h[2] + h[3] + h[4];
       if (!isNaN(HASHES_OF_FIVE.FLUSH_RANK_HASHES[k])) {
         found++;

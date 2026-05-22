@@ -119,7 +119,5 @@
     "typescript": "^5.9.3",
     "vitest": "^3.2.4"
   },
-  "dependencies": {
-    "kombinatoricsjs": "^1.0.4"
-  }
+  "dependencies": {}
 }
