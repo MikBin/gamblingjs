@@ -28,7 +28,7 @@ import {
 } from './interfaces';
 
 import { filterWinningCards, getFlushSuitFromIndex } from './routines';
-import { combinations } from 'kombinatoricsjs';
+import { combinations } from './routines';
 
 // import * as kombinatoricsJs from './lib/kombinatoricsjs/src/kombinatoricsjs.js';
 

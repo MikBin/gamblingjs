@@ -1,3 +1,4 @@
+export { loadHashes, initHashesAsync } from './init';
 import { handOfFiveEvalIndexed, getHandInfo } from './pokerEvaluator5';
 import { handOfSixEvalIndexed } from './pokerEvaluator6';
 

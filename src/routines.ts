@@ -1,11 +1,42 @@
-// Fallback combinatorics functions for demo
-const multiCombinations = (arr: any[], k: number, rep: number): any[][] => {
-  // When rep = 1, this is just regular combinations
+export const shuffle = (array: any[]) => {
+  let currentIndex = array.length, randomIndex;
+
+  // While there remain elements to shuffle.
+  while (currentIndex > 0) {
+
+    // Pick a remaining element.
+    randomIndex = Math.floor(Math.random() * currentIndex);
+    currentIndex--;
+
+    // And swap it with the current element.
+    [array[currentIndex], array[randomIndex]] = [
+      array[randomIndex], array[currentIndex]];
+  }
+
+  return array;
+};
+
+export const combinations = (arr: any[], k: number): any[][] => {
+  if (k > arr.length || k <= 0) return [];
+  if (k === arr.length) return [arr];
+  if (k === 1) return arr.map(el => [el]);
+
+  const result: any[][] = [];
+  for (let i = 0; i <= arr.length - k; i++) {
+    const head = arr[i];
+    const tailCombinations = combinations(arr.slice(i + 1), k - 1);
+    for (const tail of tailCombinations) {
+      result.push([head, ...tail]);
+    }
+  }
+  return result;
+};
+
+export const multiCombinations = (arr: any[], k: number, rep: number): any[][] => {
   if (rep === 1) {
     return combinations(arr, k);
   }
   
-  // For other cases, generate combinations with repetition
   if (k <= 0) return [[]];
   if (arr.length === 0) return [];
   
@@ -29,24 +60,7 @@ const multiCombinations = (arr: any[], k: number, rep: number): any[][] => {
   return result;
 };
 
-const combinations = (arr: any[], k: number): any[][] => {
-  // Simple combinations implementation
-  if (k > arr.length || k <= 0) return [];
-  if (k === arr.length) return [arr];
-  if (k === 1) return arr.map(el => [el]);
-  
-  const result: any[][] = [];
-  for (let i = 0; i <= arr.length - k; i++) {
-    const head = arr[i];
-    const tailCombinations = combinations(arr.slice(i + 1), k - 1);
-    for (const tail of tailCombinations) {
-      result.push([head, ...tail]);
-    }
-  }
-  return result;
-};
-
-const crossProduct = (list: any[], k: number): any[][] => {
+export const crossProduct = (list: any[], k: number): any[][] => {
   if (k < 1) return [list];
   let crossProdList: any[][] = new Array(Math.pow(list.length, k));
   let l: number = crossProdList.length;
@@ -64,7 +78,6 @@ const crossProduct = (list: any[], k: number): any[][] => {
   }
   return crossProdList;
 };
-
 // import * as kombinatoricsJs from './lib/kombinatoricsjs/src/kombinatoricsjs.js';
 import { hashRanking, NumberMap } from './interfaces';
 import * as CONSTANTS from './constants';

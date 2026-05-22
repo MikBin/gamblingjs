@@ -26,14 +26,16 @@ export class PokerEvaluator {
   private low9Evaluator: Low9Evaluator;
   private texasHoldemEvaluator: TexasHoldemEvaluator;
 
-  constructor() {
-    // Load hash tables for 7-card evaluations
-    fastHashesCreators.high();
-    fastHashesCreators.Ato5();
-    fastHashesCreators.Ato6();
-    fastHashesCreators.low8();
-    fastHashesCreators.low9();
-    fastHashesCreators['2to7']();
+  constructor(autoInitHashes = true) {
+    if (autoInitHashes) {
+      // Load hash tables for 7-card evaluations
+      fastHashesCreators.high();
+      fastHashesCreators.Ato5();
+      fastHashesCreators.Ato6();
+      fastHashesCreators.low8();
+      fastHashesCreators.low9();
+      fastHashesCreators['2to7']();
+    }
 
     this.highEvaluator = new HighEvaluator();
     this.lowAto5Evaluator = new LowAto5Evaluator();
