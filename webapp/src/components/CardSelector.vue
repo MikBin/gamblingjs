@@ -16,15 +16,18 @@
     </div>
 
     <div class="grid grid-cols-4 sm:grid-cols-6 md:grid-cols-8 lg:grid-cols-13 gap-2">
-      <Card
-        v-for="cardIndex in filteredCards"
-        :key="cardIndex"
-        :card-index="cardIndex"
-        :is-selected="selectedCards.includes(cardIndex)"
-        :is-disabled="isCardDisabled(cardIndex)"
-        size="small"
-        @click="handleCardClick"
-      />
+      <template v-for="cardIndex in filteredCards" :key="cardIndex">
+        <Card
+          v-if="!selectedCards.includes(cardIndex) && !disabledCards.includes(cardIndex)"
+          :card-index="cardIndex"
+          :is-selected="false"
+          :is-disabled="false"
+          size="small"
+          @click="handleCardClick"
+        />
+        <!-- Empty placeholder to maintain grid structure when card is selected/removed -->
+        <div v-else class="w-12 h-16 rounded-lg bg-base-300 opacity-20 border-2 border-dashed border-base-content/20"></div>
+      </template>
     </div>
   </div>
 </template>

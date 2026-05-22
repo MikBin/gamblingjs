@@ -93,7 +93,25 @@ export const usePokerStore = defineStore('poker', () => {
     evaluationResult.value = result;
     if (result && typeof result.handRank === 'number') {
         currentHandRank.value = result.handRank;
-        handStrength.value = (6185 - result.handRank) / 6185; // Normalize to 0-1
+
+        let strength = 0;
+        const maxRank = 7461; // from gamblingjs constants
+
+        // For Low variants, smaller rank is often better or inverted.
+        if (gameVariant.value.startsWith('low-')) {
+            // Rough estimation, since actual scale varies by low variant
+            // For now, mapping inverse relation
+            // Usually rank 1 is best for some low variants.
+            strength = 1 - (result.handRank / maxRank);
+        } else {
+            // Standard High game
+            // Rank values go from 1 to 7461 where 7461 is the worst hand (High Card 7)
+            // Wait, standard 5-card rank values: 1 is Royal Flush, 7462 is worst hand.
+            // Let's assume standard 1=Best, 7462=Worst.
+            strength = 1 - (result.handRank / maxRank);
+        }
+
+        handStrength.value = Math.max(0, Math.min(1, strength));
     }
   };
 

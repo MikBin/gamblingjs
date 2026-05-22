@@ -11,10 +11,10 @@ import {
   FAST_HASH_DEFINED
 } from './pokerHashes7';
 import {
-  HASHES_OF_SIX,
+  HASHES_OF_FIVE_ON_SIX,
   HASHES_OF_SIX_LOW_Ato5,
   HASHES_OF_SIX_LOW_Ato6,
-  HASHES_OF_SIX_LOWBALL27,
+  HASHES_OF_FIVE_ON_SIX_LOWBALL27,
   HASHES_OF_SIX_LOW8,
   HASHES_OF_SIX_LOW9,
   FAST_HASH_DEFINED_6
@@ -61,10 +61,10 @@ export const loadHashes = (hashes: PrecomputedHashes) => {
   }
 
   if (hashes['6']) {
-    if (hashes['6'].high) { assignHashRanking(HASHES_OF_SIX, hashes['6'].high); FAST_HASH_DEFINED_6.high = true; }
+    if (hashes['6'].high) { assignHashRanking(HASHES_OF_FIVE_ON_SIX, hashes['6'].high); FAST_HASH_DEFINED_6.high = true; }
     if (hashes['6'].Ato5) { assignHashRanking(HASHES_OF_SIX_LOW_Ato5, hashes['6'].Ato5); FAST_HASH_DEFINED_6.Ato5 = true; }
     if (hashes['6'].Ato6) { assignHashRanking(HASHES_OF_SIX_LOW_Ato6, hashes['6'].Ato6); FAST_HASH_DEFINED_6.Ato6 = true; }
-    if (hashes['6']['2to7']) { assignHashRanking(HASHES_OF_SIX_LOWBALL27, hashes['6']['2to7']); FAST_HASH_DEFINED_6['2to7'] = true; }
+    if (hashes['6']['2to7']) { assignHashRanking(HASHES_OF_FIVE_ON_SIX_LOWBALL27, hashes['6']['2to7']); FAST_HASH_DEFINED_6['2to7'] = true; }
     if (hashes['6'].low8) { assignHashRanking(HASHES_OF_SIX_LOW8, hashes['6'].low8); FAST_HASH_DEFINED_6.low8 = true; }
     if (hashes['6'].low9) { assignHashRanking(HASHES_OF_SIX_LOW9, hashes['6'].low9); FAST_HASH_DEFINED_6.low9 = true; }
   }

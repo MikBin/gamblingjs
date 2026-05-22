@@ -33,30 +33,15 @@
 
       <!-- Results -->
       <div v-if="results" class="results mt-4 space-y-4">
-        <div class="stats stats-vertical lg:stats-horizontal shadow w-full">
-          <div class="stat">
-            <div class="stat-title">Win %</div>
-            <div class="stat-value text-success">{{ formatPercent(results.winProbability) }}</div>
-          </div>
-          <div class="stat">
-            <div class="stat-title">Tie %</div>
-            <div class="stat-value text-warning">{{ formatPercent(results.tieProbability) }}</div>
-          </div>
-          <div class="stat">
-             <div class="stat-title">Equity</div>
-             <div class="stat-value">{{ formatPercent(results.equity) }}</div>
-          </div>
-        </div>
-
         <!-- Distribution Chart (Simple Bar) -->
-        <div v-if="results.handDistribution" class="space-y-2">
+        <div v-if="results" class="space-y-2">
             <h4 class="font-semibold text-sm">Hand Distribution</h4>
-            <div v-for="(prob, type) in results.handDistribution" :key="type" class="flex items-center text-xs">
+            <div v-for="(prob, type) in validResults" :key="type" class="flex items-center text-xs">
                 <span class="w-24 shrink-0">{{ type }}</span>
                 <div class="flex-1 h-4 bg-base-300 rounded overflow-hidden">
-                    <div class="h-full bg-secondary" :style="{ width: `${prob * 100}%` }"></div>
+                    <div class="h-full bg-secondary" :style="{ width: `${(prob as number) * 100}%` }"></div>
                 </div>
-                <span class="w-12 text-right shrink-0">{{ formatPercent(prob) }}</span>
+                <span class="w-12 text-right shrink-0">{{ formatPercent(prob as number) }}</span>
             </div>
         </div>
       </div>
@@ -65,7 +50,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref } from 'vue';
+import { ref, computed } from 'vue';
 
 const props = defineProps({
   canRun: {
@@ -93,6 +78,12 @@ const numRuns = ref(5000);
 const run = () => {
   emit('run', numRuns.value);
 };
+
+const validResults = computed(() => {
+  if (!props.results) return {};
+  const entries = Object.entries(props.results).filter(([key, val]) => typeof val === 'number' && key !== 'average');
+  return Object.fromEntries(entries);
+});
 
 const formatPercent = (val: number) => {
   if (val === undefined || val === null) return '0%';

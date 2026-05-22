@@ -23,6 +23,17 @@
 
       <!-- Right Column: Analysis -->
       <div class="w-full lg:w-96 space-y-6">
+         <!-- Game Variant Selection -->
+         <div class="bg-base-200 p-4 rounded-xl shadow-lg border border-base-300">
+             <label class="label"><span class="label-text font-bold">Game Variant</span></label>
+             <select v-model="pokerStore.gameVariant" class="select select-bordered w-full">
+                <option value="texas-holdem">Texas Hold'em (High)</option>
+                <option value="low-a-to-5">Low A-to-5</option>
+                <option value="low-8-or-better">Low 8-or-Better</option>
+                <option value="low-9-or-better">Low 9-or-Better</option>
+             </select>
+         </div>
+
          <!-- Evaluation Result -->
          <HandRankingDisplay
            :hand-rank="pokerStore.currentHandRank"
@@ -68,21 +79,22 @@ const handleCardSelect = (cardIndex: number) => {
   }
 };
 
-// Auto-evaluate when cards change
+// Auto-evaluate when cards or variant change
 watch(
-  () => pokerStore.allCards,
-  async (newCards) => {
-    if (newCards.length >= 5) {
+  () => [pokerStore.allCards, pokerStore.gameVariant],
+  async ([newCards, newVariant]) => {
+    const cards = newCards as number[];
+    const variant = newVariant as string;
+    if (cards.length >= 5) {
       try {
-        const result = await evaluator.evaluateHand([...newCards]); // Copy to avoid mutation issues if any
+        const result = await evaluator.evaluateHand([...cards], variant);
         pokerStore.setEvaluationResult(result as any);
       } catch (e) {
         console.error("Evaluation error:", e);
+        pokerStore.setEvaluationResult(null);
       }
     } else {
-        // Reset result if cards < 5 (unless we want to keep last valid?)
-        // Let's reset for clarity.
-        // pokerStore.setEvaluationResult(null); // Need to handle null in store
+        pokerStore.setEvaluationResult(null);
     }
   },
   { deep: true }
@@ -96,28 +108,17 @@ const evaluatorHandCards = computed(() => {
 });
 
 const winningCards = computed(() => {
-    // If result has winning cards (best hand)
-    // Note: gamblingjs verbose result might not explicitly list the card indices of the best 5 in a simple array
-    // Let's assume result.winningCards is available or we derive it.
-    // For now, if we don't have it, we return empty.
-    /*
-      interface verboseHandInfo {
-         handRank: number;
-         handRankDescription: string;
-         bestHand: string; // e.g. "Ac Ks..."
-         // We might not get indices directly.
-      }
-    */
-   // If the API returns indices, use them. Else empty.
-   return [];
+    const res = pokerStore.evaluationResult;
+    if (res && res.winningCards && Array.isArray(res.winningCards)) {
+        return res.winningCards;
+    }
+    return [];
 });
 
 const handRankName = computed(() => {
     const res = pokerStore.evaluationResult;
     if (!res) return '';
-    // Fix: check if res has handRankDescription, else default to empty string.
-    // TypeScript complained about string | null not assignable to string | undefined
-    const name = res.handRankDescription || res.handCategory;
+    const name = res.handRankDescription || res.handGroup || res.handCategory;
     return (name || '') as string;
 });
 
