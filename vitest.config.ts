@@ -8,6 +8,7 @@ export default defineConfig({
     environment: 'node',
     pool: 'forks',
     maxWorkers: 1,
+
     include: ['test/**/*.test.ts', 'test/**/*.spec.ts'],
     exclude: [
       'node_modules',
