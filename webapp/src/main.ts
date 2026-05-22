@@ -3,6 +3,10 @@ import { createRouter, createWebHistory } from 'vue-router'
 import { createPinia } from 'pinia'
 import './style.css'
 import App from './App.vue'
+import { PokerEvaluator } from '@gamblingjs'
+
+// Initialize the poker evaluator hashes on startup
+const _evaluator = new PokerEvaluator(true);
 
 import HomeView from './views/HomeView.vue'
 import EvaluatorView from './views/EvaluatorView.vue'

@@ -49,5 +49,5 @@ module.exports = {
     es6: true,
     jest: true
   },
-  ignorePatterns: ['dist/', 'node_modules/', '*.js', 'src/lib/**', 'test/**']
+  ignorePatterns: ['dist/', 'node_modules/', '*.js', 'src/lib/**', 'test/**', 'webapp/**']
 };

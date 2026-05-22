@@ -24,13 +24,8 @@
         </div>
 
         <div
-          v-if="pocketCards.length < 2"
-          class="w-20 h-28 border-2 border-dashed border-base-content/20 rounded-lg flex items-center justify-center text-base-content/30"
-        >
-          Empty
-        </div>
-         <div
-          v-if="pocketCards.length < 1"
+          v-for="i in (2 - pocketCards.length)"
+          :key="`empty-pocket-${i}`"
           class="w-20 h-28 border-2 border-dashed border-base-content/20 rounded-lg flex items-center justify-center text-base-content/30"
         >
           Empty
