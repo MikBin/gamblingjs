@@ -12,7 +12,6 @@
 TypeScript ESM library for poker hand evaluation and simulation. No runtime dependencies.
 - `src/core/` — Core evaluators (HighEvaluator, LowEvaluator)
 - `src/variants/` — Game variants (Texas Hold'em, Omaha, Stud)
-- `src/poker-table/` — Table simulation (PokerTable, dealers, players, analytics)
 - `src/utils/` — Card/validation utilities
 - `src/PokerEvaluator.ts` — Unified public API facade
 - `test/` — Vitest tests (`.test.ts`), setup in `test/setup.ts`
