@@ -19,7 +19,8 @@ describe('Razz Ranker', () => {
 
     expect(result.gameType).toBe('razz');
     expect(result.config).toEqual(config);
-    expect(result.hands.length).toBe(455);
+    // 1755 hands with suit distinctions (13 trips + 312 pairs + 1430 unpaired)
+    expect(result.hands.length).toBe(1755);
 
     // Check that results are sorted by winPct descending
     for (let i = 0; i < result.hands.length - 1; i++) {

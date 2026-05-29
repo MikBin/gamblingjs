@@ -25,14 +25,23 @@ export interface HandStrengthResult {
   /** Number of simulation runs */
   runs: number;
 
-  // ─── Omaha Hi/Lo Specific Metrics ───────────────────────────────────
+  // ─── Split-Pot / Hi-Lo Metrics ───────────────────────────────────
 
+  /** Combined equity percentage (0-100) */
+  equity?: number;
   /** High hand win percentage (0-100) */
-  winHiPct?: number;
+  highWinPct?: number;
   /** Low hand win percentage (0-100) */
-  winLoPct?: number;
+  lowWinPct?: number;
   /** Scoop percentage (wins both High and Low, or High when no Low) (0-100) */
   scoopPct?: number;
+
+  // ─── Omaha Hi/Lo Aliases ───────────────────────────────────
+
+  /** High hand win percentage (alias for highWinPct) */
+  winHiPct?: number;
+  /** Low hand win percentage (alias for lowWinPct) */
+  winLoPct?: number;
 }
 
 export interface SimulationResult {

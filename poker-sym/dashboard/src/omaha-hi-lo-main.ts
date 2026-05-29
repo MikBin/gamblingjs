@@ -1,0 +1,162 @@
+import { fastHashesCreators } from '../../../src/pokerHashes7.js';
+import { enumerateOmahaStartingHands } from '@poker-sym/hands/omaha.js';
+import { SimulationConfig, SimulationResult, HandStrengthResult } from '@poker-sym/simulation/types.js';
+import { TIERS, assignTiers } from '@poker-sym/ranking/tiers.js';
+
+// DOM elements
+const initStatus = document.getElementById('initStatus')!;
+const runsInput = document.getElementById('runs') as HTMLInputElement;
+const opponentsInput = document.getElementById('opponents') as HTMLInputElement;
+const runBtn = document.getElementById('run') as HTMLButtonElement;
+const progressContainer = document.getElementById('progressContainer')!;
+const progressFill = document.getElementById('progressFill')!;
+const progressText = document.getElementById('progressText')!;
+const resultsDiv = document.getElementById('results')!;
+
+// Initialize hash tables
+async function init() {
+  await new Promise((r) => setTimeout(r, 50));
+  fastHashesCreators.high();
+  initStatus.textContent = '✓ Evaluator ready';
+  initStatus.classList.add('ready');
+  runBtn.disabled = false;
+}
+
+interface WorkerMsg {
+  type: 'progress' | 'done';
+  completed?: number;
+  total?: number;
+  results?: HandStrengthResult[];
+}
+
+// Run simulation across a pool of Web Workers
+function runSimulation(config: SimulationConfig): Promise<SimulationResult> {
+  return new Promise((resolve) => {
+    const hands = enumerateOmahaStartingHands();
+    const numWorkers = Math.max(1, Math.min(4, Math.floor((navigator.hardwareConcurrency || 4) / 2)));
+    const allResults: HandStrengthResult[] = [];
+    let completedHands = 0;
+    const totalHands = hands.length;
+    const workerLastProgress: number[] = new Array(numWorkers).fill(0);
+    const workers: Worker[] = [];
+    const promises: Promise<void>[] = [];
+
+    for (let w = 0; w < numWorkers; w++) {
+      const start = Math.floor((w / numWorkers) * hands.length);
+      const end = Math.floor(((w + 1) / numWorkers) * hands.length);
+      const batch = hands.slice(start, end);
+
+      const worker = new Worker(new URL('./omaha-hi-lo-worker.ts', import.meta.url), { type: 'module' });
+      workers.push(worker);
+
+      const promise = new Promise<void>((resolveWorker) => {
+        worker.onmessage = (event: MessageEvent<WorkerMsg>) => {
+          const msg = event.data;
+          if (msg.type === 'progress' && msg.completed != null) {
+            const delta = msg.completed - workerLastProgress[w]!;
+            workerLastProgress[w] = msg.completed;
+            completedHands += delta;
+            const pct = (completedHands / totalHands) * 100;
+            progressFill.style.width = pct + '%';
+            progressText.textContent = completedHands + '/' + totalHands + ' hands (' + pct.toFixed(0) + '%)';
+          } else if (msg.type === 'done' && msg.results) {
+            allResults.push(...msg.results);
+            resolveWorker();
+          }
+        };
+      });
+
+      promises.push(promise);
+
+      worker.postMessage({
+        hands: batch,
+        config,
+        seedOffset: w * 1_000_000,
+      });
+    }
+
+    Promise.all(promises).then(() => {
+      workers.forEach((w) => w.terminate());
+
+      if (config.opponents > 0) {
+        allResults.sort((a, b) => b.winPct - a.winPct || b.averageRank - a.averageRank);
+      } else {
+        allResults.sort((a, b) => b.averageRank - a.averageRank);
+      }
+
+      resolve({
+        gameType: 'omaha-hi-lo',
+        config,
+        hands: allResults,
+        timestamp: new Date().toISOString(),
+      });
+    });
+  });
+}
+
+// Render results table
+function renderResults(result: SimulationResult) {
+  const { hands, config } = result;
+  const hasOpponents = config.opponents > 0;
+  const tiered = assignTiers(hands);
+
+  let html = '<table><thead><tr>';
+  html += '<th>#</th><th>Hand</th><th>Tier</th>';
+  if (hasOpponents) {
+    html += '<th>Win Hi%</th><th>Win Lo%</th><th>Scoop%</th>';
+  }
+  html += '<th>Avg Rank</th></tr></thead><tbody>';
+
+  for (const h of tiered) {
+    const tierNum = h.tier + 1;
+    const tierName = TIERS[h.tier]!.name;
+
+    html += '<tr class="tier-' + tierNum + '">';
+    html += '<td>' + h.rank + '</td>';
+    html += '<td class="hand-cell">' + h.key + '</td>';
+    html += '<td><span class="tier-badge tier-badge-' + tierNum + '">' + tierName + '</span></td>';
+    if (hasOpponents) {
+      html += '<td>' + (h.winHiPct ?? h.winPct).toFixed(2) + '%</td>';
+      html += '<td>' + (h.winLoPct ?? 0).toFixed(2) + '%</td>';
+      html += '<td>' + (h.scoopPct ?? 0).toFixed(2) + '%</td>';
+    }
+    html += '<td>' + h.averageRank.toFixed(1) + '</td>';
+    html += '</tr>';
+  }
+
+  html += '</tbody></table>';
+  resultsDiv.innerHTML = html;
+}
+
+// Event handler
+runBtn.addEventListener('click', async () => {
+  const runs = parseInt(runsInput.value, 10) || 1000;
+  const opponents = parseInt(opponentsInput.value, 10) || 0;
+
+  const config: SimulationConfig = {
+    runs: Math.max(100, Math.min(100000, runs)),
+    opponents: Math.max(0, Math.min(9, opponents)),
+    useCache: true,
+  };
+
+  runBtn.disabled = true;
+  runBtn.textContent = 'Running...';
+  progressContainer.classList.add('active');
+  progressFill.style.width = '0%';
+  progressText.textContent = 'Starting...';
+  resultsDiv.innerHTML = '';
+
+  const startTime = performance.now();
+  const result = await runSimulation(config);
+  const elapsed = ((performance.now() - startTime) / 1000).toFixed(1);
+
+  progressFill.style.width = '100%';
+  progressText.textContent = '✓ Completed in ' + elapsed + 's';
+
+  renderResults(result);
+
+  runBtn.disabled = false;
+  runBtn.textContent = 'Run Simulation';
+});
+
+init();

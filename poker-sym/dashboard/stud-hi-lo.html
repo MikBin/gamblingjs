@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>poker-sym — Starting Hand Ranking</title>
+  <title>poker-sym — Stud Hi/Lo Starting Hand Ranking</title>
   <style>
     * { margin: 0; padding: 0; box-sizing: border-box; }
     body {
@@ -15,6 +15,11 @@
     }
     h1 { text-align: center; font-size: 1.5rem; margin-bottom: 0.25rem; color: #f1f5f9; }
     .subtitle { text-align: center; color: #94a3b8; font-size: 0.85rem; margin-bottom: 1.5rem; }
+
+    .nav { text-align: center; margin-bottom: 1.5rem; }
+    .nav a { color: #3b82f6; font-size: 0.85rem; text-decoration: none; }
+    .nav a:hover { text-decoration: underline; }
+    .nav .sep { color: #475569; margin: 0 0.3rem; }
 
     .controls {
       max-width: 600px;
@@ -79,7 +84,7 @@
     }
 
     .results-container {
-      max-width: 800px;
+      max-width: 950px;
       margin: 0 auto;
       overflow-x: auto;
     }
@@ -136,15 +141,16 @@
 </head>
 <body>
   <h1>♠ poker-sym ♥</h1>
-  <p class="subtitle">Monte Carlo Starting Hand Ranking — Texas Hold'em</p>
-  <div class="nav" style="text-align:center;margin-bottom:1.5rem">
-    <strong>Hold'em</strong><span class="sep" style="color:#475569;margin:0 0.3rem">·</span>
-    <a href="omaha.html" style="color:#3b82f6;font-size:0.85rem;text-decoration:none">Omaha Hi</a><span class="sep" style="color:#475569;margin:0 0.3rem">·</span>
-    <a href="omaha-hi-lo.html" style="color:#3b82f6;font-size:0.85rem;text-decoration:none">Omaha Hi/Lo</a><span class="sep" style="color:#475569;margin:0 0.3rem">·</span>
-    <a href="stud.html" style="color:#3b82f6;font-size:0.85rem;text-decoration:none">Stud</a><span class="sep" style="color:#475569;margin:0 0.3rem">·</span>
-    <a href="stud-hi-lo.html" style="color:#3b82f6;font-size:0.85rem;text-decoration:none">Stud Hi/Lo</a><span class="sep" style="color:#475569;margin:0 0.3rem">·</span>
-    <a href="razz.html" style="color:#3b82f6;font-size:0.85rem;text-decoration:none">Razz</a><span class="sep" style="color:#475569;margin:0 0.3rem">·</span>
-    <a href="street.html" style="color:#8b5cf6;font-size:0.85rem;text-decoration:none">Street Analysis</a>
+  <p class="subtitle">Monte Carlo Starting Hand Ranking — Stud Hi/Lo</p>
+
+  <div class="nav">
+    <a href="index.html">Hold'em</a><span class="sep">·</span>
+    <a href="omaha.html">Omaha Hi</a><span class="sep">·</span>
+    <a href="omaha-hi-lo.html">Omaha Hi/Lo</a><span class="sep">·</span>
+    <a href="stud.html">Stud</a><span class="sep">·</span>
+    <strong>Stud Hi/Lo</strong><span class="sep">·</span>
+    <a href="razz.html">Razz</a><span class="sep">·</span>
+    <a href="street.html">Street Analysis</a>
   </div>
 
   <div id="initStatus" class="init-status">Initializing evaluator...</div>
@@ -156,7 +162,7 @@
     </div>
     <div class="field">
       <label for="opponents">Opponents</label>
-      <input type="number" id="opponents" value="1" min="0" max="9" step="1" />
+      <input type="number" id="opponents" value="1" min="0" max="6" step="1" />
     </div>
     <button id="run" disabled>Run Simulation</button>
   </div>
@@ -170,6 +176,6 @@
 
   <div id="results" class="results-container"></div>
 
-  <script type="module" src="/src/main.ts"></script>
+  <script type="module" src="/src/stud-hi-lo-main.ts"></script>
 </body>
 </html>
