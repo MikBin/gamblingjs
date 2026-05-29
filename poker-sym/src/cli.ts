@@ -5,6 +5,7 @@ import { HighEvaluator } from '../../src/core/HighEvaluator.js';
 import { handOfFiveEvalIndexed } from '../../src/pokerEvaluator5.js';
 import { fastHashesCreators } from '../../src/pokerHashes7.js';
 import { rankHoldemStartingHands } from './ranking/ranker.js';
+import { rankOmahaStartingHands } from './ranking/omaha-ranker.js';
 import { rankStreets } from './ranking/street-ranker.js';
 import { SimulationConfig } from './simulation/types.js';
 import { formatTable, formatJSON, formatCSV, formatMarkdown } from './output.js';
@@ -20,8 +21,9 @@ const program = new Command();
 
 program
   .name('poker-sym')
-  .description('Monte Carlo simulation for poker starting hand ranking')
+  .description('Monte Carlo simulation for poker starting hand ranking (Hold\'em, Omaha)')
   .version('0.1.0')
+  .option('-g, --game <type>', 'game variant: holdem, omaha', 'holdem')
   .option('-n, --runs <number>', 'number of simulation runs per hand', '10000')
   .option('-o, --opponents <number>', 'number of opponents (0 = raw strength)', '0')
   .option('-s, --seed <number>', 'random seed for reproducibility')
@@ -37,6 +39,7 @@ program
       useCache: true,
     };
 
+    const game = options.game?.toLowerCase() ?? 'holdem';
     const format = options.format as string;
     const outputFile = options.output as string | undefined;
     const streetMode = options.street as boolean | undefined;
@@ -51,58 +54,20 @@ program
 
     const startTime = Date.now();
 
-    if (streetMode) {
-      // Street-by-street analysis mode
-      console.error(
-        `Running Texas Hold'em street-by-street analysis...\n` +
-          `  Hands: 169 | Runs/hand: ${config.runs}`,
-      );
-
-      const result = rankStreets(
-        handOfFiveEvalIndexed,
-        evalFn7,
-        config.runs,
-        config.seed,
-        (completed, total, hand) => {
-          if (completed % 10 === 0 || completed === total) {
-            const pct = ((completed / total) * 100).toFixed(0);
-            process.stderr.write(`\r  Progress: ${completed}/${total} (${pct}%) — ${hand}    `);
-          }
-        },
-      );
-
-      const elapsed = ((Date.now() - startTime) / 1000).toFixed(1);
-      process.stderr.write(`\n  Completed in ${elapsed}s\n`);
-
-      let output: string;
-      switch (format) {
-        case 'json':
-          output = formatStreetJSON(result);
-          break;
-        case 'csv':
-          output = formatStreetCSV(result);
-          break;
-        case 'md':
-          output = formatStreetMarkdown(result);
-          break;
-        default:
-          output = detailed ? formatStreetTableDetailed(result) : formatStreetTable(result);
+    if (game === 'omaha') {
+      if (streetMode) {
+        console.error('Street analysis for Omaha is not yet supported.');
+        process.exit(1);
       }
 
-      if (outputFile) {
-        fs.writeFileSync(outputFile, output, 'utf-8');
-        console.error(`\nResults written to ${outputFile}`);
-      } else {
-        console.log(output);
-      }
-    } else {
-      // Original preflop simulation mode
       console.error(
-        `Running Texas Hold'em preflop simulation...\n` +
-          `  Hands: 169 | Runs/hand: ${config.runs} | Opponents: ${config.opponents}`,
+        `Running Omaha Hi preflop simulation...\n` +
+          `  Note: Omaha simulation involves ~9,854 hands and 60 combinations per evaluation.\n` +
+          `  This will take significantly longer than Hold'em. Use -n to reduce iterations if needed.\n` +
+          `  Runs/hand: ${config.runs} | Opponents: ${config.opponents}`,
       );
 
-      const result = rankHoldemStartingHands(evalFn7, config, (completed, total, hand) => {
+      const result = rankOmahaStartingHands({ eval5: handOfFiveEvalIndexed }, config, (completed, total, hand) => {
         if (completed % 10 === 0 || completed === total) {
           const pct = ((completed / total) * 100).toFixed(0);
           process.stderr.write(`\r  Progress: ${completed}/${total} (${pct}%) — ${hand}    `);
@@ -132,6 +97,90 @@ program
         console.error(`\nResults written to ${outputFile}`);
       } else {
         console.log(output);
+      }
+    } else {
+      if (streetMode) {
+        // Street-by-street analysis mode
+        console.error(
+          `Running Texas Hold'em street-by-street analysis...\n` +
+            `  Hands: 169 | Runs/hand: ${config.runs}`,
+        );
+
+        const result = rankStreets(
+          handOfFiveEvalIndexed,
+          evalFn7,
+          config.runs,
+          config.seed,
+          (completed, total, hand) => {
+            if (completed % 10 === 0 || completed === total) {
+              const pct = ((completed / total) * 100).toFixed(0);
+              process.stderr.write(`\r  Progress: ${completed}/${total} (${pct}%) — ${hand}    `);
+            }
+          },
+        );
+
+        const elapsed = ((Date.now() - startTime) / 1000).toFixed(1);
+        process.stderr.write(`\n  Completed in ${elapsed}s\n`);
+
+        let output: string;
+        switch (format) {
+          case 'json':
+            output = formatStreetJSON(result);
+            break;
+          case 'csv':
+            output = formatStreetCSV(result);
+            break;
+          case 'md':
+            output = formatStreetMarkdown(result);
+            break;
+          default:
+            output = detailed ? formatStreetTableDetailed(result) : formatStreetTable(result);
+        }
+
+        if (outputFile) {
+          fs.writeFileSync(outputFile, output, 'utf-8');
+          console.error(`\nResults written to ${outputFile}`);
+        } else {
+          console.log(output);
+        }
+      } else {
+        // Original preflop simulation mode
+        console.error(
+          `Running Texas Hold'em preflop simulation...\n` +
+            `  Hands: 169 | Runs/hand: ${config.runs} | Opponents: ${config.opponents}`,
+        );
+
+        const result = rankHoldemStartingHands(evalFn7, config, (completed, total, hand) => {
+          if (completed % 10 === 0 || completed === total) {
+            const pct = ((completed / total) * 100).toFixed(0);
+            process.stderr.write(`\r  Progress: ${completed}/${total} (${pct}%) — ${hand}    `);
+          }
+        });
+
+        const elapsed = ((Date.now() - startTime) / 1000).toFixed(1);
+        process.stderr.write(`\n  Completed in ${elapsed}s\n`);
+
+        let output: string;
+        switch (format) {
+          case 'json':
+            output = formatJSON(result);
+            break;
+          case 'csv':
+            output = formatCSV(result);
+            break;
+          case 'md':
+            output = formatMarkdown(result);
+            break;
+          default:
+            output = formatTable(result);
+        }
+
+        if (outputFile) {
+          fs.writeFileSync(outputFile, output, 'utf-8');
+          console.error(`\nResults written to ${outputFile}`);
+        } else {
+          console.log(output);
+        }
       }
     }
   });
