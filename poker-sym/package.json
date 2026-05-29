@@ -1,0 +1,31 @@
+{
+  "name": "poker-sym",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "Monte Carlo simulation tool for poker starting hand ranking",
+  "scripts": {
+    "build": "tsc",
+    "dev": "tsx src/cli.ts",
+    "start": "tsx src/cli.ts",
+    "test": "vitest run",
+    "test:watch": "vitest watch",
+    "test:coverage": "vitest run --coverage",
+    "type-check": "tsc --noEmit",
+    "lint": "eslint src/**/*.ts",
+    "format": "prettier --write src/**/*.ts",
+    "simulate": "tsx src/cli.ts"
+  },
+  "dependencies": {
+    "cli-table3": "^0.6.5",
+    "commander": "^12.1.0",
+    "gamblingjs": "file:..",
+    "ora": "^8.1.1"
+  },
+  "devDependencies": {
+    "@types/node": "^24.7.2",
+    "tsx": "^4.20.6",
+    "typescript": "^5.9.3",
+    "vitest": "^3.2.4"
+  }
+}
