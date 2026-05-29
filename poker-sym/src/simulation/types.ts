@@ -24,6 +24,15 @@ export interface HandStrengthResult {
   tiePct: number;
   /** Number of simulation runs */
   runs: number;
+
+  // ─── Omaha Hi/Lo Specific Metrics ───────────────────────────────────
+
+  /** High hand win percentage (0-100) */
+  winHiPct?: number;
+  /** Low hand win percentage (0-100) */
+  winLoPct?: number;
+  /** Scoop percentage (wins both High and Low, or High when no Low) (0-100) */
+  scoopPct?: number;
 }
 
 export interface SimulationResult {
