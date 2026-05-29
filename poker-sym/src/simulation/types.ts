@@ -42,3 +42,112 @@ export const DEFAULT_CONFIG: SimulationConfig = {
   opponents: 0,
   useCache: true,
 };
+
+// ─── Street Analysis Types ───────────────────────────────────────────
+
+/** Distribution of hand categories at a given street. */
+export interface StreetCategoryDistribution {
+  'high card': number;
+  'one pair': number;
+  'two pair': number;
+  'three of a kind': number;
+  straight: number;
+  flush: number;
+  'full house': number;
+  'four of a kind': number;
+  'straight flush': number;
+}
+
+/** Statistical distribution of equity at a given street. */
+export interface EquityDistribution {
+  mean: number;
+  variance: number;
+  stdDev: number;
+  percentiles: {
+    p5: number;
+    p10: number;
+    p25: number;
+    p50: number;
+    p75: number;
+    p90: number;
+    p95: number;
+  };
+  min: number;
+  max: number;
+}
+
+/** Board texture classification. */
+export type BoardTexture =
+  | 'dry'
+  | 'semi-connected'
+  | 'flush-draw'
+  | 'straight-draw'
+  | 'wet'
+  | 'monotone'
+  | 'paired'
+  | 'high'
+  | 'low';
+
+/** Equity stats grouped by board texture. */
+export interface TextureEquity {
+  texture: BoardTexture;
+  count: number;
+  averageRank: number;
+  categoryDistribution: StreetCategoryDistribution;
+}
+
+/** Equity realization metrics. */
+export interface EquityRealization {
+  /** % of runs where hand category improved from previous street */
+  improvementRate: number;
+  /** % of runs reaching full house or better */
+  nutPercentage: number;
+  /** % of boards where rank exceeded median for that street */
+  playabilityScore: number;
+  /** % of draws at this street that converted by river (flop/turn only; 0 for river) */
+  drawConversionRate: number;
+}
+
+/** Complete statistics for a single street (flop/turn/river). */
+export interface StreetStats {
+  averageRank: number;
+  categories: StreetCategoryDistribution;
+  distribution: EquityDistribution;
+  textureEquity: TextureEquity[];
+  realization: EquityRealization;
+}
+
+/** Per-hand result across all three streets. */
+export interface StreetHandResult {
+  hand: string;
+  flop: StreetStats;
+  turn: StreetStats;
+  river: StreetStats;
+}
+
+/** Full street analysis result for all 169 hands. */
+export interface StreetAnalysisResult {
+  gameType: 'texas-holdem';
+  config: {
+    runs: number;
+    opponents: number;
+    seed?: number;
+  };
+  hands: StreetHandResult[];
+  timestamp: string;
+}
+
+/** Category names in order matching handsRankingDelimiter_5cards thresholds. */
+export const HAND_CATEGORY_NAMES = [
+  'high card',
+  'one pair',
+  'two pair',
+  'three of a kind',
+  'straight',
+  'flush',
+  'full house',
+  'four of a kind',
+  'straight flush',
+] as const;
+
+export type HandCategoryName = (typeof HAND_CATEGORY_NAMES)[number];
