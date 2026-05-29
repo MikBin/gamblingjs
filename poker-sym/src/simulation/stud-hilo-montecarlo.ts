@@ -2,25 +2,24 @@ import { SeedableRNG } from '../utils/rng.js';
 import { makeDeck } from '../utils/deck.js';
 import { HandGroup } from '../hands/types.js';
 import { HandStrengthResult, SimulationConfig } from './types.js';
-import { HighEvaluator } from '../../../src/core/HighEvaluator.js';
-import { Low8Evaluator } from '../../../src/core/LowEvaluator.js';
+import { handOfSevenEvalHiLow8Indexed } from '../../../src/pokerEvaluator7.js';
+import { hiLowRank } from '../../../src/interfaces.js';
 
-export const bestStudLow = (cards: number[], evaluator: Low8Evaluator): number => {
-  if (cards.length < 5) return -1;
-  try {
-    const res = evaluator.evaluate(cards);
-    return res > 0 ? res : -1;
-  } catch {
-    return -1; // Return -1 if it doesn't qualify for Low 8 or fails
-  }
-};
+export type StudHiLoEvaluator = (
+  c1: number,
+  c2: number,
+  c3: number,
+  c4: number,
+  c5: number,
+  c6: number,
+  c7: number,
+) => hiLowRank;
 
 const simulateSingleRun = (
   holeCards: number[],
   deck: number[],
   rng: SeedableRNG,
-  highEvaluator: HighEvaluator,
-  lowEvaluator: Low8Evaluator,
+  evaluator: StudHiLoEvaluator,
 ): { highRank: number; lowRank: number } => {
   const d = [...deck];
   for (let i = d.length - 1; i > 0; i--) {
@@ -29,26 +28,25 @@ const simulateSingleRun = (
   }
 
   // Draw 4 more cards for the player
-  const playerRemaining = d.slice(0, 4);
-  const playerFullHand = [...holeCards, ...playerRemaining];
+  const board = d.slice(0, 4);
+  const result = evaluator(
+    holeCards[0]!,
+    holeCards[1]!,
+    holeCards[2]!,
+    board[0]!,
+    board[1]!,
+    board[2]!,
+    board[3]!,
+  );
 
-  let highRank = 0;
-  try {
-    highRank = highEvaluator.evaluate(playerFullHand);
-  } catch (e) {
-    highRank = 0;
-  }
-  const lowRank = bestStudLow(playerFullHand, lowEvaluator);
-
-  return { highRank, lowRank };
+  return { highRank: result.hi, lowRank: result.low };
 };
 
 const simulateWithOpponents = (
   holeCards: number[],
   deck: number[],
   rng: SeedableRNG,
-  highEvaluator: HighEvaluator,
-  lowEvaluator: Low8Evaluator,
+  evaluator: StudHiLoEvaluator,
   numOpponents: number,
 ): { equity: number; scoop: number; highWin: number; lowWin: number; highRank: number } => {
   const d = [...deck];
@@ -57,45 +55,41 @@ const simulateWithOpponents = (
     [d[i], d[j]] = [d[j]!, d[i]!];
   }
 
-  // Max 6 opponents for an 7-handed game (3 hole + 4 player cards = 7, 7 * 6 opponents = 42. Total 49. Deck has 49 left)
-  // If > 6 opponents, we will just use the available cards. A real stud game might use community card for 7th st, but for sim purposes, limit max to 6.
   const actualOpponents = Math.min(numOpponents, 6);
   const totalNeeded = 4 + (actualOpponents * 7);
   const dealt = d.slice(0, totalNeeded);
 
   const playerRemaining = dealt.slice(0, 4);
-  const playerFullHand = [...holeCards, ...playerRemaining];
-
-  let ourHigh = 0;
-  try {
-     ourHigh = highEvaluator.evaluate(playerFullHand);
-  } catch (e) {
-     ourHigh = 0;
-  }
-  const ourLow = bestStudLow(playerFullHand, lowEvaluator);
-
-  const oppHands: number[][] = [];
-  let offset = 4;
-  for (let i = 0; i < actualOpponents; i++) {
-    oppHands.push(dealt.slice(offset, offset + 7));
-    offset += 7;
-  }
+  const ourResult = evaluator(
+    holeCards[0]!,
+    holeCards[1]!,
+    holeCards[2]!,
+    playerRemaining[0]!,
+    playerRemaining[1]!,
+    playerRemaining[2]!,
+    playerRemaining[3]!,
+  );
+  const ourHigh = ourResult.hi;
+  const ourLow = ourResult.low;
 
   let bestOppHigh = -1;
-  let bestOppLow = -1; // -1 means no low qualified
-
+  let bestOppLow = -1;
   let highTies = 0;
   let lowTies = 0;
+  let offset = 4;
 
-  for (const opp of oppHands) {
-    if (opp.length < 7) continue;
-
-    let oppHigh = 0;
-    try {
-        oppHigh = highEvaluator.evaluate(opp);
-    } catch {
-        oppHigh = 0;
-    }
+  for (let i = 0; i < actualOpponents; i++) {
+    const oppResult = evaluator(
+      d[offset]!,
+      d[offset + 1]!,
+      d[offset + 2]!,
+      d[offset + 3]!,
+      d[offset + 4]!,
+      d[offset + 5]!,
+      d[offset + 6]!,
+    );
+    const oppHigh = oppResult.hi;
+    const oppLow = oppResult.low;
 
     if (oppHigh > bestOppHigh) {
       bestOppHigh = oppHigh;
@@ -104,13 +98,13 @@ const simulateWithOpponents = (
       highTies++;
     }
 
-    const oppLow = bestStudLow(opp, lowEvaluator);
     if (oppLow > bestOppLow) {
       bestOppLow = oppLow;
       lowTies = 1;
     } else if (oppLow === bestOppLow && oppLow >= 0) {
       lowTies++;
     }
+    offset += 7;
   }
 
   let highWinShare = 0;
@@ -135,7 +129,6 @@ const simulateWithOpponents = (
   if (anyLowQualifies) {
     equity = (highWinShare * 0.5) + (lowWinShare * 0.5);
   } else {
-    // If no low qualifies, high takes the entire pot.
     equity = highWinShare;
   }
 
@@ -147,14 +140,11 @@ const simulateWithOpponents = (
 export const simulateStudHiLoHand = (
   hand: HandGroup,
   config: SimulationConfig,
-  highEvaluator: HighEvaluator,
-  lowEvaluator: Low8Evaluator,
+  evaluator: StudHiLoEvaluator = handOfSevenEvalHiLow8Indexed,
 ): HandStrengthResult => {
   const rng = new SeedableRNG(config.seed ?? Date.now());
   const deck = makeDeck(hand.cards);
 
-  // Stud deck logic: player has 3 cards. Max players that can receive 7 distinct cards = Math.floor(52 / 7) = 7.
-  // 1 player + 6 opponents = 7 total.
   let numOpponents = config.opponents;
   if (numOpponents > 6) {
     numOpponents = 6;
@@ -164,7 +154,7 @@ export const simulateStudHiLoHand = (
     let totalRank = 0;
     let validRuns = 0;
     for (let i = 0; i < config.runs; i++) {
-      const { highRank } = simulateSingleRun(hand.cards, deck, rng, highEvaluator, lowEvaluator);
+      const { highRank } = simulateSingleRun(hand.cards, deck, rng, evaluator);
       if (highRank > 0) {
         totalRank += highRank;
         validRuns++;
@@ -192,28 +182,27 @@ export const simulateStudHiLoHand = (
   let totalTies = 0;
 
   for (let i = 0; i < config.runs; i++) {
-    const r = simulateWithOpponents(hand.cards, deck, rng, highEvaluator, lowEvaluator, numOpponents);
+    const r = simulateWithOpponents(hand.cards, deck, rng, evaluator, numOpponents);
     if (r.highRank > 0 || r.equity >= 0) {
-       totalEquity += r.equity;
-       totalScoop += r.scoop;
-       totalHighWins += r.highWin;
-       totalLowWins += r.lowWin;
-       totalHighRank += r.highRank;
-       if (r.equity > 0 && r.equity < 1 && r.highWin < 1 && r.lowWin < 1) {
-          totalTies++;
-       }
-       validRuns++;
+      totalEquity += r.equity;
+      totalScoop += r.scoop;
+      totalHighWins += r.highWin;
+      totalLowWins += r.lowWin;
+      totalHighRank += r.highRank;
+      if (r.equity > 0 && r.equity < 1 && r.highWin < 1 && r.lowWin < 1) {
+        totalTies++;
+      }
+      validRuns++;
     }
   }
 
   if (validRuns === 0) validRuns = 1;
 
-  // To maintain generic sorting compatability, we'll set winPct = equity * 100
   return {
     key: hand.key,
     averageRank: totalHighRank / validRuns,
-    winPct: (totalEquity / validRuns) * 100, // Equivalent to equity
-    tiePct: (totalTies / validRuns) * 100, // True tie percentage approximation
+    winPct: (totalEquity / validRuns) * 100,
+    tiePct: (totalTies / validRuns) * 100,
     runs: config.runs,
     equity: (totalEquity / validRuns) * 100,
     highWinPct: (totalHighWins / validRuns) * 100,

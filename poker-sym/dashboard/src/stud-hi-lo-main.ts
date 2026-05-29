@@ -1,6 +1,5 @@
 import { fastHashesCreators } from '../../../src/pokerHashes7.js';
-import { HighEvaluator } from '../../../src/core/HighEvaluator.js';
-import { Low8Evaluator } from '../../../src/core/LowEvaluator.js';
+import { handOfSevenEvalHiLow8Indexed } from '../../../src/pokerEvaluator7.js';
 import { enumerateStudStartingHands } from '../../src/hands/stud.js';
 import { simulateStudHiLoHand } from '../../src/simulation/stud-hilo-montecarlo.js';
 import { SimulationConfig, SimulationResult } from '../../src/simulation/types.js';
@@ -21,6 +20,7 @@ const resultsDiv = document.getElementById('results')!;
 async function init() {
   await new Promise((r) => setTimeout(r, 50));
   fastHashesCreators.high();
+  fastHashesCreators.low8();
   initStatus.textContent = '✓ Evaluator ready';
   initStatus.classList.add('ready');
   runBtn.disabled = false;
@@ -29,9 +29,6 @@ async function init() {
 // Run simulation in chunks to keep UI responsive
 function runSimulation(config: SimulationConfig): Promise<SimulationResult> {
   return new Promise((resolve) => {
-    const highEvaluator = new HighEvaluator();
-    const lowEvaluator = new Low8Evaluator();
-
     const hands = enumerateStudStartingHands();
     const results: SimulationResult['hands'] = [];
     let i = 0;
@@ -41,7 +38,7 @@ function runSimulation(config: SimulationConfig): Promise<SimulationResult> {
       const end = Math.min(i + chunkSize, hands.length);
       for (; i < end; i++) {
         const hand = hands[i]!;
-        const result = simulateStudHiLoHand(hand, config, highEvaluator, lowEvaluator);
+        const result = simulateStudHiLoHand(hand, config, handOfSevenEvalHiLow8Indexed);
         results.push(result);
       }
 

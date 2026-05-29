@@ -4,9 +4,9 @@ import fs from 'fs';
 import os from 'os';
 import { Worker } from 'worker_threads';
 import { HighEvaluator } from '../../src/core/HighEvaluator.js';
-import { Low8Evaluator } from '../../src/core/LowEvaluator.js';
 import { OmahaEvaluator } from '../../src/core/OmahaEvaluator.js';
 import { handOfFiveEvalIndexed } from '../../src/pokerEvaluator5.js';
+import { handOfSevenEvalHiLow8Indexed } from '../../src/pokerEvaluator7.js';
 import { fastHashesCreators } from '../../src/pokerHashes7.js';
 import { rankHoldemStartingHands } from './ranking/ranker.js';
 import { rankOmahaStartingHands } from './ranking/omaha-ranker.js';
@@ -45,7 +45,7 @@ program
     const isDefaultRuns = runsOption === '10000';
 
     const config: SimulationConfig = {
-      runs: ((game === 'omaha' || game === 'omaha-hi-lo' || game === 'stud-hi-lo') && isDefaultRuns) ? 1000 : parseInt(runsOption, 10),
+      runs: ((game === 'omaha' || game === 'omaha-hi-lo') && isDefaultRuns) ? 1000 : parseInt(runsOption, 10),
       opponents: parseInt(options.opponents, 10),
       seed: options.seed ? parseInt(options.seed, 10) : undefined,
       useCache: true,
@@ -133,8 +133,7 @@ program
           `  Hands: 1,755 | Runs/hand: ${config.runs} | Opponents: ${config.opponents}`
       );
 
-      const lowEvaluator = new Low8Evaluator();
-      const result = rankStudHiLoStartingHands(evaluator, lowEvaluator, config, (completed, total, hand) => {
+      const result = rankStudHiLoStartingHands(handOfSevenEvalHiLow8Indexed, config, (completed, total, hand) => {
         if (completed % 10 === 0 || completed === total) {
           const pct = ((completed / total) * 100).toFixed(0);
           process.stderr.write(`\r  Progress: ${completed}/${total} (${pct}%) — ${hand}    `);

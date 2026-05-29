@@ -1,12 +1,9 @@
 import { SimulationConfig, SimulationResult, HandStrengthResult } from '../simulation/types.js';
-import { HighEvaluator } from '../../../src/core/HighEvaluator.js';
-import { Low8Evaluator } from '../../../src/core/LowEvaluator.js';
 import { enumerateStudStartingHands } from '../hands/stud.js';
-import { simulateStudHiLoHand } from '../simulation/stud-hilo-montecarlo.js';
+import { simulateStudHiLoHand, StudHiLoEvaluator } from '../simulation/stud-hilo-montecarlo.js';
 
 export const rankStudHiLoStartingHands = (
-  highEvaluator: HighEvaluator,
-  lowEvaluator: Low8Evaluator,
+  evaluator: StudHiLoEvaluator,
   config: SimulationConfig,
   onProgress?: (completed: number, total: number, hand: string) => void,
 ): SimulationResult => {
@@ -16,7 +13,7 @@ export const rankStudHiLoStartingHands = (
 
   for (let i = 0; i < total; i++) {
     const hand = hands[i]!;
-    const result = simulateStudHiLoHand(hand, config, highEvaluator, lowEvaluator);
+    const result = simulateStudHiLoHand(hand, config, evaluator);
     results.push(result);
 
     if (onProgress) {
