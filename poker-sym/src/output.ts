@@ -28,7 +28,8 @@ export const formatTable = (result: SimulationResult): string => {
     table.push(row as string[]);
   }
 
-  let output = `\nTexas Hold'em Starting Hand Ranking\n`;
+  const gameName = result.gameType === 'omaha-hi' ? 'Omaha Hi' : result.gameType === '7card-stud' ? '7-Card Stud' : 'Texas Hold\'em';
+  let output = `\n${gameName} Starting Hand Ranking\n`;
   output += `Runs: ${result.config.runs} | Opponents: ${result.config.opponents} | Date: ${result.timestamp}\n`;
   output += table.toString();
   return output;
@@ -81,7 +82,8 @@ export const formatMarkdown = (result: SimulationResult): string => {
   const tiered = assignTiers(result.hands);
   const hasOpponents = result.config.opponents > 0;
 
-  let md = `# Texas Hold'em Starting Hand Ranking\n\n`;
+  const gameName = result.gameType === 'omaha-hi' ? 'Omaha Hi' : result.gameType === '7card-stud' ? '7-Card Stud' : 'Texas Hold\'em';
+  let md = `# ${gameName} Starting Hand Ranking\n\n`;
   md += `- **Runs:** ${result.config.runs}\n`;
   md += `- **Opponents:** ${result.config.opponents}\n`;
   md += `- **Date:** ${result.timestamp}\n\n`;
