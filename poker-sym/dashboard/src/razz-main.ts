@@ -2,6 +2,7 @@ import { enumerateStudStartingHands } from '../../src/hands/stud.js';
 import { simulateRazzHand } from '../../src/simulation/razz-montecarlo.js';
 import { SimulationConfig, SimulationResult } from '../../src/simulation/types.js';
 import { TIERS, assignTiers } from '../../src/ranking/tiers.js';
+import { makeSortable } from './sortable-table.js';
 
 // DOM elements
 const initStatus = document.getElementById('initStatus')!;
@@ -73,30 +74,36 @@ function renderResults(result: SimulationResult) {
   const tiered = assignTiers(hands);
 
   let html = '<table><thead><tr>';
-  html += '<th>#</th><th>Hand</th><th>Tier</th>';
+  html += '<th class="sortable">#<span class="sort-indicator"> ↕</span></th>';
+  html += '<th>Hand</th><th>Tier</th>';
   if (hasOpponents) {
-    html += '<th>Win%</th><th>Tie%</th>';
+    html += '<th class="sortable">Win%<span class="sort-indicator"> ↕</span></th>';
+    html += '<th class="sortable">Tie%<span class="sort-indicator"> ↕</span></th>';
   }
-  html += '<th>Avg Rank</th></tr></thead><tbody>';
+  html += '<th class="sortable">Avg Rank<span class="sort-indicator"> ↕</span></th>';
+  html += '</tr></thead><tbody>';
 
   for (const h of tiered) {
     const tierNum = h.tier + 1;
     const tierName = TIERS[h.tier]!.name;
 
     html += '<tr class="tier-' + tierNum + '">';
-    html += '<td>' + h.rank + '</td>';
+    html += '<td data-value="' + h.rank + '">' + h.rank + '</td>';
     html += '<td class="hand-cell">' + h.key + '</td>';
     html += '<td><span class="tier-badge tier-badge-' + tierNum + '">' + tierName + '</span></td>';
     if (hasOpponents) {
-      html += '<td>' + h.winPct.toFixed(2) + '%</td>';
-      html += '<td>' + h.tiePct.toFixed(2) + '%</td>';
+      html += '<td data-value="' + h.winPct + '">' + h.winPct.toFixed(2) + '%</td>';
+      html += '<td data-value="' + h.tiePct + '">' + h.tiePct.toFixed(2) + '%</td>';
     }
-    html += '<td>' + h.averageRank.toFixed(1) + '</td>';
+    html += '<td data-value="' + h.averageRank + '">' + h.averageRank.toFixed(1) + '</td>';
     html += '</tr>';
   }
 
   html += '</tbody></table>';
   resultsDiv.innerHTML = html;
+
+  const table = resultsDiv.querySelector('table');
+  if (table) makeSortable(table);
 }
 
 // Event handler

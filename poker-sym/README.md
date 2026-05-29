@@ -4,16 +4,59 @@ Monte Carlo simulation tool for evaluating poker starting hand strength. Part of
 
 ## Overview
 
-`poker-sym` uses Monte Carlo simulation to rank starting hands by their preflop equity. Currently supports **Texas Hold'em** and **Omaha Hi**.
+`poker-sym` uses Monte Carlo simulation to rank starting hands by their preflop equity. Supports **6 game variants**:
+
+| Variant | Starting Hands | Description |
+|---------|---------------|-------------|
+| Texas Hold'em | 169 | 2-card starting hands |
+| Omaha Hi | 9,854 | 4-card starting hands |
+| Omaha Hi/Lo | 9,854 | 4-card hands, split pot (high/low 8) |
+| 7-Card Stud | 1,098 | 3-card starting hands |
+| Stud Hi/Lo | 1,098 | 3-card hands, split pot (high/low 8) |
+| Razz | 1,098 | 3-card hands, lowball (A-5) |
 
 Each simulation:
-1. Enumerates all canonical starting hands (169 for Hold'em, 9,854 for Omaha)
+1. Enumerates all canonical starting hands
 2. For each hand, runs N random board completions
-3. Evaluates the resulting 7-card or 5-card best hand using the gamblingjs evaluator
+3. Evaluates the resulting best hand using the gamblingjs evaluator
 4. Calculates win/tie percentages against opponents
 5. Ranks all hands and assigns tier classifications
 
-## Quick Start
+## Dashboard
+
+The `dashboard/` directory contains an interactive web UI built with Vite + TypeScript. It provides a real-time Monte Carlo simulation dashboard with progress tracking, tier-colored results, and **sortable numeric columns**.
+
+### Features
+- Click any numeric column header (`#`, `Win%`, `Tie%`, `Avg Rank`, etc.) to sort ascending/descending
+- Sort indicators (↕ ▲ ▼) show current sort state
+- Rank column auto-resequences after sorting
+- Progress bar with hand-by-hand updates
+- Responsive dark-themed UI
+
+### Running the Dashboard
+
+```bash
+cd poker-sym/dashboard
+
+# Development
+npm install
+npx vite
+
+# Production build
+npx vite build
+# Output in dist/ — serve with any static file server
+```
+
+### Pages
+- `index.html` — Texas Hold'em
+- `omaha.html` — Omaha Hi (uses Web Workers)
+- `omaha-hi-lo.html` — Omaha Hi/Lo (uses Web Workers)
+- `stud.html` — 7-Card Stud
+- `stud-hi-lo.html` — Stud Hi/Lo
+- `razz.html` — Razz
+- `street.html` — Street-by-street analysis
+
+## CLI
 
 ```bash
 # From the poker-sym directory (Texas Hold'em by default)
@@ -36,14 +79,12 @@ npx tsx src/cli.ts --runs 10000 --seed 42 --format csv
 
 | Option | Alias | Default | Description |
 |--------|-------|---------|-------------|
-| `--game` | `-g` | holdem | Game variant: `holdem` or `omaha` |
+| `--game` | `-g` | holdem | Game variant: `holdem`, `omaha`, `omaha-hi-lo`, `stud`, `stud-hi-lo`, `razz` |
 | `--runs` | `-n` | 10000 | Simulation runs per hand |
 | `--opponents` | `-o` | 0 | Number of opponents (0 = raw strength) |
 | `--seed` | `-s` | random | Random seed for reproducibility |
 | `--format` | `-f` | table | Output format: `table`, `json`, `csv`, `md` |
 | `--output` | `-O` | stdout | Write output to file |
-
-⚠️ **Note on Omaha Simulation Time:** Omaha has ~9,854 canonical hands and requires evaluating 60 combinations per player per iteration. Simulations will take significantly longer than Hold'em. Use `-n` to lower the iterations if necessary.
 
 ## Output Formats
 
@@ -65,7 +106,7 @@ Hands are classified into tiers based on percentile ranking:
 
 | Tier | Percentile | Description |
 |------|-----------|-------------|
-| Tier 1 | Top 5% | Premium hands (AA, KK, QQ, ...) |
+| Tier 1 | Top 5% | Premium hands |
 | Tier 2 | 5–15% | Strong playable hands |
 | Tier 3 | 15–30% | Speculative/medium hands |
 | Tier 4 | 30–50% | Marginal hands |
@@ -83,14 +124,38 @@ poker-sym/
 │   │   └── deck.ts               # Fisher-Yates shuffle, card drawing
 │   ├── hands/
 │   │   ├── canonical.ts          # Canonical hand grouping
-│   │   └── holdem.ts             # 169 Texas Hold'em starting hands
+│   │   ├── holdem.ts             # 169 Texas Hold'em starting hands
+│   │   ├── omaha.ts              # 9,854 Omaha starting hands
+│   │   └── stud.ts               # 1,098 Stud/Razz starting hands
 │   ├── simulation/
 │   │   ├── types.ts              # Shared interfaces
-│   │   └── montecarlo.ts         # Simulation engine
+│   │   ├── montecarlo.ts         # Hold'em simulation engine
+│   │   ├── omaha-montecarlo.ts   # Omaha Hi simulation engine
+│   │   ├── omaha-hilo-montecarlo.ts  # Omaha Hi/Lo simulation
+│   │   ├── stud-montecarlo.ts    # 7-Card Stud simulation
+│   │   ├── stud-hilo-montecarlo.ts   # Stud Hi/Lo simulation
+│   │   └── razz-montecarlo.ts    # Razz simulation
 │   ├── ranking/
 │   │   ├── ranker.ts             # Orchestrator
 │   │   └── tiers.ts              # Tier classification
 │   └── output.ts                 # Formatters (table/json/csv/md)
+├── dashboard/
+│   ├── index.html                # Hold'em dashboard page
+│   ├── omaha.html                # Omaha Hi dashboard page
+│   ├── omaha-hi-lo.html          # Omaha Hi/Lo dashboard page
+│   ├── stud.html                 # 7-Card Stud dashboard page
+│   ├── stud-hi-lo.html           # Stud Hi/Lo dashboard page
+│   ├── razz.html                 # Razz dashboard page
+│   ├── street.html               # Street analysis page
+│   └── src/
+│       ├── sortable-table.ts     # Reusable table sorting utility
+│       ├── main.ts               # Hold'em page logic
+│       ├── omaha-main.ts         # Omaha Hi page logic
+│       ├── omaha-hi-lo-main.ts   # Omaha Hi/Lo page logic
+│       ├── stud-main.ts          # Stud page logic
+│       ├── stud-hi-lo-main.ts    # Stud Hi/Lo page logic
+│       ├── razz-main.ts          # Razz page logic
+│       └── street-main.ts        # Street analysis logic
 ├── package.json
 ├── tsconfig.json
 ├── vitest.config.ts
@@ -108,6 +173,9 @@ npx tsx src/cli.ts --runs 1000 --opponents 5 --format table
 
 # Type check
 npx tsc --noEmit
+
+# Build dashboard for production
+cd dashboard && npx vite build
 ```
 
 ## Dependencies
