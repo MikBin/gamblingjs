@@ -14,12 +14,12 @@ interface TestData {
 }
 
 export const TEST_DATA: TestData = {
-  "low8": [
+  low8: [
     {
       inputs: {
         5: [],
         6: [],
-        7: [4, 17, 19, 20, 11, 5, 0]
+        7: [4, 17, 19, 20, 11, 5, 0],
       },
       output: {
         hi: {
@@ -27,18 +27,18 @@ export const TEST_DATA: TestData = {
           handRank: 2345,
           faces: '6689K',
           handGroup: 'one pair',
-          flushSuit: "no flush",
-          winningCards: [4, 17, 19, 20, 11]
+          flushSuit: 'no flush',
+          winningCards: [4, 17, 19, 20, 11],
         },
         low: {
           hand: [],
           handRank: -1,
           faces: '',
           handGroup: 'unqualified',
-          flushSuit: "no flush",
-          winningCards: []
-        }
-      }
-    }
-  ]
+          flushSuit: 'no flush',
+          winningCards: [],
+        },
+      },
+    },
+  ],
 };

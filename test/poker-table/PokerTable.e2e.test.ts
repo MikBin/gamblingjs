@@ -1,29 +1,53 @@
 import { describe, it, expect, beforeEach } from 'vitest';
 import { PokerTable } from '../../src/poker-table/PokerTable';
-import { GameId, LimitType, type TableConfig, type AllowedAction } from '../../src/poker-table/types';
+import {
+  GameId,
+  LimitType,
+  type TableConfig,
+  type AllowedAction,
+} from '../../src/poker-table/types';
 import { PokerEvaluator, GameVariant } from '../../src';
 import type { Dealer } from '../../src/poker-table/deck';
 import type { PlayerAgent } from '../../src/poker-table/player';
 
 class E2EDealer implements Dealer {
   private q: number[] = [];
-  setDeck(cards: number[]) { this.q = cards.slice(); }
-  initDeck(): void { /* keep queue as-is between hands (test drives order) */ }
-  shuffle(): void { /* deterministic: no-op */ }
-  burn(count: number = 1): void { for (let i=0;i<count;i++) this.dealCard(); }
-  dealCard(): number { if (this.q.length===0) throw new Error('E2EDealer empty'); const c = this.q.shift(); if (c===undefined) throw new Error('undef'); return c; }
-  deal(count: number): number[] { const out: number[] = []; for (let i=0;i<count;i++) out.push(this.dealCard()); return out; }
-  remaining(): number { return this.q.length; }
+  setDeck(cards: number[]) {
+    this.q = cards.slice();
+  }
+  initDeck(): void {
+    /* keep queue as-is between hands (test drives order) */
+  }
+  shuffle(): void {
+    /* deterministic: no-op */
+  }
+  burn(count: number = 1): void {
+    for (let i = 0; i < count; i++) this.dealCard();
+  }
+  dealCard(): number {
+    if (this.q.length === 0) throw new Error('E2EDealer empty');
+    const c = this.q.shift();
+    if (c === undefined) throw new Error('undef');
+    return c;
+  }
+  deal(count: number): number[] {
+    const out: number[] = [];
+    for (let i = 0; i < count; i++) out.push(this.dealCard());
+    return out;
+  }
+  remaining(): number {
+    return this.q.length;
+  }
 }
 
 class DeterministicAgent implements PlayerAgent {
   onHandStart(): void {}
   onStreetChange(): void {}
   decideAction(ctx: any) {
-    const priority: AllowedAction[] = ['raise','bet','call','check','fold'];
-    const action = priority.find(a => ctx.allowedActions.includes(a))!;
+    const priority: AllowedAction[] = ['raise', 'bet', 'call', 'check', 'fold'];
+    const action = priority.find((a) => ctx.allowedActions.includes(a))!;
     if (action === 'bet' || action === 'raise') {
-      const amount = (ctx.minRaise ?? (ctx.toCall + 1) ?? 2);
+      const amount = ctx.minRaise ?? ctx.toCall + 1 ?? 2;
       return { action, amount } as const;
     }
     return { action } as const;
@@ -34,7 +58,10 @@ function makeCashConfig(): TableConfig {
   return {
     maxSeats: 6,
     structure: { kind: 'cash', blinds: { smallBlind: 1, bigBlind: 2, ante: 0 } },
-    rotation: { sequence: [{ game: GameId.TEXAS_HOLDEM, limit: LimitType.NO_LIMIT, hands: 999 }], loop: true },
+    rotation: {
+      sequence: [{ game: GameId.TEXAS_HOLDEM, limit: LimitType.NO_LIMIT, hands: 999 }],
+      loop: true,
+    },
     dealerButtonSeat: 0,
   };
 }
@@ -53,7 +80,10 @@ function makeSngConfig(): TableConfig {
       advanceEvery: 2,
       startingLevelId: 'L1',
     },
-    rotation: { sequence: [{ game: GameId.TEXAS_HOLDEM, limit: LimitType.NO_LIMIT, hands: 999 }], loop: true },
+    rotation: {
+      sequence: [{ game: GameId.TEXAS_HOLDEM, limit: LimitType.NO_LIMIT, hands: 999 }],
+      loop: true,
+    },
     dealerButtonSeat: 0,
   };
 }
@@ -63,10 +93,17 @@ function makeSngConfig(): TableConfig {
 function buildHoldemDeck(): number[] {
   return [
     // hole cards (six)
-    10,11,12,13,14,15,
+    10,
+    11,
+    12,
+    13,
+    14,
+    15,
     // burn + board
     16, // burn
-    17,18,19, // flop
+    17,
+    18,
+    19, // flop
     20, // burn
     21, // turn
     22, // burn
@@ -82,8 +119,11 @@ describe('PokerTable E2E - deterministic cash and SNG flows', () => {
     dealer = new E2EDealer();
   });
 
-  it('simulates a deterministic 3-handed cash Hold\'em hand end-to-end', () => {
-    table = new PokerTable(makeCashConfig(), dealer, { passiveDealing: true, analytics: { enabled: true } });
+  it("simulates a deterministic 3-handed cash Hold'em hand end-to-end", () => {
+    table = new PokerTable(makeCashConfig(), dealer, {
+      passiveDealing: true,
+      analytics: { enabled: true },
+    });
     // seat players 0,1,2 and register deterministic agents
     table.addPlayer({ id: 'p0', chips: 100, seat: 0 });
     table.addPlayer({ id: 'p1', chips: 100, seat: 1 });
@@ -101,43 +141,43 @@ describe('PokerTable E2E - deterministic cash and SNG flows', () => {
 
     // Verify blinds collected and hole cards dealt deterministically
     const snap0 = table.getSnapshot();
-    const p0 = snap0.players.find(p=>p.seat===0)!;
-    const p1 = snap0.players.find(p=>p.seat===1)!;
-    const p2 = snap0.players.find(p=>p.seat===2)!;
+    const p0 = snap0.players.find((p) => p.seat === 0)!;
+    const p1 = snap0.players.find((p) => p.seat === 1)!;
+    const p2 = snap0.players.find((p) => p.seat === 2)!;
 
     expect(p1.chips).toBe(99); // SB
     expect(p2.chips).toBe(98); // BB
     expect(snap0.pot).toBe(3);
 
     // Dealing order: seat1, seat2, seat0, then again
-    expect(p1.holeCards).toEqual([10,13]);
-    expect(p2.holeCards).toEqual([11,14]);
-    expect(p0.holeCards).toEqual([12,15]);
+    expect(p1.holeCards).toEqual([10, 13]);
+    expect(p2.holeCards).toEqual([11, 14]);
+    expect(p0.holeCards).toEqual([12, 15]);
     expect(snap0.street).toBe('preflop');
 
     // Request deterministic actions from agents and record to analytics
-    const a1 = table.requestAction('p1', ['check','bet'], 0, 2);
+    const a1 = table.requestAction('p1', ['check', 'bet'], 0, 2);
     table.recordAction('p1', a1.action as any, (a1 as any).amount);
     expect(a1.action).toBe('bet');
 
-    const a2 = table.requestAction('p2', ['fold','call','raise'], 2, 2);
+    const a2 = table.requestAction('p2', ['fold', 'call', 'raise'], 2, 2);
     table.recordAction('p2', a2.action as any, (a2 as any).amount);
-    expect(['raise','call','fold']).toContain(a2.action);
+    expect(['raise', 'call', 'fold']).toContain(a2.action);
 
     // Streets advance deterministically with provided deck
     table.nextStreet(); // flop
     let s = table.getSnapshot();
-    expect(s.communityCards).toEqual([17,18,19]);
+    expect(s.communityCards).toEqual([17, 18, 19]);
     expect(s.street).toBe('flop');
 
     table.nextStreet(); // turn
     s = table.getSnapshot();
-    expect(s.communityCards).toEqual([17,18,19,21]);
+    expect(s.communityCards).toEqual([17, 18, 19, 21]);
     expect(s.street).toBe('turn');
 
     table.nextStreet(); // river
     s = table.getSnapshot();
-    expect(s.communityCards).toEqual([17,18,19,21,23]);
+    expect(s.communityCards).toEqual([17, 18, 19, 21, 23]);
     expect(s.street).toBe('river');
 
     table.nextStreet(); // showdown
@@ -161,7 +201,10 @@ describe('PokerTable E2E - deterministic cash and SNG flows', () => {
   });
 
   it('simulates a deterministic Sit & Go (tournament) level progression and bustout via forced bets', () => {
-    table = new PokerTable(makeSngConfig(), dealer, { passiveDealing: true, analytics: { enabled: true } });
+    table = new PokerTable(makeSngConfig(), dealer, {
+      passiveDealing: true,
+      analytics: { enabled: true },
+    });
     // 3-handed SNG with shallow stacks to force a bust quickly via blinds/antes
     table.addPlayer({ id: 'p0', chips: 7, seat: 0 });
     table.addPlayer({ id: 'p1', chips: 7, seat: 1 });
@@ -198,12 +241,12 @@ describe('PokerTable E2E - deterministic cash and SNG flows', () => {
       dealer.setDeck(buildHoldemDeck());
       table.startHand();
       const s = table.getSnapshot();
-      const busted = s.players.filter(p => p.chips === 0).length;
+      const busted = s.players.filter((p) => p.chips === 0).length;
       if (busted > 0) break;
     }
 
     const finalSnap = table.getSnapshot();
-    const zeroStacks = finalSnap.players.filter(p => p.chips === 0);
+    const zeroStacks = finalSnap.players.filter((p) => p.chips === 0);
     expect(zeroStacks.length).toBeGreaterThan(0); // at least one player busted
 
     // Optionally, remove busted players to simulate SNG elimination flow

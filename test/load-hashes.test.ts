@@ -22,10 +22,10 @@ describe('loadHashes', () => {
           FLUSH_RANK_HASHES: {},
           baseRankValues: [],
           baseSuitValues: [],
-          rankingInfos: []
-        }
+          rankingInfos: [],
+        },
       },
-      '6': {}
+      '6': {},
     };
 
     loadHashes(dummyHashes as any);

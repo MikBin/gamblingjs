@@ -30,7 +30,12 @@ export function validateArray(value: unknown, paramName: string): boolean {
  * @returns true if valid
  * @throws Error if invalid
  */
-export function validateInteger(value: unknown, paramName: string, min: number, max: number): boolean {
+export function validateInteger(
+  value: unknown,
+  paramName: string,
+  min: number,
+  max: number,
+): boolean {
   if (typeof value !== 'number' || !Number.isInteger(value)) {
     throw new Error(`${paramName} must be an integer`);
   }
@@ -73,7 +78,7 @@ export function validateIntegerArray(
   array: unknown,
   paramName: string,
   min: number,
-  max: number
+  max: number,
 ): boolean {
   validateArray(array, paramName);
 
@@ -114,7 +119,11 @@ export function validateNoDuplicates(array: unknown[], paramName: string): boole
  * @returns true if valid
  * @throws Error if invalid
  */
-export function validateExactLength(array: unknown, paramName: string, expectedLength: number): boolean {
+export function validateExactLength(
+  array: unknown,
+  paramName: string,
+  expectedLength: number,
+): boolean {
   validateArray(array, paramName);
 
   const arr = array as unknown[];
@@ -139,7 +148,7 @@ export function validateLengthRange(
   array: unknown,
   paramName: string,
   minLength: number,
-  maxLength: number
+  maxLength: number,
 ): boolean {
   validateArray(array, paramName);
 

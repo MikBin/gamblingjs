@@ -1,6 +1,16 @@
 import { BaseEvaluator } from './BaseEvaluator';
-import { handOfFiveEvalLow_Ato5Indexed, handOfFiveEvalHiLow8Indexed, handOfFiveEvalHiLow9Indexed } from '../pokerEvaluator5';
-import { handOfSevenEvalLow_Ato5Indexed, handOfSevenEvalLow8Indexed_Verbose, handOfSevenEvalLow9Indexed_Verbose, _handOfSevenEvalHiLow8Indexed, _handOfSevenEvalHiLow9Indexed } from '../pokerEvaluator7';
+import {
+  handOfFiveEvalLow_Ato5Indexed,
+  handOfFiveEvalHiLow8Indexed,
+  handOfFiveEvalHiLow9Indexed,
+} from '../pokerEvaluator5';
+import {
+  handOfSevenEvalLow_Ato5Indexed,
+  handOfSevenEvalLow8Indexed_Verbose,
+  handOfSevenEvalLow9Indexed_Verbose,
+  _handOfSevenEvalHiLow8Indexed,
+  _handOfSevenEvalHiLow9Indexed,
+} from '../pokerEvaluator7';
 import { verboseHandInfo } from '../interfaces';
 
 /**
@@ -37,7 +47,15 @@ export class LowAto5Evaluator extends LowEvaluator {
       return handOfFiveEvalLow_Ato5Indexed(hand[0]!, hand[1]!, hand[2]!, hand[3]!, hand[4]!);
     } else if (hand.length === 7) {
       this.validateHand(hand, 7);
-      return handOfSevenEvalLow_Ato5Indexed(hand[0]!, hand[1]!, hand[2]!, hand[3]!, hand[4]!, hand[5]!, hand[6]!);
+      return handOfSevenEvalLow_Ato5Indexed(
+        hand[0]!,
+        hand[1]!,
+        hand[2]!,
+        hand[3]!,
+        hand[4]!,
+        hand[5]!,
+        hand[6]!,
+      );
     } else {
       throw new Error('LowAto5Evaluator only supports 5-card and 7-card hands');
     }
@@ -70,7 +88,9 @@ export class Low8Evaluator extends LowEvaluator {
       return result.low;
     } else if (hand.length === 7) {
       this.validateHand(hand, 7);
-      const result = _handOfSevenEvalHiLow8Indexed(...hand as [number, number, number, number, number, number, number]);
+      const result = _handOfSevenEvalHiLow8Indexed(
+        ...(hand as [number, number, number, number, number, number, number]),
+      );
       return result.low;
     } else {
       throw new Error('Low8Evaluator only supports 5-card and 7-card hands');
@@ -79,12 +99,20 @@ export class Low8Evaluator extends LowEvaluator {
 
   evaluateVerbose(hand: number[]): verboseHandInfo {
     this.validateHand(hand, 7);
-    return handOfSevenEvalLow8Indexed_Verbose(hand[0]!, hand[1]!, hand[2]!, hand[3]!, hand[4]!, hand[5]!, hand[6]!);
+    return handOfSevenEvalLow8Indexed_Verbose(
+      hand[0]!,
+      hand[1]!,
+      hand[2]!,
+      hand[3]!,
+      hand[4]!,
+      hand[5]!,
+      hand[6]!,
+    );
   }
 
   protected qualifiesForLow(hand: number[]): boolean {
     // Check if any card has rank higher than 8 (ranks 9-A are 0-8 in 0-based indexing)
-    return hand.every(card => (card >> 2) <= 7); // Cards 0-31 are ranks 2-8
+    return hand.every((card) => card >> 2 <= 7); // Cards 0-31 are ranks 2-8
   }
 
   protected getQualificationThreshold(): number {
@@ -104,7 +132,9 @@ export class Low9Evaluator extends LowEvaluator {
       return result.low;
     } else if (hand.length === 7) {
       this.validateHand(hand, 7);
-      const result = _handOfSevenEvalHiLow9Indexed(...hand as [number, number, number, number, number, number, number]);
+      const result = _handOfSevenEvalHiLow9Indexed(
+        ...(hand as [number, number, number, number, number, number, number]),
+      );
       return result.low;
     } else {
       throw new Error('Low9Evaluator only supports 5-card and 7-card hands');
@@ -113,12 +143,20 @@ export class Low9Evaluator extends LowEvaluator {
 
   evaluateVerbose(hand: number[]): verboseHandInfo {
     this.validateHand(hand, 7);
-    return handOfSevenEvalLow9Indexed_Verbose(hand[0]!, hand[1]!, hand[2]!, hand[3]!, hand[4]!, hand[5]!, hand[6]!);
+    return handOfSevenEvalLow9Indexed_Verbose(
+      hand[0]!,
+      hand[1]!,
+      hand[2]!,
+      hand[3]!,
+      hand[4]!,
+      hand[5]!,
+      hand[6]!,
+    );
   }
 
   protected qualifiesForLow(hand: number[]): boolean {
     // Check if any card has rank higher than 9 (ranks 10-A are 0-8 in 0-based indexing)
-    return hand.every(card => (card >> 2) <= 8); // Cards 0-35 are ranks 2-9
+    return hand.every((card) => card >> 2 <= 8); // Cards 0-35 are ranks 2-9
   }
 
   protected getQualificationThreshold(): number {

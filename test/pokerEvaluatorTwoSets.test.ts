@@ -11,12 +11,10 @@ import {
   bfBestOfFiveFromTwoSetsLow_Ato6,
   bfBestOfFiveFromTwoSetsLow_Ato6Indexed,
   bfBestOfFiveFromTwoSetsLowBall27,
-  bfBestOfFiveFromTwoSetsLowBall27Indexed
+  bfBestOfFiveFromTwoSetsLowBall27Indexed,
 } from '../src/pokerEvaluatorTwoSets';
 
-import {
-  handOfFiveEvalHiLow8
-} from '../src/pokerEvaluator5'
+import { handOfFiveEvalHiLow8 } from '../src/pokerEvaluator5';
 
 import { fullCardsDeckHash_5, fullCardsDeckHash_7 } from '../src/constants';
 
@@ -28,18 +26,18 @@ describe('bfBestOfFiveFromTwoSets', () => {
           fullCardsDeckHash_5[12],
           fullCardsDeckHash_5[3],
           fullCardsDeckHash_5[25],
-          fullCardsDeckHash_5[36]
+          fullCardsDeckHash_5[36],
         ],
         [
           fullCardsDeckHash_5[35],
           fullCardsDeckHash_5[22],
           fullCardsDeckHash_5[9],
           fullCardsDeckHash_5[4],
-          fullCardsDeckHash_5[7]
+          fullCardsDeckHash_5[7],
         ],
         2,
-        3
-      )
+        3,
+      ),
     ).toBeGreaterThan(7139);
   });
 
@@ -50,17 +48,17 @@ describe('bfBestOfFiveFromTwoSets', () => {
           fullCardsDeckHash_5[12],
           fullCardsDeckHash_5[3],
           fullCardsDeckHash_5[25],
-          fullCardsDeckHash_5[36]
+          fullCardsDeckHash_5[36],
         ],
         [
           fullCardsDeckHash_5[35],
           fullCardsDeckHash_5[22],
           fullCardsDeckHash_5[9],
           fullCardsDeckHash_5[4],
-          fullCardsDeckHash_5[7]
+          fullCardsDeckHash_5[7],
         ],
         3,
-        4
+        4,
       );
     }).toThrowError('sum of nA+nB parameters MUST be 5');
   });
@@ -72,17 +70,17 @@ describe('bfBestOfFiveFromTwoSets', () => {
           fullCardsDeckHash_5[12],
           fullCardsDeckHash_5[3],
           fullCardsDeckHash_5[25],
-          fullCardsDeckHash_5[36]
+          fullCardsDeckHash_5[36],
         ],
         [
           fullCardsDeckHash_5[35],
           fullCardsDeckHash_5[22],
           fullCardsDeckHash_5[9],
           fullCardsDeckHash_5[4],
-          fullCardsDeckHash_5[7]
+          fullCardsDeckHash_5[7],
         ],
         3,
-        4
+        4,
       );
     }).toThrowError('sum of nA+nB parameters MUST be 5');
   });
@@ -94,18 +92,18 @@ describe('bfBestOfFiveFromTwoSets', () => {
           fullCardsDeckHash_5[12],
           fullCardsDeckHash_5[3],
           fullCardsDeckHash_5[25],
-          fullCardsDeckHash_5[36]
+          fullCardsDeckHash_5[36],
         ],
         [
           fullCardsDeckHash_5[35],
           fullCardsDeckHash_5[22],
           fullCardsDeckHash_5[9],
           fullCardsDeckHash_5[4],
-          fullCardsDeckHash_5[7]
+          fullCardsDeckHash_5[7],
         ],
         3,
         4,
-        handOfFiveEvalHiLow8
+        handOfFiveEvalHiLow8,
       );
     }).toThrowError('sum of nA+nB parameters MUST be 5');
   });
@@ -117,18 +115,18 @@ describe('bfBestOfFiveFromTwoSets', () => {
           fullCardsDeckHash_5[12],
           fullCardsDeckHash_5[3],
           fullCardsDeckHash_5[25],
-          fullCardsDeckHash_5[36]
+          fullCardsDeckHash_5[36],
         ],
         [
           fullCardsDeckHash_5[38],
           fullCardsDeckHash_5[51],
           fullCardsDeckHash_5[9],
           fullCardsDeckHash_5[4],
-          fullCardsDeckHash_5[7]
+          fullCardsDeckHash_5[7],
         ],
         2,
-        3
-      )
+        3,
+      ),
     ).toBeGreaterThan(7295);
   });
 
@@ -139,19 +137,19 @@ describe('bfBestOfFiveFromTwoSets', () => {
           fullCardsDeckHash_5[12],
           fullCardsDeckHash_5[3],
           fullCardsDeckHash_5[25],
-          fullCardsDeckHash_5[36]
+          fullCardsDeckHash_5[36],
         ],
         [
           fullCardsDeckHash_5[38],
           fullCardsDeckHash_5[51],
           fullCardsDeckHash_5[9],
           fullCardsDeckHash_5[4],
-          fullCardsDeckHash_5[7]
+          fullCardsDeckHash_5[7],
         ],
         2,
         3,
-        handOfFiveEvalHiLow8
-      )
+        handOfFiveEvalHiLow8,
+      ),
     ).toEqual({ hi: 7449, low: -1 });
   });
 
@@ -162,18 +160,18 @@ describe('bfBestOfFiveFromTwoSets', () => {
           fullCardsDeckHash_5[12],
           fullCardsDeckHash_5[3],
           fullCardsDeckHash_5[25],
-          fullCardsDeckHash_5[36]
+          fullCardsDeckHash_5[36],
         ],
         [
           fullCardsDeckHash_5[38],
           fullCardsDeckHash_5[51],
           fullCardsDeckHash_5[9],
           fullCardsDeckHash_5[4],
-          fullCardsDeckHash_5[7]
+          fullCardsDeckHash_5[7],
         ],
         2,
-        3
-      )
+        3,
+      ),
     ).toEqual({ hi: 7449, low: -1 });
   });
 
@@ -184,23 +182,23 @@ describe('bfBestOfFiveFromTwoSets', () => {
           fullCardsDeckHash_5[12],
           fullCardsDeckHash_5[0],
           fullCardsDeckHash_5[25],
-          fullCardsDeckHash_5[36]
+          fullCardsDeckHash_5[36],
         ],
         [
           fullCardsDeckHash_5[38],
           fullCardsDeckHash_5[51],
           fullCardsDeckHash_5[1],
           fullCardsDeckHash_5[2],
-          fullCardsDeckHash_5[3]
+          fullCardsDeckHash_5[3],
         ],
         2,
-        3
-      )
+        3,
+      ),
     ).toEqual({ hi: 7452, low: 55 });
 
     expect(bfBestOfFiveFromTwoSetsHiLow8Indexed([12, 25, 0, 36], [1, 2, 3, 38, 51], 2, 3)).toEqual({
       hi: 7452,
-      low: 55
+      low: 55,
     });
   });
 
@@ -211,23 +209,23 @@ describe('bfBestOfFiveFromTwoSets', () => {
           fullCardsDeckHash_5[12],
           fullCardsDeckHash_5[0],
           fullCardsDeckHash_5[25],
-          fullCardsDeckHash_5[36]
+          fullCardsDeckHash_5[36],
         ],
         [
           fullCardsDeckHash_5[38],
           fullCardsDeckHash_5[51],
           fullCardsDeckHash_5[1],
           fullCardsDeckHash_5[2],
-          fullCardsDeckHash_5[3]
+          fullCardsDeckHash_5[3],
         ],
         2,
-        3
-      )
+        3,
+      ),
     ).toEqual({ hi: 7452, low: 125 });
 
     expect(bfBestOfFiveFromTwoSetsHiLow9Indexed([12, 25, 0, 36], [1, 2, 3, 38, 51], 2, 3)).toEqual({
       hi: 7452,
-      low: 125
+      low: 125,
     });
   });
 
@@ -238,22 +236,22 @@ describe('bfBestOfFiveFromTwoSets', () => {
           fullCardsDeckHash_5[12],
           fullCardsDeckHash_5[0],
           fullCardsDeckHash_5[25],
-          fullCardsDeckHash_5[36]
+          fullCardsDeckHash_5[36],
         ],
         [
           fullCardsDeckHash_5[38],
           fullCardsDeckHash_5[51],
           fullCardsDeckHash_5[1],
           fullCardsDeckHash_5[2],
-          fullCardsDeckHash_5[3]
+          fullCardsDeckHash_5[3],
         ],
         2,
-        3
-      )
+        3,
+      ),
     ).toBe(6174);
 
     expect(bfBestOfFiveFromTwoSetsHiLow_Ato5Indexed([12, 25, 36, 0], [1, 3, 2, 38, 51], 2, 3)).toBe(
-      6174
+      6174,
     );
   });
 
@@ -264,24 +262,24 @@ describe('bfBestOfFiveFromTwoSets', () => {
           fullCardsDeckHash_5[12],
           fullCardsDeckHash_5[0],
           fullCardsDeckHash_5[50],
-          fullCardsDeckHash_5[36]
+          fullCardsDeckHash_5[36],
         ],
         [
           fullCardsDeckHash_5[38],
           fullCardsDeckHash_5[51],
           fullCardsDeckHash_5[1],
           fullCardsDeckHash_5[2],
-          fullCardsDeckHash_5[4]
+          fullCardsDeckHash_5[4],
         ],
         2,
-        3
-      )
+        3,
+      ),
     ).toBe(7006);
   });
 
   it('bfBestOfFiveFromTwoSetsLow_Ato6 top hand is A 2 3 4 6', () => {
     expect(bfBestOfFiveFromTwoSetsLow_Ato6Indexed([12, 0, 26, 36], [38, 51, 1, 2, 4], 2, 3)).toBe(
-      7461
+      7461,
     );
   });
 
@@ -292,18 +290,18 @@ describe('bfBestOfFiveFromTwoSets', () => {
           fullCardsDeckHash_5[12],
           fullCardsDeckHash_5[13],
           fullCardsDeckHash_5[25],
-          fullCardsDeckHash_5[36]
+          fullCardsDeckHash_5[36],
         ],
         [
           fullCardsDeckHash_5[38],
           fullCardsDeckHash_5[9],
           fullCardsDeckHash_5[1],
           fullCardsDeckHash_5[2],
-          fullCardsDeckHash_5[3]
+          fullCardsDeckHash_5[3],
         ],
         2,
-        3
-      )
+        3,
+      ),
     ).toBe(6174);
   });
 
@@ -314,22 +312,22 @@ describe('bfBestOfFiveFromTwoSets', () => {
           fullCardsDeckHash_5[12],
           fullCardsDeckHash_5[25],
           fullCardsDeckHash_5[11],
-          fullCardsDeckHash_5[24]
+          fullCardsDeckHash_5[24],
         ],
         [
           fullCardsDeckHash_5[38],
           fullCardsDeckHash_5[51],
           fullCardsDeckHash_5[10],
           fullCardsDeckHash_5[9],
-          fullCardsDeckHash_5[8]
+          fullCardsDeckHash_5[8],
         ],
         2,
-        3
-      )
+        3,
+      ),
     ).toBe(3548);
 
     expect(
-      bfBestOfFiveFromTwoSetsLowBall27Indexed([12, 25, 11, 24], [10, 9, 8, 38, 51], 2, 3)
+      bfBestOfFiveFromTwoSetsLowBall27Indexed([12, 25, 11, 24], [10, 9, 8, 38, 51], 2, 3),
     ).toBe(3548);
   });
 
@@ -340,19 +338,18 @@ describe('bfBestOfFiveFromTwoSets', () => {
           fullCardsDeckHash_5[12],
           fullCardsDeckHash_5[13],
           fullCardsDeckHash_5[25],
-          fullCardsDeckHash_5[5]
+          fullCardsDeckHash_5[5],
         ],
         [
           fullCardsDeckHash_5[38],
           fullCardsDeckHash_5[9],
           fullCardsDeckHash_5[1],
           fullCardsDeckHash_5[2],
-          fullCardsDeckHash_5[3]
+          fullCardsDeckHash_5[3],
         ],
         2,
-        3
-      )
+        3,
+      ),
     ).toBe(7461);
   });
-
 });

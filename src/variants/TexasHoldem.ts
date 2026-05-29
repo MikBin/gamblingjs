@@ -10,7 +10,7 @@ import { verboseHandInfo, hiLowRank } from '../interfaces';
 export enum TexasHoldemGameType {
   HIGH_ONLY = 'high-only',
   HIGH_LOW_8 = 'high-low-8',
-  HIGH_LOW_9 = 'high-low-9'
+  HIGH_LOW_9 = 'high-low-9',
 }
 
 /**
@@ -41,7 +41,7 @@ export class TexasHoldemEvaluator extends BaseEvaluator {
   evaluateHand(
     holeCards: number[],
     communityCards: number[],
-    gameType: TexasHoldemGameType = TexasHoldemGameType.HIGH_ONLY
+    gameType: TexasHoldemGameType = TexasHoldemGameType.HIGH_ONLY,
   ): hiLowRank {
     this.validateTexasHoldemHand(holeCards, communityCards);
 
@@ -95,11 +95,11 @@ export class TexasHoldemEvaluator extends BaseEvaluator {
    */
   private validateTexasHoldemHand(holeCards: number[], communityCards: number[]): void {
     if (!Array.isArray(holeCards) || holeCards.length !== 2) {
-      throw new Error('Texas Hold\'em requires exactly 2 hole cards');
+      throw new Error("Texas Hold'em requires exactly 2 hole cards");
     }
 
     if (!Array.isArray(communityCards) || communityCards.length < 3 || communityCards.length > 5) {
-      throw new Error('Texas Hold\'em requires 3-5 community cards');
+      throw new Error("Texas Hold'em requires 3-5 community cards");
     }
 
     // Validate all cards
@@ -123,9 +123,6 @@ export class TexasHoldemEvaluator extends BaseEvaluator {
    */
   private evaluateHighLow(cards: number[], lowEvaluator: Low8Evaluator | Low9Evaluator): hiLowRank {
     // Use the existing brute force function for high-low evaluation
-    return bestFiveOnXHiLowIndexed(
-      (hand: number[]) => lowEvaluator.evaluate(hand),
-      cards
-    );
+    return bestFiveOnXHiLowIndexed((hand: number[]) => lowEvaluator.evaluate(hand), cards);
   }
 }

@@ -1,14 +1,9 @@
-
 import { describe, it, expect, beforeAll } from 'vitest';
 import { PokerEvaluator, GameVariant } from '../../src/PokerEvaluator';
 import { fastHashesCreators } from '../../src/pokerHashes7';
-import {
-  generateRandomSevenCardHand,
-  measureExecutionTime,
-} from '../testUtils';
+import { generateRandomSevenCardHand, measureExecutionTime } from '../testUtils';
 
 describe('Performance Tests', () => {
-
   describe('Hashes Construction', () => {
     it('should measure the construction time for all hash variants', async () => {
       const variants = Object.keys(fastHashesCreators);
@@ -18,7 +13,7 @@ describe('Performance Tests', () => {
         // function, this is the best we can do to measure each creator.
         const { averageTime, totalTime } = await measureExecutionTime(
           () => fastHashesCreators[variant](),
-          1 // Measure one full construction
+          1, // Measure one full construction
         );
         console.log(`Hash Construction - ${variant}:`);
         console.log(`  Average Time: ${averageTime.toFixed(4)} ms`);
@@ -53,7 +48,7 @@ describe('Performance Tests', () => {
               const hand = generateRandomSevenCardHand().slice(0, size);
               evaluator.evaluate(hand, variant);
             },
-            1000 // Use a sufficient number of iterations for a stable average
+            1000, // Use a sufficient number of iterations for a stable average
           );
           console.log(`Hand Evaluation - ${size}-card ${variant}:`);
           console.log(`  Average Time: ${(averageTime * 1000).toFixed(4)} µs`); // Log in microseconds

@@ -22,19 +22,15 @@ import {
   bfBestOfFiveOnXindexed,
   bfBestOfFiveOnX,
   getHandInfo5onX,
-  getHandInfo5onXHiLow
+  getHandInfo5onXHiLow,
 } from '../src/pokerEvaluator5';
-import {
-  HASHES_OF_FIVE_LOW8,
-  HASHES_OF_FIVE_LOW9
-} from '../src/pokerHashes5'
+import { HASHES_OF_FIVE_LOW8, HASHES_OF_FIVE_LOW9 } from '../src/pokerHashes5';
 
 import { fullCardsDeckHash_5 } from '../src/constants';
 
-import { TEST_DATA } from './test_data/hiLowVerboseTestData'
+import { TEST_DATA } from './test_data/hiLowVerboseTestData';
 
-describe("best of five on X", () => {
-
+describe('best of five on X', () => {
   it('get best hand of 5 card on 7 (brute force version)', () => {
     expect(
       bfBestOfFiveOnX([
@@ -44,10 +40,9 @@ describe("best of five on X", () => {
         fullCardsDeckHash_5[2],
         fullCardsDeckHash_5[3],
         fullCardsDeckHash_5[25],
-        fullCardsDeckHash_5[38]
-      ])
+        fullCardsDeckHash_5[38],
+      ]),
     ).toBe(7452);
-
   });
 
   it('get best hand of 5 card on 7 (brute force version) - indexed', () => {
@@ -62,8 +57,8 @@ describe('testing hand of five eval', () => {
         fullCardsDeckHash_5[0],
         fullCardsDeckHash_5[1],
         fullCardsDeckHash_5[2],
-        fullCardsDeckHash_5[3]
-      )
+        fullCardsDeckHash_5[3],
+      ),
     ).toBe(7452);
   });
 
@@ -74,8 +69,8 @@ describe('testing hand of five eval', () => {
         fullCardsDeckHash_5[13],
         fullCardsDeckHash_5[1],
         fullCardsDeckHash_5[2],
-        fullCardsDeckHash_5[3]
-      )
+        fullCardsDeckHash_5[3],
+      ),
     ).toBe(0);
   });
 
@@ -93,80 +88,80 @@ describe('testing hand of five eval', () => {
 describe('testing hilo 8 and 9 routines: ', () => {
   it('should evaluate hi/low hands correctly', () => {
     expect(
-    handOfFiveEvalHiLow8(
-      fullCardsDeckHash_5[12],
-      fullCardsDeckHash_5[11],
-      fullCardsDeckHash_5[10],
-      fullCardsDeckHash_5[9],
-      fullCardsDeckHash_5[8]
-    )
-  ).toEqual({ hi: 7461, low: -1 });
+      handOfFiveEvalHiLow8(
+        fullCardsDeckHash_5[12],
+        fullCardsDeckHash_5[11],
+        fullCardsDeckHash_5[10],
+        fullCardsDeckHash_5[9],
+        fullCardsDeckHash_5[8],
+      ),
+    ).toEqual({ hi: 7461, low: -1 });
 
-  expect(
-    handOfFiveEvalHiLow(
-      HASHES_OF_FIVE_LOW8.HASHES,
-      fullCardsDeckHash_5[12],
-      fullCardsDeckHash_5[11],
-      fullCardsDeckHash_5[10],
-      fullCardsDeckHash_5[9],
-      fullCardsDeckHash_5[8]
-    )
-  ).toEqual({ hi: 7461, low: -1 });
+    expect(
+      handOfFiveEvalHiLow(
+        HASHES_OF_FIVE_LOW8.HASHES,
+        fullCardsDeckHash_5[12],
+        fullCardsDeckHash_5[11],
+        fullCardsDeckHash_5[10],
+        fullCardsDeckHash_5[9],
+        fullCardsDeckHash_5[8],
+      ),
+    ).toEqual({ hi: 7461, low: -1 });
 
-  expect(
-    handOfFiveEvalHiLow8(
-      fullCardsDeckHash_5[6],
-      fullCardsDeckHash_5[5],
-      fullCardsDeckHash_5[4],
-      fullCardsDeckHash_5[3],
-      fullCardsDeckHash_5[2]
-    )
-  ).toEqual({ hi: 7455, low: 0 });
+    expect(
+      handOfFiveEvalHiLow8(
+        fullCardsDeckHash_5[6],
+        fullCardsDeckHash_5[5],
+        fullCardsDeckHash_5[4],
+        fullCardsDeckHash_5[3],
+        fullCardsDeckHash_5[2],
+      ),
+    ).toEqual({ hi: 7455, low: 0 });
 
-  expect(
-    handOfFiveEvalHiLow8(
-      fullCardsDeckHash_5[6],
-      fullCardsDeckHash_5[5],
-      fullCardsDeckHash_5[4],
-      fullCardsDeckHash_5[3],
-      fullCardsDeckHash_5[12]
-    )
-  ).toEqual({ hi: 6898, low: 3 });
+    expect(
+      handOfFiveEvalHiLow8(
+        fullCardsDeckHash_5[6],
+        fullCardsDeckHash_5[5],
+        fullCardsDeckHash_5[4],
+        fullCardsDeckHash_5[3],
+        fullCardsDeckHash_5[12],
+      ),
+    ).toEqual({ hi: 6898, low: 3 });
 
-  expect(
-    handOfFiveEvalHiLow8(
-      fullCardsDeckHash_5[7],
-      fullCardsDeckHash_5[5],
-      fullCardsDeckHash_5[4],
-      fullCardsDeckHash_5[3],
-      fullCardsDeckHash_5[12]
-    )
-  ).toEqual({ hi: 6903, low: -1 });
+    expect(
+      handOfFiveEvalHiLow8(
+        fullCardsDeckHash_5[7],
+        fullCardsDeckHash_5[5],
+        fullCardsDeckHash_5[4],
+        fullCardsDeckHash_5[3],
+        fullCardsDeckHash_5[12],
+      ),
+    ).toEqual({ hi: 6903, low: -1 });
 
-  expect(handOfFiveEvalHiLow8Indexed(7, 5, 4, 3, 12)).toEqual({ hi: 6903, low: -1 });
+    expect(handOfFiveEvalHiLow8Indexed(7, 5, 4, 3, 12)).toEqual({ hi: 6903, low: -1 });
 
-  expect(
-    handOfFiveEvalHiLow9(
-      fullCardsDeckHash_5[7],
-      fullCardsDeckHash_5[5],
-      fullCardsDeckHash_5[4],
-      fullCardsDeckHash_5[3],
-      fullCardsDeckHash_5[12]
-    )
-  ).toEqual({ hi: 6903, low: 38 });
+    expect(
+      handOfFiveEvalHiLow9(
+        fullCardsDeckHash_5[7],
+        fullCardsDeckHash_5[5],
+        fullCardsDeckHash_5[4],
+        fullCardsDeckHash_5[3],
+        fullCardsDeckHash_5[12],
+      ),
+    ).toEqual({ hi: 6903, low: 38 });
 
-  expect(handOfFiveEvalHiLow9Indexed(7, 5, 4, 3, 12)).toEqual({ hi: 6903, low: 38 });
+    expect(handOfFiveEvalHiLow9Indexed(7, 5, 4, 3, 12)).toEqual({ hi: 6903, low: 38 });
 
-  expect(
-    handOfFiveEvalHiLow(
-      HASHES_OF_FIVE_LOW9.HASHES,
-      fullCardsDeckHash_5[7],
-      fullCardsDeckHash_5[5],
-      fullCardsDeckHash_5[4],
-      fullCardsDeckHash_5[3],
-      fullCardsDeckHash_5[12]
-    )
-  ).toEqual({ hi: 6903, low: 38 });
+    expect(
+      handOfFiveEvalHiLow(
+        HASHES_OF_FIVE_LOW9.HASHES,
+        fullCardsDeckHash_5[7],
+        fullCardsDeckHash_5[5],
+        fullCardsDeckHash_5[4],
+        fullCardsDeckHash_5[3],
+        fullCardsDeckHash_5[12],
+      ),
+    ).toEqual({ hi: 6903, low: 38 });
   });
 });
 
@@ -178,8 +173,8 @@ describe('ace to five lowball: ', () => {
         fullCardsDeckHash_5[11],
         fullCardsDeckHash_5[11],
         fullCardsDeckHash_5[11],
-        fullCardsDeckHash_5[10]
-      )
+        fullCardsDeckHash_5[10],
+      ),
     ).toBe(0);
 
     expect(
@@ -188,8 +183,8 @@ describe('ace to five lowball: ', () => {
         fullCardsDeckHash_5[11],
         fullCardsDeckHash_5[10],
         fullCardsDeckHash_5[9],
-        fullCardsDeckHash_5[8]
-      )
+        fullCardsDeckHash_5[8],
+      ),
     ).toBe(4888);
 
     expect(
@@ -198,8 +193,8 @@ describe('ace to five lowball: ', () => {
         fullCardsDeckHash_5[0],
         fullCardsDeckHash_5[1],
         fullCardsDeckHash_5[2],
-        fullCardsDeckHash_5[3]
-      )
+        fullCardsDeckHash_5[3],
+      ),
     ).toBe(6174);
   });
 
@@ -220,8 +215,8 @@ describe('testing ace to six lowball ', () => {
         fullCardsDeckHash_5[11],
         fullCardsDeckHash_5[10],
         fullCardsDeckHash_5[9],
-        fullCardsDeckHash_5[8]
-      )
+        fullCardsDeckHash_5[8],
+      ),
     ).toBe(0);
   });
 
@@ -255,8 +250,8 @@ describe('testing LowBall27: ', () => {
         fullCardsDeckHash_5[11],
         fullCardsDeckHash_5[10],
         fullCardsDeckHash_5[9],
-        fullCardsDeckHash_5[8]
-      )
+        fullCardsDeckHash_5[8],
+      ),
     ).toBe(0);
 
     expect(handOfFiveEvalLowBall27Indexed(12, 11, 10, 9, 8)).toBe(0);
@@ -269,8 +264,8 @@ describe('testing LowBall27: ', () => {
         fullCardsDeckHash_5[1],
         fullCardsDeckHash_5[2],
         fullCardsDeckHash_5[3],
-        fullCardsDeckHash_5[18]
-      )
+        fullCardsDeckHash_5[18],
+      ),
     ).toBe(7461);
     expect(handOfFiveEvalLowBall27Indexed(0, 1, 2, 3, 18)).toBe(7461);
   });
@@ -279,132 +274,133 @@ describe('testing LowBall27: ', () => {
 describe('test hand info: ', () => {
   /**@TODO one assertion for each test case
    * extend test to all hand groups
-  */
+   */
   it('should get some infos: ', () => {
     expect(getHandInfo(2345)).toBeInstanceOf(Object);
     expect(getHandInfo(2345)).toEqual({
       hand: [4, 4, 6, 7, 11],
       faces: '6689K',
-      handGroup: 'one pair'
+      handGroup: 'one pair',
     });
     expect(getHandInfo27(7461)).toEqual({
       hand: [0, 1, 2, 3, 5],
       faces: '23457',
-      handGroup: 'high card'
+      handGroup: 'high card',
     });
 
     expect(getHandInfoAto5(0)).toEqual({
       hand: [11, 11, 11, 11, 10],
       faces: 'KKKKQ',
-      handGroup: 'four of a kind'
+      handGroup: 'four of a kind',
     });
 
     expect(getHandInfoAto5(6174)).toEqual({
       hand: [3, 2, 1, 0, 12],
       faces: '5432A',
-      handGroup: 'high card'
+      handGroup: 'high card',
     });
 
     expect(getHandInfoAto6(6174)).toEqual({
       faces: 'AA654',
       hand: [12, 12, 4, 3, 2],
-      handGroup: 'one pair'
+      handGroup: 'one pair',
     });
 
     expect(getHandInfoAto6(7461)).toEqual({
       hand: [4, 2, 1, 0, 12],
       faces: '6432A',
-      handGroup: 'high card'
+      handGroup: 'high card',
     });
   });
 
-  it("get info on low8 on five cards: ", () => {
+  it('get info on low8 on five cards: ', () => {
     expect(getHandInfoLow8(28)).toEqual({
       hand: [6, 4, 2, 0, 12],
       faces: '8642A',
-      handGroup: 'high card'
+      handGroup: 'high card',
     });
   });
 
-  it("get no hand defined for that rank: ", () => {
+  it('get no hand defined for that rank: ', () => {
     expect(getHandInfoLow8(88)).toEqual({
       hand: [],
       faces: '',
-      handGroup: 'unqualified'
+      handGroup: 'unqualified',
     });
   });
 
-  it("get info on low9 on five cards: ", () => {
+  it('get info on low9 on five cards: ', () => {
     expect(getHandInfoLow9(28)).toEqual({
       hand: [7, 6, 3, 1, 0],
       faces: '98532',
-      handGroup: 'high card'
+      handGroup: 'high card',
     });
   });
 
-  it("get info on low8 on five cards for best hand possible: ", () => {
+  it('get info on low8 on five cards for best hand possible: ', () => {
     expect(getHandInfoLow8(55)).toEqual({
       hand: [3, 2, 1, 0, 12],
       faces: '5432A',
-      handGroup: 'high card'
+      handGroup: 'high card',
     });
   });
 
-  it("get info on low9 on five cards for best hand possible: ", () => {
+  it('get info on low9 on five cards for best hand possible: ', () => {
     expect(getHandInfoLow9(125)).toEqual({
       hand: [3, 2, 1, 0, 12],
       faces: '5432A',
-      handGroup: 'high card'
+      handGroup: 'high card',
     });
   });
 
-  it("in low9 get no hand defined for that rank: ", () => {
+  it('in low9 get no hand defined for that rank: ', () => {
     expect(getHandInfoLow9(588)).toEqual({
       hand: [],
       faces: '',
-      handGroup: 'unqualified'
+      handGroup: 'unqualified',
     });
   });
 });
 
-describe("testing hand info of best five cards from hand of > 5 cards", () => {
-  it("gets info of best high hand of 5 cards on group of 7", () => {
-    expect(getHandInfo5onX([4, 17, 19, 20, 11, 5, 0], "high")).toEqual({
+describe('testing hand info of best five cards from hand of > 5 cards', () => {
+  it('gets info of best high hand of 5 cards on group of 7', () => {
+    expect(getHandInfo5onX([4, 17, 19, 20, 11, 5, 0], 'high')).toEqual({
       hand: [4, 4, 6, 7, 11],
       handRank: 2345,
       faces: '6689K',
       handGroup: 'one pair',
-      flushSuit: "no flush",
-      winningCards: [4, 17, 19, 20, 11]
+      flushSuit: 'no flush',
+      winningCards: [4, 17, 19, 20, 11],
     });
   });
 
-  it("gets info of best high hand of 5 cards on group of 6, tells flush suit (spades)", () => {
-    expect(getHandInfo5onX([4, 6, 19, 20, 11, 5, 0], "high")).toEqual({
+  it('gets info of best high hand of 5 cards on group of 6, tells flush suit (spades)', () => {
+    expect(getHandInfo5onX([4, 6, 19, 20, 11, 5, 0], 'high')).toEqual({
       hand: [0, 4, 5, 6, 11],
       handRank: 6234,
       faces: '2678K',
       handGroup: 'flush',
-      flushSuit: "spades",
-      winningCards: [4, 6, 11, 5, 0]
+      flushSuit: 'spades',
+      winningCards: [4, 6, 11, 5, 0],
     });
   });
 
-  it("gets info of best high hand of 5 cards on group of 6, tells flush suit (hearts)", () => {
-    expect(getHandInfo5onX([30, 32, 19, 20, 37, 33, 26], "high")).toEqual({
+  it('gets info of best high hand of 5 cards on group of 6, tells flush suit (hearts)', () => {
+    expect(getHandInfo5onX([30, 32, 19, 20, 37, 33, 26], 'high')).toEqual({
       hand: [0, 4, 6, 7, 11],
       handRank: 6254,
       faces: '2689K',
       handGroup: 'flush',
-      flushSuit: "hearts",
-      winningCards: [30, 32, 20, 37, 26]
+      flushSuit: 'hearts',
+      winningCards: [30, 32, 20, 37, 26],
     });
   });
 });
 
-describe("testing hand info of best five cards from hand of > 5 cards HiLow version ---> returns HiLowVerboseHandInfo", () => {
-  it("gets info of best high hand of 5 cards on group of 7", () => {
-    expect(getHandInfo5onXHiLow(TEST_DATA.low8[0]["inputs"][7], "low8")).toEqual(TEST_DATA.low8[0].output);
+describe('testing hand info of best five cards from hand of > 5 cards HiLow version ---> returns HiLowVerboseHandInfo', () => {
+  it('gets info of best high hand of 5 cards on group of 7', () => {
+    expect(getHandInfo5onXHiLow(TEST_DATA.low8[0]['inputs'][7], 'low8')).toEqual(
+      TEST_DATA.low8[0].output,
+    );
   });
-
 });

@@ -3,10 +3,14 @@ import { expect, vi } from 'vitest';
 // Custom matchers for poker-specific assertions
 expect.extend({
   toBeValidHand(received: any) {
-    const pass = Array.isArray(received) && received.length === 2 && received.every(card => typeof card === 'number');
+    const pass =
+      Array.isArray(received) &&
+      received.length === 2 &&
+      received.every((card) => typeof card === 'number');
     return {
       pass,
-      message: () => pass ? 'Expected hand to be invalid' : 'Expected hand to be valid (array of 2 numbers)'
+      message: () =>
+        pass ? 'Expected hand to be invalid' : 'Expected hand to be valid (array of 2 numbers)',
     };
   },
 
@@ -14,7 +18,8 @@ expect.extend({
     const pass = typeof received === 'number' && received >= 0 && received <= 51;
     return {
       pass,
-      message: () => pass ? 'Expected card to be invalid' : 'Expected card to be valid (number 0-51)'
+      message: () =>
+        pass ? 'Expected card to be invalid' : 'Expected card to be valid (number 0-51)',
     };
   },
 
@@ -22,9 +27,10 @@ expect.extend({
     const pass = typeof received === 'number' && received >= 0 && received <= 9;
     return {
       pass,
-      message: () => pass ? 'Expected hand rank to be invalid' : 'Expected hand rank to be valid (number 0-9)'
+      message: () =>
+        pass ? 'Expected hand rank to be invalid' : 'Expected hand rank to be valid (number 0-9)',
     };
-  }
+  },
 });
 
 // Global test utilities
@@ -43,7 +49,7 @@ export const createMockEvaluator = () => ({
   evaluate: vi.fn(),
   evaluateHigh: vi.fn(),
   evaluateLow: vi.fn(),
-  compareHands: vi.fn()
+  compareHands: vi.fn(),
 });
 
 export const createMockCardUtils = () => ({
@@ -51,7 +57,7 @@ export const createMockCardUtils = () => ({
   stringToCard: vi.fn(),
   isValidCard: vi.fn(),
   getCardSuit: vi.fn(),
-  getCardRank: vi.fn()
+  getCardRank: vi.fn(),
 });
 
 // Test data generators

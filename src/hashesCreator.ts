@@ -16,19 +16,19 @@ const multiCombinations = (arr: any[], k: number, rep: number): any[][] => {
   if (rep === 1) {
     return combinations(arr, k);
   }
-  
+
   // For other cases, generate combinations with repetition
   if (k <= 0) return [[]];
   if (arr.length === 0) return [];
-  
+
   const result: any[][] = [];
-  
+
   function generateCombos(remaining: number, currentCombo: any[], startIndex: number) {
     if (remaining === 0) {
       result.push([...currentCombo]);
       return;
     }
-    
+
     for (let i = startIndex; i < arr.length; i++) {
       // For each element, try using it 1 to rep times (or until we've used all remaining slots)
       for (let count = 1; count <= Math.min(rep, remaining); count++) {
@@ -37,7 +37,7 @@ const multiCombinations = (arr: any[], k: number, rep: number): any[][] => {
       }
     }
   }
-  
+
   generateCombos(k, [], 0);
   return result;
 };
@@ -46,8 +46,8 @@ const combinations = (arr: any[], k: number): any[][] => {
   // Simple combinations implementation
   if (k > arr.length || k <= 0) return [];
   if (k === arr.length) return [arr];
-  if (k === 1) return arr.map(el => [el]);
-  
+  if (k === 1) return arr.map((el) => [el]);
+
   const result: any[][] = [];
   for (let i = 0; i <= arr.length - k; i++) {
     const head = arr[i];
@@ -391,10 +391,9 @@ export const createRankOf5AceToSix_Full = (): Readonly<hashRanking> => {
   const TRIPLES = ROUTINES.trisList(rankCards, true);
   const DOUBLE_PAIRS = ROUTINES.doublePairsList(rankCards, true);
   const SINGLE_PAIRS = ROUTINES.singlePairsList(rankCards);
-  const HIGH_CARDS: number[][] = multiCombinations(rankCards, 5, 1)
-    .filter((H, i) => {
-      return !ROUTINES.checkStraight(H);
-    });
+  const HIGH_CARDS: number[][] = multiCombinations(rankCards, 5, 1).filter((H, i) => {
+    return !ROUTINES.checkStraight(H);
+  });
 
   /**fill straight flushes as are the lowest hand possbile */
   STRAIGHTS.forEach((h, idx) => {
@@ -562,7 +561,7 @@ export const createRankOf7AceToFive_Low = (
     });
   }
 
-return hashRankingLow;
+  return hashRankingLow;
 };
 
 export const createRankOf6AceToSix_Low = (
@@ -661,11 +660,7 @@ export const createRankOf6AceToFive_Low = (
 };
 
 export const createRankOf5AceToFive_Low9 = () => {
-  const lowHands: number[][] = multiCombinations(
-    [7, 6, 5, 4, 3, 2, 1, 0, 12],
-    5,
-    1,
-  );
+  const lowHands: number[][] = multiCombinations([7, 6, 5, 4, 3, 2, 1, 0, 12], 5, 1);
   const hashRankingLow9: hashRanking = {
     HASHES: {},
     FLUSH_CHECK_KEYS: {},

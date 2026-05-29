@@ -11,7 +11,7 @@ import {
   getFlushDrawsHands,
   getLow8DrawsHands,
   getDoubleSidedStraightDrawsHands,
-  getDoubleBellyBusterDrawsHands
+  getDoubleBellyBusterDrawsHands,
 } from '../src/hashesCreator';
 import * as CONSTANTS from '../src/constants';
 import { hashRanking, hashRankingSeven } from '../src/interfaces';
@@ -143,7 +143,7 @@ describe('testing hash of low Ato5: ', () => {
   it('creates hash low8 for 7 cards hand', () => {
     let HASHES_OF_LOW_on7: hashRanking;
     expect(
-      (HASHES_OF_LOW_on7 = createRankOf7AceToFive_Low(HASHES_OF_LOW8_on5, CONSTANTS.rankCards))
+      (HASHES_OF_LOW_on7 = createRankOf7AceToFive_Low(HASHES_OF_LOW8_on5, CONSTANTS.rankCards)),
     ).toBeTruthy();
   });
 });
@@ -158,7 +158,6 @@ describe('testing hash of low ace to six', () => {
   });
 });
 
-
 describe('testing draw hands generator', () => {
   it('should generate draw hands', () => {
     expect(getFlushDrawsHands().length).toBeGreaterThan(0);
@@ -166,4 +165,4 @@ describe('testing draw hands generator', () => {
     expect(getDoubleBellyBusterDrawsHands().length).toBeGreaterThan(0);
     expect(getLow8DrawsHands().length).toBeGreaterThan(0);
   });
-})
+});

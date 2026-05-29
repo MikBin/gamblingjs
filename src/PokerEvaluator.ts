@@ -12,7 +12,7 @@ export enum GameVariant {
   LOW_A_TO_5 = 'low-a-to-5',
   LOW_8_OR_BETTER = 'low-8-or-better',
   LOW_9_OR_BETTER = 'low-9-or-better',
-  TEXAS_HOLDEM = 'texas-holdem'
+  TEXAS_HOLDEM = 'texas-holdem',
 }
 
 /**
@@ -78,7 +78,10 @@ export class PokerEvaluator {
    * @param variant - The game variant to evaluate for
    * @returns Detailed hand information including rank, winning cards, and description
    */
-  static evaluate7CardsVerbose(hand: number[], variant: GameVariant = GameVariant.HIGH): verboseHandInfo {
+  static evaluate7CardsVerbose(
+    hand: number[],
+    variant: GameVariant = GameVariant.HIGH,
+  ): verboseHandInfo {
     const evaluator = new PokerEvaluator();
     return evaluator.evaluateVerbose(hand, variant);
   }
@@ -94,7 +97,7 @@ export class PokerEvaluator {
   static evaluateTexasHoldem(
     holeCards: number[],
     communityCards: number[],
-    gameType: TexasHoldemGameType = TexasHoldemGameType.HIGH_ONLY
+    gameType: TexasHoldemGameType = TexasHoldemGameType.HIGH_ONLY,
   ): hiLowRank {
     const evaluator = new PokerEvaluator();
     return evaluator.texasHoldemEvaluator.evaluateHand(holeCards, communityCards, gameType);

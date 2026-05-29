@@ -8,7 +8,7 @@ import {
   HASHES_OF_FIVE_ON_SEVEN_LOWBALL27,
   HASHES_OF_SEVEN_LOW8,
   HASHES_OF_SEVEN_LOW9,
-  FAST_HASH_DEFINED
+  FAST_HASH_DEFINED,
 } from './pokerHashes7';
 import {
   HASHES_OF_FIVE_ON_SIX,
@@ -17,7 +17,7 @@ import {
   HASHES_OF_FIVE_ON_SIX_LOWBALL27,
   HASHES_OF_SIX_LOW8,
   HASHES_OF_SIX_LOW9,
-  FAST_HASH_DEFINED_6
+  FAST_HASH_DEFINED_6,
 } from './pokerHashes6';
 
 export interface PrecomputedHashes {
@@ -28,7 +28,7 @@ export interface PrecomputedHashes {
     '2to7'?: hashRankingSeven;
     low8?: hashRankingSeven;
     low9?: hashRankingSeven;
-  },
+  };
   6: {
     high?: hashRankingSeven;
     Ato5?: hashRankingSeven;
@@ -36,7 +36,7 @@ export interface PrecomputedHashes {
     '2to7'?: hashRankingSeven;
     low8?: hashRankingSeven;
     low9?: hashRankingSeven;
-  }
+  };
 }
 
 const assignHashRanking = (target: hashRankingSeven, source: hashRankingSeven) => {
@@ -52,21 +52,57 @@ const assignHashRanking = (target: hashRankingSeven, source: hashRankingSeven) =
  */
 export const loadHashes = (hashes: PrecomputedHashes) => {
   if (hashes['7']) {
-    if (hashes['7'].high) { assignHashRanking(HASHES_OF_FIVE_ON_SEVEN, hashes['7'].high); FAST_HASH_DEFINED.high = true; }
-    if (hashes['7'].Ato5) { assignHashRanking(HASHES_OF_SEVEN_LOW_Ato5, hashes['7'].Ato5); FAST_HASH_DEFINED.Ato5 = true; }
-    if (hashes['7'].Ato6) { assignHashRanking(HASHES_OF_SEVEN_LOW_Ato6, hashes['7'].Ato6); FAST_HASH_DEFINED.Ato6 = true; }
-    if (hashes['7']['2to7']) { assignHashRanking(HASHES_OF_FIVE_ON_SEVEN_LOWBALL27, hashes['7']['2to7']); FAST_HASH_DEFINED['2to7'] = true; }
-    if (hashes['7'].low8) { assignHashRanking(HASHES_OF_SEVEN_LOW8, hashes['7'].low8); FAST_HASH_DEFINED.low8 = true; }
-    if (hashes['7'].low9) { assignHashRanking(HASHES_OF_SEVEN_LOW9, hashes['7'].low9); FAST_HASH_DEFINED.low9 = true; }
+    if (hashes['7'].high) {
+      assignHashRanking(HASHES_OF_FIVE_ON_SEVEN, hashes['7'].high);
+      FAST_HASH_DEFINED.high = true;
+    }
+    if (hashes['7'].Ato5) {
+      assignHashRanking(HASHES_OF_SEVEN_LOW_Ato5, hashes['7'].Ato5);
+      FAST_HASH_DEFINED.Ato5 = true;
+    }
+    if (hashes['7'].Ato6) {
+      assignHashRanking(HASHES_OF_SEVEN_LOW_Ato6, hashes['7'].Ato6);
+      FAST_HASH_DEFINED.Ato6 = true;
+    }
+    if (hashes['7']['2to7']) {
+      assignHashRanking(HASHES_OF_FIVE_ON_SEVEN_LOWBALL27, hashes['7']['2to7']);
+      FAST_HASH_DEFINED['2to7'] = true;
+    }
+    if (hashes['7'].low8) {
+      assignHashRanking(HASHES_OF_SEVEN_LOW8, hashes['7'].low8);
+      FAST_HASH_DEFINED.low8 = true;
+    }
+    if (hashes['7'].low9) {
+      assignHashRanking(HASHES_OF_SEVEN_LOW9, hashes['7'].low9);
+      FAST_HASH_DEFINED.low9 = true;
+    }
   }
 
   if (hashes['6']) {
-    if (hashes['6'].high) { assignHashRanking(HASHES_OF_FIVE_ON_SIX, hashes['6'].high); FAST_HASH_DEFINED_6.high = true; }
-    if (hashes['6'].Ato5) { assignHashRanking(HASHES_OF_SIX_LOW_Ato5, hashes['6'].Ato5); FAST_HASH_DEFINED_6.Ato5 = true; }
-    if (hashes['6'].Ato6) { assignHashRanking(HASHES_OF_SIX_LOW_Ato6, hashes['6'].Ato6); FAST_HASH_DEFINED_6.Ato6 = true; }
-    if (hashes['6']['2to7']) { assignHashRanking(HASHES_OF_FIVE_ON_SIX_LOWBALL27, hashes['6']['2to7']); FAST_HASH_DEFINED_6['2to7'] = true; }
-    if (hashes['6'].low8) { assignHashRanking(HASHES_OF_SIX_LOW8, hashes['6'].low8); FAST_HASH_DEFINED_6.low8 = true; }
-    if (hashes['6'].low9) { assignHashRanking(HASHES_OF_SIX_LOW9, hashes['6'].low9); FAST_HASH_DEFINED_6.low9 = true; }
+    if (hashes['6'].high) {
+      assignHashRanking(HASHES_OF_FIVE_ON_SIX, hashes['6'].high);
+      FAST_HASH_DEFINED_6.high = true;
+    }
+    if (hashes['6'].Ato5) {
+      assignHashRanking(HASHES_OF_SIX_LOW_Ato5, hashes['6'].Ato5);
+      FAST_HASH_DEFINED_6.Ato5 = true;
+    }
+    if (hashes['6'].Ato6) {
+      assignHashRanking(HASHES_OF_SIX_LOW_Ato6, hashes['6'].Ato6);
+      FAST_HASH_DEFINED_6.Ato6 = true;
+    }
+    if (hashes['6']['2to7']) {
+      assignHashRanking(HASHES_OF_FIVE_ON_SIX_LOWBALL27, hashes['6']['2to7']);
+      FAST_HASH_DEFINED_6['2to7'] = true;
+    }
+    if (hashes['6'].low8) {
+      assignHashRanking(HASHES_OF_SIX_LOW8, hashes['6'].low8);
+      FAST_HASH_DEFINED_6.low8 = true;
+    }
+    if (hashes['6'].low9) {
+      assignHashRanking(HASHES_OF_SIX_LOW9, hashes['6'].low9);
+      FAST_HASH_DEFINED_6.low9 = true;
+    }
   }
 };
 
@@ -76,7 +112,7 @@ export const loadHashes = (hashes: PrecomputedHashes) => {
  * to initialize the library without freezing the UI.
  */
 export const initHashesAsync = async () => {
-  const yieldToMain = () => new Promise(resolve => setTimeout(resolve, 0));
+  const yieldToMain = () => new Promise((resolve) => setTimeout(resolve, 0));
 
   const tasks7 = [
     { name: 'high', fn: fastHashesCreators.high },

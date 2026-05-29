@@ -1,5 +1,5 @@
 import { HandStrengthResult, SimulationConfig, SimulationResult } from '../simulation/types.js';
-import { simulateOmahaHand, OmahaEvaluator } from '../simulation/omaha-montecarlo.js';
+import { simulateOmahaHand, OmahaEvaluatorUnion } from '../simulation/omaha-montecarlo.js';
 import { enumerateOmahaStartingHands } from '../hands/omaha.js';
 import { ProgressCallback } from './ranker.js';
 
@@ -10,7 +10,7 @@ import { ProgressCallback } from './ranker.js';
  * ranks them by strength, and returns the complete result.
  */
 export const rankOmahaStartingHands = (
-  evaluator: OmahaEvaluator,
+  evaluator: OmahaEvaluatorUnion,
   config: SimulationConfig,
   onProgress?: ProgressCallback,
 ): SimulationResult => {

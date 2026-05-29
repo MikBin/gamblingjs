@@ -55,8 +55,8 @@ import { handToCardsSymbols, filterWinningCards } from './routines';
 const combinations = (arr: any[], k: number): any[][] => {
   if (k > arr.length || k <= 0) return [];
   if (k === arr.length) return [arr];
-  if (k === 1) return arr.map(el => [el]);
-  
+  if (k === 1) return arr.map((el) => [el]);
+
   const result: any[][] = [];
   for (let i = 0; i <= arr.length - k; i++) {
     const head = arr[i];

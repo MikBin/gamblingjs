@@ -5,13 +5,32 @@ import type { Dealer } from '../../src/poker-table/deck';
 
 class TestDealer implements Dealer {
   private q: number[] = [];
-  setDeck(cards: number[]) { this.q = cards.slice(); }
-  initDeck(): void { /* keep queue */ }
-  shuffle(): void { /* no-op */ }
-  burn(count: number = 1): void { for (let i=0;i<count;i++) this.dealCard(); }
-  dealCard(): number { if (this.q.length===0) throw new Error('empty'); const c = this.q.shift(); if (c===undefined) throw new Error('undef'); return c; }
-  deal(count: number): number[] { const out: number[] = []; for (let i=0;i<count;i++) out.push(this.dealCard()); return out; }
-  remaining(): number { return this.q.length; }
+  setDeck(cards: number[]) {
+    this.q = cards.slice();
+  }
+  initDeck(): void {
+    /* keep queue */
+  }
+  shuffle(): void {
+    /* no-op */
+  }
+  burn(count: number = 1): void {
+    for (let i = 0; i < count; i++) this.dealCard();
+  }
+  dealCard(): number {
+    if (this.q.length === 0) throw new Error('empty');
+    const c = this.q.shift();
+    if (c === undefined) throw new Error('undef');
+    return c;
+  }
+  deal(count: number): number[] {
+    const out: number[] = [];
+    for (let i = 0; i < count; i++) out.push(this.dealCard());
+    return out;
+  }
+  remaining(): number {
+    return this.q.length;
+  }
 }
 
 function makeRotationConfig(): TableConfig {
@@ -38,7 +57,7 @@ describe('PokerTable - rotation and tournament levels', () => {
     table = new PokerTable(makeRotationConfig(), dealer, { passiveDealing: true });
     table.addPlayer({ id: 'p0', chips: 100, seat: 0 });
     table.addPlayer({ id: 'p1', chips: 100, seat: 1 });
-    dealer.setDeck(Array.from({length: 52}, (_, i) => i));
+    dealer.setDeck(Array.from({ length: 52 }, (_, i) => i));
   });
 
   it('rotates games per hands configuration', () => {
@@ -63,7 +82,10 @@ describe('PokerTable - rotation and tournament levels', () => {
         advanceEvery: 2,
         startingLevelId: 'L1',
       },
-      rotation: { sequence: [{ game: GameId.TEXAS_HOLDEM, limit: LimitType.NO_LIMIT, hands: 999 }], loop: true },
+      rotation: {
+        sequence: [{ game: GameId.TEXAS_HOLDEM, limit: LimitType.NO_LIMIT, hands: 999 }],
+        loop: true,
+      },
       dealerButtonSeat: 0,
     };
 
@@ -72,24 +94,24 @@ describe('PokerTable - rotation and tournament levels', () => {
     table.addPlayer({ id: 'p1', chips: 100, seat: 1 });
 
     // Hand 1 -> level 1 blinds collected
-    dealer.setDeck(Array.from({length: 52}, (_, i) => i));
+    dealer.setDeck(Array.from({ length: 52 }, (_, i) => i));
     table.startHand();
     let snap = table.getSnapshot();
-    const p0h1 = snap.players.find(p=>p.seat===0)!;
-    const p1h1 = snap.players.find(p=>p.seat===1)!;
+    const p0h1 = snap.players.find((p) => p.seat === 0)!;
+    const p1h1 = snap.players.find((p) => p.seat === 1)!;
     // SB seat 1 pays 1, BB seat 0 pays 2 (only two players; sb = next after button=0 -> seat1, bb=seat0)
     expect(p1h1.chips).toBe(99);
     expect(p0h1.chips).toBe(98);
 
     // Hand 2 -> still level 1
-    dealer.setDeck(Array.from({length: 52}, (_, i) => i));
+    dealer.setDeck(Array.from({ length: 52 }, (_, i) => i));
     table.startHand();
     snap = table.getSnapshot();
     // Total pot should have increased by 3 again from blinds
     expect(snap.pot).toBeGreaterThanOrEqual(3);
 
     // Hand 3 -> level 2 (2/4 + ante 1 each)
-    dealer.setDeck(Array.from({length: 52}, (_, i) => i));
+    dealer.setDeck(Array.from({ length: 52 }, (_, i) => i));
     table.startHand();
     snap = table.getSnapshot();
     // Two players, ante 1 each -> 2 chips antes plus blinds 2 and 4

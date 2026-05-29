@@ -6,7 +6,21 @@
 /**
  * Card rank names in order from lowest to highest.
  */
-export const RANK_NAMES = ['2', '3', '4', '5', '6', '7', '8', '9', 'T', 'J', 'Q', 'K', 'A'] as const;
+export const RANK_NAMES = [
+  '2',
+  '3',
+  '4',
+  '5',
+  '6',
+  '7',
+  '8',
+  '9',
+  'T',
+  'J',
+  'Q',
+  'K',
+  'A',
+] as const;
 
 /**
  * Card suit names.
@@ -46,8 +60,8 @@ export function stringToCardIndex(cardString: string): number {
   const rankChar = cardString[0].toUpperCase();
   const suitChar = cardString[1].toLowerCase();
 
-  const rankIndex = RANK_NAMES.indexOf(rankChar as typeof RANK_NAMES[number]);
-  const suitIndex = SUIT_NAMES.indexOf(suitChar as typeof SUIT_NAMES[number]);
+  const rankIndex = RANK_NAMES.indexOf(rankChar as (typeof RANK_NAMES)[number]);
+  const suitIndex = SUIT_NAMES.indexOf(suitChar as (typeof SUIT_NAMES)[number]);
 
   if (rankIndex === -1) {
     throw new Error(`Invalid rank: ${rankChar}. Must be one of: ${RANK_NAMES.join(', ')}`);
@@ -57,7 +71,7 @@ export function stringToCardIndex(cardString: string): number {
     throw new Error(`Invalid suit: ${suitChar}. Must be one of: ${SUIT_NAMES.join(', ')}`);
   }
 
-  return rankIndex + (suitIndex * 13); // rank + suit * 13
+  return rankIndex + suitIndex * 13; // rank + suit * 13
 }
 
 /**

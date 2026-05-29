@@ -22,7 +22,7 @@ export const createMockEvaluator = (): MockEvaluator => ({
   evaluate: vi.fn(),
   evaluateHigh: vi.fn(),
   evaluateLow: vi.fn(),
-  compareHands: vi.fn()
+  compareHands: vi.fn(),
 });
 
 export const createMockCardUtils = (): MockCardUtils => ({
@@ -30,7 +30,7 @@ export const createMockCardUtils = (): MockCardUtils => ({
   stringToCard: vi.fn(),
   isValidCard: vi.fn(),
   getCardSuit: vi.fn(),
-  getCardRank: vi.fn()
+  getCardRank: vi.fn(),
 });
 
 // Type-safe test data generators
@@ -64,30 +64,30 @@ export const createVerboseHandInfo = (
   handRank: number,
   faces: string,
   handGroup: string,
-  flushSuit: string | number = "no flush",
-  winningCards: (number | string)[] = []
+  flushSuit: string | number = 'no flush',
+  winningCards: (number | string)[] = [],
 ): verboseHandInfo => ({
   hand,
   handRank,
   faces,
   handGroup,
   flushSuit,
-  winningCards
+  winningCards,
 });
 
 export const createHiLowVerboseHandInfo = (
   hi: verboseHandInfo,
-  low: verboseHandInfo
+  low: verboseHandInfo,
 ): HiLowVerboseHandInfo => ({
   hi,
-  low
+  low,
 });
 
 // Type-safe assertion helpers
 export const expectHandToBeValid = (hand: number[]): void => {
   expect(Array.isArray(hand)).toBe(true);
   expect(hand).toHaveLength(2);
-  hand.forEach(card => {
+  hand.forEach((card) => {
     expect(typeof card).toBe('number');
     expect(card).toBeGreaterThanOrEqual(0);
     expect(card).toBeLessThanOrEqual(51);
@@ -97,7 +97,7 @@ export const expectHandToBeValid = (hand: number[]): void => {
 export const expectBoardToBeValid = (board: number[], expectedLength: number = 5): void => {
   expect(Array.isArray(board)).toBe(true);
   expect(board).toHaveLength(expectedLength);
-  board.forEach(card => {
+  board.forEach((card) => {
     expect(typeof card).toBe('number');
     expect(card).toBeGreaterThanOrEqual(0);
     expect(card).toBeLessThanOrEqual(51);
@@ -113,7 +113,7 @@ export const expectHandRankToBeValid = (rank: number): void => {
 // Performance testing utilities
 export const measureExecutionTime = async <T>(
   fn: () => Promise<T> | T,
-  iterations: number = 1000
+  iterations: number = 1000,
 ): Promise<{ result: T; averageTime: number; totalTime: number }> => {
   const times: number[] = [];
 
@@ -134,7 +134,7 @@ export const measureExecutionTime = async <T>(
   return {
     result: finalResult!,
     averageTime,
-    totalTime
+    totalTime,
   };
 };
 
@@ -148,8 +148,8 @@ export const validateTestDataStructure = (data: any): boolean => {
   }
 
   // Check if it's a collection of test cases
-  return Object.values(data).every((testCases: any) =>
-    Array.isArray(testCases) && testCases.every(validateTestCase)
+  return Object.values(data).every(
+    (testCases: any) => Array.isArray(testCases) && testCases.every(validateTestCase),
   );
 };
 

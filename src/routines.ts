@@ -1,16 +1,15 @@
 export const shuffle = (array: any[]) => {
-  let currentIndex = array.length, randomIndex;
+  let currentIndex = array.length,
+    randomIndex;
 
   // While there remain elements to shuffle.
   while (currentIndex > 0) {
-
     // Pick a remaining element.
     randomIndex = Math.floor(Math.random() * currentIndex);
     currentIndex--;
 
     // And swap it with the current element.
-    [array[currentIndex], array[randomIndex]] = [
-      array[randomIndex], array[currentIndex]];
+    [array[currentIndex], array[randomIndex]] = [array[randomIndex], array[currentIndex]];
   }
 
   return array;
@@ -19,7 +18,7 @@ export const shuffle = (array: any[]) => {
 export const combinations = (arr: any[], k: number): any[][] => {
   if (k > arr.length || k <= 0) return [];
   if (k === arr.length) return [arr];
-  if (k === 1) return arr.map(el => [el]);
+  if (k === 1) return arr.map((el) => [el]);
 
   const result: any[][] = [];
   for (let i = 0; i <= arr.length - k; i++) {
@@ -36,18 +35,18 @@ export const multiCombinations = (arr: any[], k: number, rep: number): any[][] =
   if (rep === 1) {
     return combinations(arr, k);
   }
-  
+
   if (k <= 0) return [[]];
   if (arr.length === 0) return [];
-  
+
   const result: any[][] = [];
-  
+
   function generateCombos(remaining: number, currentCombo: any[], startIndex: number) {
     if (remaining === 0) {
       result.push([...currentCombo]);
       return;
     }
-    
+
     for (let i = startIndex; i < arr.length; i++) {
       for (let count = 1; count <= Math.min(rep, remaining); count++) {
         const newCombo = [...currentCombo, ...Array(count).fill(arr[i])];
@@ -55,7 +54,7 @@ export const multiCombinations = (arr: any[], k: number, rep: number): any[][] =
       }
     }
   }
-  
+
   generateCombos(k, [], 0);
   return result;
 };
@@ -199,9 +198,7 @@ export const sortedPairsToAdd = (startSet: number[]): number[][] => {
 };
 
 export const doublePairsList = (startSet: number[], isLow: boolean = false): number[][] => {
-  const toAdd = isLow
-    ? multiCombinations(startSet, 2, 1)
-    : sortedPairsToAdd(startSet);
+  const toAdd = isLow ? multiCombinations(startSet, 2, 1) : sortedPairsToAdd(startSet);
   const doublePairs = [];
 
   for (let j = 0; j < toAdd.length; ++j) {
@@ -215,9 +212,7 @@ export const doublePairsList = (startSet: number[], isLow: boolean = false): num
 };
 
 export const trisList = (startSet: number[], isLow: boolean = false): number[][] => {
-  const toAdd = isLow
-    ? multiCombinations(startSet, 2, 1)
-    : sortedPairsToAdd(startSet);
+  const toAdd = isLow ? multiCombinations(startSet, 2, 1) : sortedPairsToAdd(startSet);
   const tris = [];
   for (let i = 0; i < startSet.length; ++i) {
     for (let j = 0; j < toAdd.length; ++j) {
@@ -484,13 +479,16 @@ const applySuitTemplate = (hand: number[], template: number[]) => {
 export const allFourCardsHands = () => {
   const shiftedRanks = new Array(13).fill(0).map((v, i) => i);
 
-  const ALL: number[][] = multiCombinations(shiftedRanks, 4, 4)
-    .map((hand) => hand.sort());
+  const ALL: number[][] = multiCombinations(shiftedRanks, 4, 4).map((hand) => hand.sort());
 
   const noReps: number[][] = multiCombinations(shiftedRanks, 4, 1);
 
-  const twoPairs: number[][] = multiCombinations(shiftedRanks, 2, 1)
-    .map((c) => [c[0], c[0], c[1], c[1]]);
+  const twoPairs: number[][] = multiCombinations(shiftedRanks, 2, 1).map((c) => [
+    c[0],
+    c[0],
+    c[1],
+    c[1],
+  ]);
 
   const tempOnePair: number[][] = multiCombinations(shiftedRanks, 3, 1);
 

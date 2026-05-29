@@ -1,13 +1,16 @@
 #!/usr/bin/env node
 import { Command } from 'commander';
 import fs from 'fs';
+import os from 'os';
+import { Worker } from 'worker_threads';
 import { HighEvaluator } from '../../src/core/HighEvaluator.js';
+import { OmahaEvaluator } from '../../src/core/OmahaEvaluator.js';
 import { handOfFiveEvalIndexed } from '../../src/pokerEvaluator5.js';
 import { fastHashesCreators } from '../../src/pokerHashes7.js';
 import { rankHoldemStartingHands } from './ranking/ranker.js';
 import { rankOmahaStartingHands } from './ranking/omaha-ranker.js';
 import { rankStreets } from './ranking/street-ranker.js';
-import { SimulationConfig } from './simulation/types.js';
+import { SimulationConfig, SimulationResult, HandStrengthResult } from './simulation/types.js';
 import { formatTable, formatJSON, formatCSV, formatMarkdown } from './output.js';
 import {
   formatStreetTable,
@@ -32,14 +35,17 @@ program
   .option('--street', 'run street-by-street analysis (flop/turn/river)')
   .option('--detailed', 'show detailed per-hand breakdown (with --street)')
   .action(async (options) => {
+    const game = (options.game as string)?.toLowerCase() ?? 'holdem';
+    const runsOption = options.runs as string;
+    const isDefaultRuns = runsOption === '10000';
+
     const config: SimulationConfig = {
-      runs: parseInt(options.runs, 10),
+      runs: (game === 'omaha' && isDefaultRuns) ? 1000 : parseInt(runsOption, 10),
       opponents: parseInt(options.opponents, 10),
       seed: options.seed ? parseInt(options.seed, 10) : undefined,
       useCache: true,
     };
 
-    const game = options.game?.toLowerCase() ?? 'holdem';
     const format = options.format as string;
     const outputFile = options.output as string | undefined;
     const streetMode = options.street as boolean | undefined;
@@ -62,17 +68,29 @@ program
 
       console.error(
         `Running Omaha Hi preflop simulation...\n` +
-          `  Note: Omaha simulation involves ~9,854 hands and 60 combinations per evaluation.\n` +
-          `  This will take significantly longer than Hold'em. Use -n to reduce iterations if needed.\n` +
-          `  Runs/hand: ${config.runs} | Opponents: ${config.opponents}`,
+          `  Hands: ~9,854 | Runs/hand: ${config.runs} | Opponents: ${config.opponents}\n` +
+          `  Using ${Math.max(1, Math.floor(os.cpus().length / 2))} worker threads`,
       );
 
-      const result = rankOmahaStartingHands({ eval5: handOfFiveEvalIndexed }, config, (completed, total, hand) => {
-        if (completed % 10 === 0 || completed === total) {
-          const pct = ((completed / total) * 100).toFixed(0);
-          process.stderr.write(`\r  Progress: ${completed}/${total} (${pct}%) — ${hand}    `);
-        }
-      });
+      let result: SimulationResult;
+      try {
+        result = await runOmahaWorkerPool(config, (completed, total, hand) => {
+          if (completed % 10 === 0 || completed === total) {
+            const pct = ((completed / total) * 100).toFixed(0);
+            process.stderr.write(`\r  Progress: ${completed}/${total} (${pct}%) — ${hand}    `);
+          }
+        });
+      } catch {
+        // Fallback to single-threaded
+        console.error('\n  Worker pool failed, falling back to single-threaded...');
+        const omahaEvaluator = new OmahaEvaluator();
+        result = rankOmahaStartingHands(omahaEvaluator, config, (completed, total, hand) => {
+          if (completed % 10 === 0 || completed === total) {
+            const pct = ((completed / total) * 100).toFixed(0);
+            process.stderr.write(`\r  Progress: ${completed}/${total} (${pct}%) — ${hand}    `);
+          }
+        });
+      }
 
       const elapsed = ((Date.now() - startTime) / 1000).toFixed(1);
       process.stderr.write(`\n  Completed in ${elapsed}s\n`);
@@ -184,5 +202,88 @@ program
       }
     }
   });
+
+/**
+ * Run Omaha simulation across a pool of worker threads.
+ * Shards the canonical hand list across N/2 CPU workers.
+ */
+async function runOmahaWorkerPool(
+  config: SimulationConfig,
+  onProgress: (completed: number, total: number, hand: string) => void,
+): Promise<SimulationResult> {
+  const { enumerateOmahaStartingHands } = await import('./hands/omaha.js');
+  const hands = enumerateOmahaStartingHands();
+  const numWorkers = Math.max(1, Math.floor(os.cpus().length / 2));
+  const workerPath = new URL('./workers/omaha-cli-worker.ts', import.meta.url).href;
+
+  interface WorkerMsg {
+    type: 'progress' | 'done';
+    completed?: number;
+    total?: number;
+    results?: HandStrengthResult[];
+  }
+
+  const allResults: HandStrengthResult[] = [];
+  let completedHands = 0;
+  const totalHands = hands.length;
+  const workerLastProgress: number[] = new Array(numWorkers).fill(0);
+
+  const workers: Worker[] = [];
+  const promises: Promise<void>[] = [];
+
+  for (let w = 0; w < numWorkers; w++) {
+    const start = Math.floor((w / numWorkers) * hands.length);
+    const end = Math.floor(((w + 1) / numWorkers) * hands.length);
+    const batch = hands.slice(start, end);
+
+    const worker = new Worker(workerPath);
+    workers.push(worker);
+
+    const promise = new Promise<void>((resolve, reject) => {
+      worker.on('message', (msg: WorkerMsg) => {
+        if (msg.type === 'progress' && msg.completed != null) {
+          const delta = msg.completed - workerLastProgress[w]!;
+          workerLastProgress[w] = msg.completed;
+          completedHands += delta;
+          const hand = batch[(msg.completed ?? 1) - 1]?.key ?? '';
+          onProgress(Math.min(completedHands, totalHands), totalHands, hand);
+        } else if (msg.type === 'done' && msg.results) {
+          allResults.push(...msg.results);
+          resolve();
+        }
+      });
+
+      worker.on('error', reject);
+      worker.on('exit', (code) => {
+        if (code !== 0) reject(new Error(`Worker exited with code ${code}`));
+      });
+    });
+
+    promises.push(promise);
+
+    worker.postMessage({
+      hands: batch,
+      config,
+      seedOffset: w * 1_000_000,
+    });
+  }
+
+  await Promise.all(promises);
+  workers.forEach((w) => w.terminate());
+
+  // Sort results
+  if (config.opponents > 0) {
+    allResults.sort((a, b) => b.winPct - a.winPct || b.averageRank - a.averageRank);
+  } else {
+    allResults.sort((a, b) => b.averageRank - a.averageRank);
+  }
+
+  return {
+    gameType: 'omaha-hi',
+    config,
+    hands: allResults,
+    timestamp: new Date().toISOString(),
+  };
+}
 
 program.parse();

@@ -2,10 +2,19 @@ import { SeedableRNG } from '../utils/rng.js';
 import { makeDeck } from '../utils/deck.js';
 import { HandStrengthResult, SimulationConfig } from './types.js';
 import { HandGroup } from '../hands/types.js';
+import { OmahaEvaluator as CoreOmahaEvaluator } from '../../../src/core/OmahaEvaluator.js';
 
+/** Legacy evaluator shape (backward compatible). */
 export type OmahaEvaluator = {
   eval5: (c1: number, c2: number, c3: number, c4: number, c5: number) => number;
 };
+
+/** Union type accepted by simulation functions. */
+export type OmahaEvaluatorUnion = OmahaEvaluator | CoreOmahaEvaluator;
+
+function isCoreEvaluator(e: OmahaEvaluatorUnion): e is CoreOmahaEvaluator {
+  return e instanceof CoreOmahaEvaluator;
+}
 
 // Choose 2 from 4 hole cards
 function combinations2of4(cards: number[]): number[][] {
@@ -31,15 +40,24 @@ function combinations3of5(cards: number[]): number[][] {
   return result; // 10 combinations
 }
 
-// Best Omaha hand = max over all 60 combinations of eval5(hole2 + board3)
-function bestOmahaHand(holeCards: number[], board: number[], eval5: OmahaEvaluator['eval5']): number {
+/** Best Omaha hand — uses fast CoreOmahaEvaluator path when available. */
+function bestOmahaHand(
+  holeCards: number[],
+  board: number[],
+  evaluator: OmahaEvaluatorUnion,
+): number {
+  if (isCoreEvaluator(evaluator)) {
+    evaluator.setHoleCards(holeCards);
+    return evaluator.evaluate(board);
+  }
+
   let best = -Infinity;
   const holeCombos = combinations2of4(holeCards);
   const boardCombos = combinations3of5(board);
 
   for (const hc of holeCombos) {
     for (const bc of boardCombos) {
-      const score = eval5(hc[0]!, hc[1]!, bc[0]!, bc[1]!, bc[2]!);
+      const score = evaluator.eval5(hc[0]!, hc[1]!, bc[0]!, bc[1]!, bc[2]!);
       if (score > best) best = score;
     }
   }
@@ -54,7 +72,7 @@ const simulateSingleRun = (
   holeCards: number[],
   deck: number[],
   rng: SeedableRNG,
-  evaluator: OmahaEvaluator,
+  evaluator: OmahaEvaluatorUnion,
 ): number => {
   // Shuffle remaining deck
   const d = [...deck];
@@ -67,7 +85,7 @@ const simulateSingleRun = (
   const board = d.slice(0, 5);
 
   // Evaluate the best Omaha hand
-  return bestOmahaHand(holeCards, board, evaluator.eval5);
+  return bestOmahaHand(holeCards, board, evaluator);
 };
 
 /**
@@ -79,7 +97,7 @@ const simulateWithOpponents = (
   holeCards: number[],
   deck: number[],
   rng: SeedableRNG,
-  evaluator: OmahaEvaluator,
+  evaluator: OmahaEvaluatorUnion,
   numOpponents: number,
 ): { win: number; rank: number } => {
   // Shuffle remaining deck
@@ -103,12 +121,12 @@ const simulateWithOpponents = (
   const board = dealt.slice(numOpponents * 4, numOpponents * 4 + 5);
 
   // Evaluate our hand
-  const ourRank = bestOmahaHand(holeCards, board, evaluator.eval5);
+  const ourRank = bestOmahaHand(holeCards, board, evaluator);
 
   // Evaluate opponent hands
   let bestOpponentRank = -1;
   for (const opp of opponentHands) {
-    const oppRank = bestOmahaHand(opp, board, evaluator.eval5);
+    const oppRank = bestOmahaHand(opp, board, evaluator);
     if (oppRank > bestOpponentRank) {
       bestOpponentRank = oppRank;
     }
@@ -126,7 +144,7 @@ const simulateWithOpponents = (
 export const simulateOmahaHand = (
   hand: HandGroup,
   config: SimulationConfig,
-  evaluator: OmahaEvaluator,
+  evaluator: OmahaEvaluatorUnion,
 ): HandStrengthResult => {
   const rng = new SeedableRNG(config.seed ?? Date.now());
   const deck = makeDeck(hand.cards);

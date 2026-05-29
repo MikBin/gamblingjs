@@ -1,9 +1,8 @@
 import { fastHashesCreators } from '../../../src/pokerHashes7.js';
 import { enumerateOmahaStartingHands } from '@poker-sym/hands/omaha.js';
-import { simulateOmahaHand, OmahaEvaluator } from '@poker-sym/simulation/omaha-montecarlo.js';
-import { SimulationConfig, SimulationResult } from '@poker-sym/simulation/types.js';
+import { SimulationConfig, SimulationResult, HandStrengthResult } from '@poker-sym/simulation/types.js';
 import { TIERS, assignTiers } from '@poker-sym/ranking/tiers.js';
-import { handOfFiveEvalIndexed } from '../../../src/pokerEvaluator5.js';
+import { OmahaEvaluator } from '../../../src/core/OmahaEvaluator.js';
 
 // DOM elements
 const initStatus = document.getElementById('initStatus')!;
@@ -24,46 +23,75 @@ async function init() {
   runBtn.disabled = false;
 }
 
-// Run simulation in chunks to keep UI responsive
+interface WorkerMsg {
+  type: 'progress' | 'done';
+  completed?: number;
+  total?: number;
+  results?: HandStrengthResult[];
+}
+
+// Run simulation across a pool of Web Workers
 function runSimulation(config: SimulationConfig): Promise<SimulationResult> {
   return new Promise((resolve) => {
-    const evaluator: OmahaEvaluator = { eval5: handOfFiveEvalIndexed };
-
     const hands = enumerateOmahaStartingHands();
-    const results: SimulationResult['hands'] = [];
-    let i = 0;
-    const chunkSize = 15;
+    const numWorkers = Math.max(1, Math.min(4, Math.floor((navigator.hardwareConcurrency || 4) / 2)));
+    const allResults: HandStrengthResult[] = [];
+    let completedHands = 0;
+    const totalHands = hands.length;
+    const workerLastProgress: number[] = new Array(numWorkers).fill(0);
+    const workers: Worker[] = [];
+    const promises: Promise<void>[] = [];
 
-    function processChunk() {
-      const end = Math.min(i + chunkSize, hands.length);
-      for (; i < end; i++) {
-        const hand = hands[i]!;
-        const result = simulateOmahaHand(hand, config, evaluator);
-        results.push(result);
-      }
+    for (let w = 0; w < numWorkers; w++) {
+      const start = Math.floor((w / numWorkers) * hands.length);
+      const end = Math.floor(((w + 1) / numWorkers) * hands.length);
+      const batch = hands.slice(start, end);
 
-      const pct = (i / hands.length) * 100;
-      progressFill.style.width = pct + '%';
-      progressText.textContent = i + '/' + hands.length + ' hands (' + pct.toFixed(0) + '%)';
+      const worker = new Worker(new URL('./omaha-worker.ts', import.meta.url), { type: 'module' });
+      workers.push(worker);
 
-      if (i < hands.length) {
-        setTimeout(processChunk, 0);
-      } else {
-        if (config.opponents > 0) {
-          results.sort((a, b) => b.winPct - a.winPct || b.averageRank - a.averageRank);
-        } else {
-          results.sort((a, b) => b.averageRank - a.averageRank);
-        }
-        resolve({
-          gameType: 'omaha-hi',
-          config,
-          hands: results,
-          timestamp: new Date().toISOString(),
-        });
-      }
+      const promise = new Promise<void>((resolveWorker) => {
+        worker.onmessage = (event: MessageEvent<WorkerMsg>) => {
+          const msg = event.data;
+          if (msg.type === 'progress' && msg.completed != null) {
+            const delta = msg.completed - workerLastProgress[w]!;
+            workerLastProgress[w] = msg.completed;
+            completedHands += delta;
+            const pct = (completedHands / totalHands) * 100;
+            progressFill.style.width = pct + '%';
+            progressText.textContent = completedHands + '/' + totalHands + ' hands (' + pct.toFixed(0) + '%)';
+          } else if (msg.type === 'done' && msg.results) {
+            allResults.push(...msg.results);
+            resolveWorker();
+          }
+        };
+      });
+
+      promises.push(promise);
+
+      worker.postMessage({
+        hands: batch,
+        config,
+        seedOffset: w * 1_000_000,
+      });
     }
 
-    processChunk();
+    Promise.all(promises).then(() => {
+      workers.forEach((w) => w.terminate());
+
+      if (config.opponents > 0) {
+        allResults.sort((a, b) => b.winPct - a.winPct || b.averageRank - a.averageRank);
+      } else {
+        allResults.sort((a, b) => b.averageRank - a.averageRank);
+      }
+
+      resolve({
+        gameType: 'omaha-hi',
+        config,
+        hands: allResults,
+        timestamp: new Date().toISOString(),
+      });
+    });
   });
 }
 
@@ -102,7 +130,7 @@ function renderResults(result: SimulationResult) {
 
 // Event handler
 runBtn.addEventListener('click', async () => {
-  const runs = parseInt(runsInput.value, 10) || 10000;
+  const runs = parseInt(runsInput.value, 10) || 1000;
   const opponents = parseInt(opponentsInput.value, 10) || 0;
 
   const config: SimulationConfig = {

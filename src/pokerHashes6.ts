@@ -76,7 +76,10 @@ export const fastHashesCreators6: gameTypesEvalFunction = {
     FAST_HASH_DEFINED_6.Ato5 = true;
   },
   Ato6: () => {
-    subAssignHashesSix(HASHES_OF_SIX_LOW_Ato6, createRankOf6AceToSix_Low(HASHES_OF_FIVE_Ato6, rankCards_low));
+    subAssignHashesSix(
+      HASHES_OF_SIX_LOW_Ato6,
+      createRankOf6AceToSix_Low(HASHES_OF_FIVE_Ato6, rankCards_low),
+    );
     FAST_HASH_DEFINED_6.Ato6 = true;
   },
   '2to7': () => {
@@ -87,11 +90,17 @@ export const fastHashesCreators6: gameTypesEvalFunction = {
     FAST_HASH_DEFINED_6['2to7'] = true;
   },
   low8: () => {
-    subAssignHashesSix(HASHES_OF_SIX_LOW8, createRankOf6AceToFive_Low(HASHES_OF_FIVE_LOW8, rankCards_low8));
+    subAssignHashesSix(
+      HASHES_OF_SIX_LOW8,
+      createRankOf6AceToFive_Low(HASHES_OF_FIVE_LOW8, rankCards_low8),
+    );
     FAST_HASH_DEFINED_6.low8 = true;
   },
   low9: () => {
-    subAssignHashesSix(HASHES_OF_SIX_LOW9, createRankOf6AceToFive_Low(HASHES_OF_FIVE_LOW9, rankCards_low9));
+    subAssignHashesSix(
+      HASHES_OF_SIX_LOW9,
+      createRankOf6AceToFive_Low(HASHES_OF_FIVE_LOW9, rankCards_low9),
+    );
     FAST_HASH_DEFINED_6.low9 = true;
   },
 };

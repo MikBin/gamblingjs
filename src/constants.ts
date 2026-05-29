@@ -69,10 +69,14 @@ export const flush7HashCheck: Readonly<NumberMap> = {
   '399': 57,
 };
 
-export const ranksHashOn7: number[] = [0, 1, 5, 22, 98, 453, 2031, 8698, 22854, 83661, 262349, 636345, 1479181]; // 13 one for each rank
+export const ranksHashOn7: number[] = [
+  0, 1, 5, 22, 98, 453, 2031, 8698, 22854, 83661, 262349, 636345, 1479181,
+]; // 13 one for each rank
 
 /** @TODO make it like below */
-export const ranksHashOn5: number[] = [0, 1, 5, 22, 94, 312, 992, 2422, 5624, 12522, 19998, 43258, 79415]; // one for each rank
+export const ranksHashOn5: number[] = [
+  0, 1, 5, 22, 94, 312, 992, 2422, 5624, 12522, 19998, 43258, 79415,
+]; // one for each rank
 
 /** @TODO to be tested tuples for hasof5 and 7 */
 
@@ -112,8 +116,8 @@ for (let i: number = 0; i < 52; i++) {
   deckOfFlushes[i] = flushHash[i % 13]!;
   deckOfSuits[i] = suitsHash[~~(i / 13)]!;
 
-  const card5 = (fullCardsDeckHash_5[i] = ((deckOfRanks_5[i]!) << 9) + (deckOfSuits[i]!));
-  const card7 = (fullCardsDeckHash_7[i] = ((deckOfRanks_7[i]!) << 9) + (deckOfSuits[i]!));
+  const card5 = (fullCardsDeckHash_5[i] = (deckOfRanks_5[i]! << 9) + deckOfSuits[i]!);
+  const card7 = (fullCardsDeckHash_7[i] = (deckOfRanks_7[i]! << 9) + deckOfSuits[i]!);
   cardHashToDescription_5[card5] = i;
   cardHashToDescription_7[card7] = i;
 }

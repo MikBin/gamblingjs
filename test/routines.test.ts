@@ -23,7 +23,7 @@ import {
   getDiffDeck7,
   fillRank5_ato5,
   filterWinningCards,
-  getFlushSuitFromIndex
+  getFlushSuitFromIndex,
 } from '../src/routines';
 import { NumberMap, hashRanking } from '../src/interfaces';
 import { fullCardsDeckHash_5, fullCardsDeckHash_7 } from '../src/constants';
@@ -44,9 +44,12 @@ describe('testing diffs: ', () => {
 
 describe('testing basic routines', () => {
   it('returns the only element with 5 equals', () => {
-    expect(atLeastFiveEqual([[2, 3, 1, 1, 1, 1, 1, 5], [1, 1, 1, 1]])).toEqual([
-      [2, 3, 1, 1, 1, 1, 1, 5]
-    ]);
+    expect(
+      atLeastFiveEqual([
+        [2, 3, 1, 1, 1, 1, 1, 5],
+        [1, 1, 1, 1],
+      ]),
+    ).toEqual([[2, 3, 1, 1, 1, 1, 1, 5]]);
   });
   it('sums all numbers', () => {
     expect(getVectorSum([2, 3, 1, 1, 1, 1, 1, 5])).toEqual(15);
@@ -76,7 +79,7 @@ describe('testing basic routines', () => {
       [0, 0, 1, 2, 3],
       [1, 1, 0, 2, 3],
       [2, 2, 0, 1, 3],
-      [3, 3, 0, 1, 2]
+      [3, 3, 0, 1, 2],
     ]);
   });
 
@@ -87,16 +90,24 @@ describe('testing basic routines', () => {
       [2, 1],
       [3, 0],
       [3, 1],
-      [3, 2]
+      [3, 2],
     ]);
   });
 
   it('creates a sorted list of double pairs', () => {
-    expect(doublePairsList([0, 1, 2])).toEqual([[1, 1, 0, 0, 2], [2, 2, 0, 0, 1], [2, 2, 1, 1, 0]]);
+    expect(doublePairsList([0, 1, 2])).toEqual([
+      [1, 1, 0, 0, 2],
+      [2, 2, 0, 0, 1],
+      [2, 2, 1, 1, 0],
+    ]);
   });
 
   it('creates sorted triples list', () => {
-    expect(trisList([0, 1, 2])).toEqual([[0, 0, 0, 2, 1], [1, 1, 1, 2, 0], [2, 2, 2, 1, 0]]);
+    expect(trisList([0, 1, 2])).toEqual([
+      [0, 0, 0, 2, 1],
+      [1, 1, 1, 2, 0],
+      [2, 2, 2, 1, 0],
+    ]);
   });
 
   it('creates sorted fullhouses list', () => {
@@ -106,7 +117,7 @@ describe('testing basic routines', () => {
       [1, 1, 1, 0, 0],
       [1, 1, 1, 2, 2],
       [2, 2, 2, 0, 0],
-      [2, 2, 2, 1, 1]
+      [2, 2, 2, 1, 1],
     ]);
   });
 
@@ -117,7 +128,7 @@ describe('testing basic routines', () => {
       [1, 1, 1, 1, 0],
       [1, 1, 1, 1, 2],
       [2, 2, 2, 2, 0],
-      [2, 2, 2, 2, 1]
+      [2, 2, 2, 2, 1],
     ]);
   });
 
@@ -134,8 +145,15 @@ describe('testing basic routines', () => {
   });
 
   it('removes straights from a list of hands', () => {
-    let handslist = [[1, 2, 3, 4, 5], [0, 0, 0, 1, 1], [1, 1, 3, 4, 4]];
-    expect(removeStraights(handslist)).toEqual([[0, 0, 0, 1, 1], [1, 1, 3, 4, 4]]);
+    let handslist = [
+      [1, 2, 3, 4, 5],
+      [0, 0, 0, 1, 1],
+      [1, 1, 3, 4, 4],
+    ];
+    expect(removeStraights(handslist)).toEqual([
+      [0, 0, 0, 1, 1],
+      [1, 1, 3, 4, 4],
+    ]);
   });
 
   it('returns 0 if values are equals 1 if first is bigger, -1 otherwise', () => {
@@ -146,11 +164,7 @@ describe('testing basic routines', () => {
 
   it('filters 5 winning cards from a set of >5 ', () => {
     expect(filterWinningCards([11, 24, 37, 50, 10, 23, 36], [10, 10, 10, 11, 11])).toEqual([
-      11,
-      24,
-      10,
-      23,
-      36
+      11, 24, 10, 23, 36,
     ]);
   });
 });
@@ -165,7 +179,7 @@ describe('ranking calculators and hashes managers', () => {
     FLUSH_HASHES: {},
     baseRankValues: [0, 1, 2],
     baseSuitValues: [0, 1, 2],
-    rankingInfos: []
+    rankingInfos: [],
   };
 
   it('should compute rank of hand given hash and hand list', () => {
@@ -186,7 +200,7 @@ describe('ranking calculators and hashes managers', () => {
     FLUSH_HASHES: {},
     baseRankValues: [0, 1, 2],
     baseSuitValues: [0, 1, 2],
-    rankingInfos: []
+    rankingInfos: [],
   };
 
   it('fills rank of 5 hi and hi low', () => {
@@ -222,14 +236,14 @@ describe('ranking calculators and hashes managers', () => {
       handGroup: ""
     };*/
     expect(fillRankFlushes([1, 1, 0], fakeRankingObj).FLUSH_RANK_HASHES).toEqual(
-      tempObj.FLUSH_RANK_HASHES
+      tempObj.FLUSH_RANK_HASHES,
     );
   });
 
-  it("gets flush name string given card rank", () => {
-    expect(getFlushSuitFromIndex(25)).toBe("diamonds");
-    expect(getFlushSuitFromIndex(5)).toBe("spades");
-    expect(getFlushSuitFromIndex(28)).toBe("hearts");
-    expect(getFlushSuitFromIndex(45)).toBe("clubs");
+  it('gets flush name string given card rank', () => {
+    expect(getFlushSuitFromIndex(25)).toBe('diamonds');
+    expect(getFlushSuitFromIndex(5)).toBe('spades');
+    expect(getFlushSuitFromIndex(28)).toBe('hearts');
+    expect(getFlushSuitFromIndex(45)).toBe('clubs');
   });
 });

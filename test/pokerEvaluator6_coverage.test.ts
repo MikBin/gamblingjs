@@ -23,7 +23,7 @@ import {
 import { fullCardsDeckHash_7 } from '../src/constants';
 
 // Helper to map indexes to hash cards for 6-card APIs
-const H = (...idx: number[]) => idx.map(i => fullCardsDeckHash_7[i]!);
+const H = (...idx: number[]) => idx.map((i) => fullCardsDeckHash_7[i]!);
 
 describe('pokerEvaluator6 fast (non-indexed) vs indexed parity', () => {
   it('handOfSixEval matches indexed for non-flush hand', () => {
@@ -43,13 +43,11 @@ describe('pokerEvaluator6 fast (non-indexed) vs indexed parity', () => {
   it('handOfSixEvalLowBall27 parity (non-flush and flush cases)', () => {
     const nonflush = [13, 1, 2, 3, 4, 5];
     expect(handOfSixEvalLowBall27(...H(...nonflush))).toBe(
-      handOfSixEvalLowBall27Indexed(...nonflush)
+      handOfSixEvalLowBall27Indexed(...nonflush),
     );
 
     const flush6 = [12, 11, 10, 9, 8, 7];
-    expect(handOfSixEvalLowBall27(...H(...flush6))).toBe(
-      handOfSixEvalLowBall27Indexed(...flush6)
-    );
+    expect(handOfSixEvalLowBall27(...H(...flush6))).toBe(handOfSixEvalLowBall27Indexed(...flush6));
   });
 
   it('handOfSixEvalAto6 parity', () => {
