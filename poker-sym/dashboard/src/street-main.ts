@@ -86,23 +86,85 @@ const dominantCat = (stats: { categories: Record<string, number> }): { name: str
   return { name: best, pct: bestPct };
 };
 
+// Sort state
+let sortKey = 'river-avg';
+let sortDir: 'desc' | 'asc' = 'desc';
+
+/** Extract numeric sort value from a hand result for a given sort key. */
+const sortValue = (h: StreetHandResult, key: string): number => {
+  switch (key) {
+    case 'flop-avg':
+      return h.flop.averageRank;
+    case 'flop-top':
+      return dominantCat(h.flop).pct;
+    case 'flop-hit':
+      return h.flop.realization.playabilityScore;
+    case 'turn-avg':
+      return h.turn.averageRank;
+    case 'turn-top':
+      return dominantCat(h.turn).pct;
+    case 'turn-hit':
+      return h.turn.realization.playabilityScore;
+    case 'river-avg':
+      return h.river.averageRank;
+    case 'river-top':
+      return dominantCat(h.river).pct;
+    case 'river-hit':
+      return h.river.realization.playabilityScore;
+    default:
+      return h.river.averageRank;
+  }
+};
+
+const SORT_KEYS = ['flop-avg', 'turn-avg', 'river-avg'];
+const SORT_LABELS: Record<string, string> = {
+  'flop-avg': 'Flop Avg',
+  'turn-avg': 'Turn Avg',
+  'river-avg': 'River Avg',
+};
+const SORT_ARROW: Record<string, string> = { desc: ' ▼', asc: ' ▲' };
+
 // Render summary table
 function renderSummaryTable(result: StreetAnalysisResult) {
+  // Build sorted index array
+  const indices = result.hands.map((_h, i) => i);
+  indices.sort((a, b) => {
+    const va = sortValue(result.hands[a]!, sortKey);
+    const vb = sortValue(result.hands[b]!, sortKey);
+    return sortDir === 'desc' ? vb - va : va - vb;
+  });
+
   let html = '<table><thead><tr>';
   html += '<th>#</th><th>Hand</th>';
-  html += '<th>Flop Avg</th><th>Flop Top</th><th>Flop Play%</th>';
-  html += '<th>Turn Avg</th><th>Turn Top</th><th>Turn Play%</th>';
-  html += '<th>River Avg</th><th>River Top</th><th>River Play%</th>';
+  for (const col of [
+    { key: 'flop-avg', label: 'Flop Avg', sortable: true },
+    { key: 'flop-top', label: 'Flop Top', sortable: false },
+    { key: 'flop-hit', label: 'Flop Hit%', sortable: false },
+    { key: 'turn-avg', label: 'Turn Avg', sortable: true },
+    { key: 'turn-top', label: 'Turn Top', sortable: false },
+    { key: 'turn-hit', label: 'Turn Hit%', sortable: false },
+    { key: 'river-avg', label: 'River Avg', sortable: true },
+    { key: 'river-top', label: 'River Top', sortable: false },
+    { key: 'river-hit', label: 'River Hit%', sortable: false },
+  ]) {
+    if (col.sortable) {
+      const arrow = sortKey === col.key ? SORT_ARROW[sortDir] : '';
+      html += `<th class="sortable" data-sort="${col.key}">${col.label}${arrow}</th>`;
+    } else {
+      html += `<th>${col.label}</th>`;
+    }
+  }
   html += '</tr></thead><tbody>';
 
-  for (let i = 0; i < result.hands.length; i++) {
+  for (let rank = 0; rank < indices.length; rank++) {
+    const i = indices[rank]!;
     const h = result.hands[i]!;
     const flopDom = dominantCat(h.flop);
     const turnDom = dominantCat(h.turn);
     const riverDom = dominantCat(h.river);
 
     html += `<tr data-idx="${i}">`;
-    html += `<td class="num">${i + 1}</td>`;
+    html += `<td class="num">${rank + 1}</td>`;
     html += `<td class="hand-cell">${h.hand}</td>`;
     html += `<td class="num">${h.flop.averageRank.toFixed(0)}</td>`;
     html += `<td>${flopDom.name} ${flopDom.pct.toFixed(0)}%</td>`;
@@ -118,6 +180,21 @@ function renderSummaryTable(result: StreetAnalysisResult) {
 
   html += '</tbody></table>';
   resultsDiv.innerHTML = html;
+
+  // Add sort handlers on headers
+  resultsDiv.querySelectorAll('th.sortable').forEach((th) => {
+    th.addEventListener('click', (e) => {
+      e.stopPropagation();
+      const key = (th as HTMLElement).dataset.sort!;
+      if (sortKey === key) {
+        sortDir = sortDir === 'desc' ? 'asc' : 'desc';
+      } else {
+        sortKey = key;
+        sortDir = 'desc';
+      }
+      renderSummaryTable(result);
+    });
+  });
 
   // Add click handlers for detail view
   resultsDiv.querySelectorAll('tr[data-idx]').forEach((tr) => {
@@ -179,7 +256,7 @@ function showDetail(idx: number) {
     html += `<div class="realization-row">`;
     html += `<div class="realization-chip"><span class="label">Improve:</span><span class="value">${stats.realization.improvementRate.toFixed(1)}%</span></div>`;
     html += `<div class="realization-chip"><span class="label">Nuts:</span><span class="value">${stats.realization.nutPercentage.toFixed(1)}%</span></div>`;
-    html += `<div class="realization-chip"><span class="label">Playability:</span><span class="value">${stats.realization.playabilityScore.toFixed(1)}%</span></div>`;
+    html += `<div class="realization-chip"><span class="label">Hit%:</span><span class="value">${stats.realization.playabilityScore.toFixed(1)}%</span></div>`;
     if (stats.realization.drawConversionRate > 0) {
       html += `<div class="realization-chip"><span class="label">Draw→:</span><span class="value">${stats.realization.drawConversionRate.toFixed(1)}%</span></div>`;
     }

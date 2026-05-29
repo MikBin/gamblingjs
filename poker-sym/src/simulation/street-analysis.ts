@@ -282,9 +282,10 @@ const buildStreetStats = (
   }
   const nutPercentage = (nutCount / n) * 100;
 
+  // Playability: % of runs where hand achieves one pair or better
   let playableCount = 0;
-  for (const r of ranks) {
-    if (r > median) playableCount++;
+  for (const idx of catIndices) {
+    if (idx >= 1) playableCount++; // one pair or better
   }
   const playabilityScore = (playableCount / n) * 100;
 
