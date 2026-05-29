@@ -9,6 +9,8 @@ import { handOfFiveEvalIndexed } from '../../src/pokerEvaluator5.js';
 import { fastHashesCreators } from '../../src/pokerHashes7.js';
 import { rankHoldemStartingHands } from './ranking/ranker.js';
 import { rankOmahaStartingHands } from './ranking/omaha-ranker.js';
+import { rankRazzStartingHands } from './ranking/razz-ranker.js';
+
 import { rankStreets } from './ranking/street-ranker.js';
 import { SimulationConfig, SimulationResult, HandStrengthResult } from './simulation/types.js';
 import { formatTable, formatJSON, formatCSV, formatMarkdown } from './output.js';
@@ -26,7 +28,7 @@ program
   .name('poker-sym')
   .description('Monte Carlo simulation for poker starting hand ranking (Hold\'em, Omaha)')
   .version('0.1.0')
-  .option('-g, --game <type>', 'game variant: holdem, omaha', 'holdem')
+  .option('-g, --game <type>', 'game variant: holdem, omaha, razz', 'holdem')
   .option('-n, --runs <number>', 'number of simulation runs per hand', '10000')
   .option('-o, --opponents <number>', 'number of opponents (0 = raw strength)', '0')
   .option('-s, --seed <number>', 'random seed for reproducibility')
@@ -91,6 +93,51 @@ program
           }
         });
       }
+
+      const elapsed = ((Date.now() - startTime) / 1000).toFixed(1);
+      process.stderr.write(`\n  Completed in ${elapsed}s\n`);
+
+      let output: string;
+      switch (format) {
+        case 'json':
+          output = formatJSON(result);
+          break;
+        case 'csv':
+          output = formatCSV(result);
+          break;
+        case 'md':
+          output = formatMarkdown(result);
+          break;
+        default:
+          output = formatTable(result);
+      }
+
+      if (outputFile) {
+        fs.writeFileSync(outputFile, output, 'utf-8');
+        console.error(`\nResults written to ${outputFile}`);
+      } else {
+        console.log(output);
+      }
+    } else if (game === 'razz') {
+      if (streetMode) {
+        console.error('Street analysis for Razz is not yet supported.');
+        process.exit(1);
+      }
+
+      console.error(
+        `Running Razz preflop simulation...\n` +
+          `  Hands: 455 | Runs/hand: ${config.runs} | Opponents: ${config.opponents}`
+      );
+
+      // Initialize low hash tables for Razz
+      fastHashesCreators.Ato5();
+
+      const result = rankRazzStartingHands(config, (completed, total, hand) => {
+        if (completed % 10 === 0 || completed === total) {
+          const pct = ((completed / total) * 100).toFixed(0);
+          process.stderr.write(`\r  Progress: ${completed}/${total} (${pct}%) — ${hand}    `);
+        }
+      });
 
       const elapsed = ((Date.now() - startTime) / 1000).toFixed(1);
       process.stderr.write(`\n  Completed in ${elapsed}s\n`);
