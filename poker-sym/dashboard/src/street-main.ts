@@ -138,13 +138,10 @@ function renderSummaryTable(result: StreetAnalysisResult) {
   html += '<th>#</th><th>Hand</th>';
   for (const col of [
     { key: 'flop-avg', label: 'Flop Avg', sortable: true },
-    { key: 'flop-top', label: 'Flop Top', sortable: false },
     { key: 'flop-hit', label: 'Flop Hit%', sortable: false },
     { key: 'turn-avg', label: 'Turn Avg', sortable: true },
-    { key: 'turn-top', label: 'Turn Top', sortable: false },
     { key: 'turn-hit', label: 'Turn Hit%', sortable: false },
     { key: 'river-avg', label: 'River Avg', sortable: true },
-    { key: 'river-top', label: 'River Top', sortable: false },
     { key: 'river-hit', label: 'River Hit%', sortable: false },
   ]) {
     if (col.sortable) {
@@ -159,21 +156,15 @@ function renderSummaryTable(result: StreetAnalysisResult) {
   for (let rank = 0; rank < indices.length; rank++) {
     const i = indices[rank]!;
     const h = result.hands[i]!;
-    const flopDom = dominantCat(h.flop);
-    const turnDom = dominantCat(h.turn);
-    const riverDom = dominantCat(h.river);
 
     html += `<tr data-idx="${i}">`;
     html += `<td class="num">${rank + 1}</td>`;
     html += `<td class="hand-cell">${h.hand}</td>`;
     html += `<td class="num">${h.flop.averageRank.toFixed(0)}</td>`;
-    html += `<td>${flopDom.name} ${flopDom.pct.toFixed(0)}%</td>`;
     html += `<td class="num">${h.flop.realization.playabilityScore.toFixed(0)}%</td>`;
     html += `<td class="num">${h.turn.averageRank.toFixed(0)}</td>`;
-    html += `<td>${turnDom.name} ${turnDom.pct.toFixed(0)}%</td>`;
     html += `<td class="num">${h.turn.realization.playabilityScore.toFixed(0)}%</td>`;
     html += `<td class="num">${h.river.averageRank.toFixed(0)}</td>`;
-    html += `<td>${riverDom.name} ${riverDom.pct.toFixed(0)}%</td>`;
     html += `<td class="num">${h.river.realization.playabilityScore.toFixed(0)}%</td>`;
     html += '</tr>';
   }
