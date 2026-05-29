@@ -4,6 +4,7 @@ import fs from 'fs';
 import os from 'os';
 import { Worker } from 'worker_threads';
 import { HighEvaluator } from '../../src/core/HighEvaluator.js';
+import { Low8Evaluator } from '../../src/core/LowEvaluator.js';
 import { OmahaEvaluator } from '../../src/core/OmahaEvaluator.js';
 import { handOfFiveEvalIndexed } from '../../src/pokerEvaluator5.js';
 import { fastHashesCreators } from '../../src/pokerHashes7.js';
@@ -13,6 +14,7 @@ import { rankStudStartingHands } from './ranking/stud-ranker.js';
 import { rankOmahaHiLoStartingHands } from './ranking/omaha-hilo-ranker.js';
 import { rankRazzStartingHands } from './ranking/razz-ranker.js';
 import { rankStreets } from './ranking/street-ranker.js';
+import { rankStudHiLoStartingHands } from './ranking/stud-hilo-ranker.js';
 import { SimulationConfig, SimulationResult, HandStrengthResult } from './simulation/types.js';
 import { formatTable, formatJSON, formatCSV, formatMarkdown } from './output.js';
 import {
@@ -27,9 +29,9 @@ const program = new Command();
 
 program
   .name('poker-sym')
-  .description('Monte Carlo simulation for poker starting hand ranking (Hold\'em, Omaha, Omaha Hi/Lo, 7-Card Stud, Razz)')
+  .description('Monte Carlo simulation for poker starting hand ranking (Hold\'em, Omaha, Omaha Hi/Lo, 7-Card Stud, Stud Hi/Lo, Razz)')
   .version('0.1.0')
-  .option('-g, --game <type>', 'game variant: holdem, omaha, omaha-hi-lo, stud, 7card-stud, razz', 'holdem')
+  .option('-g, --game <type>', 'game variant: holdem, omaha, omaha-hi-lo, stud, 7card-stud, stud-hi-lo, razz', 'holdem')
   .option('-n, --runs <number>', 'number of simulation runs per hand', '10000')
   .option('-o, --opponents <number>', 'number of opponents (0 = raw strength)', '0')
   .option('-s, --seed <number>', 'random seed for reproducibility')
@@ -43,7 +45,7 @@ program
     const isDefaultRuns = runsOption === '10000';
 
     const config: SimulationConfig = {
-      runs: ((game === 'omaha' || game === 'omaha-hi-lo') && isDefaultRuns) ? 1000 : parseInt(runsOption, 10),
+      runs: ((game === 'omaha' || game === 'omaha-hi-lo' || game === 'stud-hi-lo') && isDefaultRuns) ? 1000 : parseInt(runsOption, 10),
       opponents: parseInt(options.opponents, 10),
       seed: options.seed ? parseInt(options.seed, 10) : undefined,
       useCache: true,
@@ -56,7 +58,7 @@ program
 
     // Initialize hash tables (required before evaluation)
     fastHashesCreators.high();
-    if (game === 'omaha-hi-lo') {
+    if (game === 'omaha-hi-lo' || game === 'stud-hi-lo') {
       fastHashesCreators.low8();
     }
 
@@ -95,6 +97,49 @@ program
           }
         });
       }
+
+      const elapsed = ((Date.now() - startTime) / 1000).toFixed(1);
+      process.stderr.write(`\n  Completed in ${elapsed}s\n`);
+
+      let output: string;
+      switch (format) {
+        case 'json':
+          output = formatJSON(result);
+          break;
+        case 'csv':
+          output = formatCSV(result);
+          break;
+        case 'md':
+          output = formatMarkdown(result);
+          break;
+        default:
+          output = formatTable(result);
+      }
+
+      if (outputFile) {
+        fs.writeFileSync(outputFile, output, 'utf-8');
+        console.error(`\nResults written to ${outputFile}`);
+      } else {
+        console.log(output);
+      }
+    } else if (game === 'stud-hi-lo') {
+      if (streetMode) {
+        console.error('Street analysis for Stud Hi/Lo is not supported.');
+        process.exit(1);
+      }
+
+      console.error(
+        `Running Stud Hi/Lo simulation...\n` +
+          `  Hands: 1,755 | Runs/hand: ${config.runs} | Opponents: ${config.opponents}`
+      );
+
+      const lowEvaluator = new Low8Evaluator();
+      const result = rankStudHiLoStartingHands(evaluator, lowEvaluator, config, (completed, total, hand) => {
+        if (completed % 10 === 0 || completed === total) {
+          const pct = ((completed / total) * 100).toFixed(0);
+          process.stderr.write(`\r  Progress: ${completed}/${total} (${pct}%) — ${hand}    `);
+        }
+      });
 
       const elapsed = ((Date.now() - startTime) / 1000).toFixed(1);
       process.stderr.write(`\n  Completed in ${elapsed}s\n`);
