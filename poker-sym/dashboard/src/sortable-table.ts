@@ -32,8 +32,8 @@ export function makeSortable(table: HTMLTableElement): void {
       rows.sort((a, b) => {
         const aCell = a.querySelectorAll('td')[colIndex] as HTMLTableCellElement | undefined;
         const bCell = b.querySelectorAll('td')[colIndex] as HTMLTableCellElement | undefined;
-        const aVal = aCell ? parseFloat(aCell.dataset.value ?? '0') : 0;
-        const bVal = bCell ? parseFloat(bCell.dataset.value ?? '0') : 0;
+        const aVal = aCell ? parseFloat(aCell.dataset.value ?? '') : NaN;
+        const bVal = bCell ? parseFloat(bCell.dataset.value ?? '') : NaN;
 
         // NaN values (e.g. "—" cells with no data-value) always sort to the bottom
         const aNaN = isNaN(aVal);
