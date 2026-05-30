@@ -147,7 +147,7 @@ export interface StreetHandResult {
 
 /** Full street analysis result for all 169 hands. */
 export interface StreetAnalysisResult {
-  gameType: 'texas-holdem';
+  gameType: string;
   config: {
     runs: number;
     opponents: number;
