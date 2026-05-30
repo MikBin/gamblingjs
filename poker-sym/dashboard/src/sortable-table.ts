@@ -34,6 +34,14 @@ export function makeSortable(table: HTMLTableElement): void {
         const bCell = b.querySelectorAll('td')[colIndex] as HTMLTableCellElement | undefined;
         const aVal = aCell ? parseFloat(aCell.dataset.value ?? '0') : 0;
         const bVal = bCell ? parseFloat(bCell.dataset.value ?? '0') : 0;
+
+        // NaN values (e.g. "—" cells with no data-value) always sort to the bottom
+        const aNaN = isNaN(aVal);
+        const bNaN = isNaN(bVal);
+        if (aNaN && bNaN) return 0;
+        if (aNaN) return 1;
+        if (bNaN) return -1;
+
         return dir === 'desc' ? bVal - aVal : aVal - bVal;
       });
 

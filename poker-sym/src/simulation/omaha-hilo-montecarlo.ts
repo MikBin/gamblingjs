@@ -88,7 +88,7 @@ const simulateWithOpponents = (
   deck: number[],
   rng: SeedableRNG,
   numOpponents: number,
-): { winHi: number; winLo: number; scoop: boolean; rank: number } => {
+): { winHi: number; winLo: number; scoop: boolean; rank: number; lowRank: number } => {
   // Shuffle remaining deck
   const d = [...deck];
   for (let i = d.length - 1; i > 0; i--) {
@@ -155,7 +155,8 @@ const simulateWithOpponents = (
     winHi,
     winLo,
     scoop: totalEquity === 1.0,
-    rank: ourScore.hi
+    rank: ourScore.hi,
+    lowRank: ourScore.low,
   };
 };
 
@@ -171,14 +172,28 @@ export const simulateOmahaHiLoHand = (
   const numOpponents = config.opponents;
 
   if (numOpponents <= 0) {
-    // Raw strength: just average the hand ranks
+    // Raw strength: average the hand ranks (hi and lo separately)
     let totalRank = 0;
+    let totalLowRank = 0;
+    let validLowRuns = 0;
     for (let i = 0; i < config.runs; i++) {
-      totalRank += simulateSingleRun(hand.cards, deck, rng);
+      const d = [...deck];
+      for (let j = d.length - 1; j > 0; j--) {
+        const k = rng.nextInt(j + 1);
+        [d[j], d[k]] = [d[k]!, d[j]!];
+      }
+      const board = d.slice(0, 5);
+      const score = bestOmahaHiLoHand(hand.cards, board);
+      totalRank += score.hi;
+      if (score.low !== -1) {
+        totalLowRank += score.low;
+        validLowRuns++;
+      }
     }
     return {
       key: hand.key,
       averageRank: totalRank / config.runs,
+      averageLowRank: validLowRuns > 0 ? totalLowRank / validLowRuns : undefined,
       winPct: 0,
       tiePct: 0,
       winHiPct: 0,
@@ -193,12 +208,19 @@ export const simulateOmahaHiLoHand = (
   let totalLoWins = 0;
   let totalScoops = 0;
   let totalRank = 0;
+  let totalLowRank = 0;
+  let validLowRuns = 0;
   let overallWins = 0;
   let overallTies = 0;
 
   for (let i = 0; i < config.runs; i++) {
     const result = simulateWithOpponents(hand.cards, deck, rng, numOpponents);
     totalRank += result.rank;
+
+    if (result.lowRank !== -1) {
+      totalLowRank += result.lowRank;
+      validLowRuns++;
+    }
 
     totalHiWins += result.winHi;
     totalLoWins += result.winLo;
@@ -211,6 +233,7 @@ export const simulateOmahaHiLoHand = (
   return {
     key: hand.key,
     averageRank: totalRank / config.runs,
+    averageLowRank: validLowRuns > 0 ? totalLowRank / validLowRuns : undefined,
     winPct: (overallWins / config.runs) * 100, // WinPct = Scoop pct for compatibility
     tiePct: (overallTies / config.runs) * 100, // TiePct = Partial win/tie
     winHiPct: (totalHiWins / config.runs) * 100,

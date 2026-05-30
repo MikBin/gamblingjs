@@ -109,7 +109,8 @@ function renderResults(result: SimulationResult) {
     html += '<th class="sortable">Win Lo%<span class="sort-indicator"> ↕</span></th>';
     html += '<th class="sortable">Scoop%<span class="sort-indicator"> ↕</span></th>';
   }
-  html += '<th class="sortable">Avg Rank<span class="sort-indicator"> ↕</span></th>';
+  html += '<th class="sortable">Hi Avg Rank<span class="sort-indicator"> ↕</span></th>';
+  html += '<th class="sortable">Lo Avg Rank<span class="sort-indicator"> ↕</span></th>';
   html += '</tr></thead><tbody>';
 
   for (const h of tiered) {
@@ -118,6 +119,7 @@ function renderResults(result: SimulationResult) {
     const winHi = h.winHiPct ?? h.winPct;
     const winLo = h.winLoPct ?? 0;
     const scoop = h.scoopPct ?? 0;
+    const loAvgRank = h.averageLowRank;
 
     html += '<tr class="tier-' + tierNum + '">';
     html += '<td data-value="' + h.rank + '">' + h.rank + '</td>';
@@ -129,6 +131,7 @@ function renderResults(result: SimulationResult) {
       html += '<td data-value="' + scoop + '">' + scoop.toFixed(2) + '%</td>';
     }
     html += '<td data-value="' + h.averageRank + '">' + h.averageRank.toFixed(1) + '</td>';
+    html += '<td' + (loAvgRank != null ? ' data-value="' + loAvgRank + '"' : '') + '>' + (loAvgRank != null ? loAvgRank.toFixed(1) : '—') + '</td>';
     html += '</tr>';
   }
 

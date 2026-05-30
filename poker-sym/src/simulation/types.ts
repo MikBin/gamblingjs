@@ -27,6 +27,8 @@ export interface HandStrengthResult {
 
   // ─── Split-Pot / Hi-Lo Metrics ───────────────────────────────────
 
+  /** Average low hand rank across runs where a low qualified (skip runs with no low) */
+  averageLowRank?: number;
   /** Combined equity percentage (0-100) */
   equity?: number;
   /** High hand win percentage (0-100) */

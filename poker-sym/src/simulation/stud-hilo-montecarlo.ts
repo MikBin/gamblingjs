@@ -48,7 +48,7 @@ const simulateWithOpponents = (
   rng: SeedableRNG,
   evaluator: StudHiLoEvaluator,
   numOpponents: number,
-): { equity: number; scoop: number; highWin: number; lowWin: number; highRank: number } => {
+): { equity: number; scoop: number; highWin: number; lowWin: number; highRank: number; lowRank: number } => {
   const d = [...deck];
   for (let i = d.length - 1; i > 0; i--) {
     const j = rng.nextInt(i + 1);
@@ -134,7 +134,7 @@ const simulateWithOpponents = (
 
   const scoop = (highWinShare === 1 && (!anyLowQualifies || lowWinShare === 1)) ? 1 : 0;
 
-  return { equity, scoop, highWin: highWinShare, lowWin: lowWinShare, highRank: ourHigh };
+  return { equity, scoop, highWin: highWinShare, lowWin: lowWinShare, highRank: ourHigh, lowRank: ourLow };
 };
 
 export const simulateStudHiLoHand = (
@@ -152,17 +152,24 @@ export const simulateStudHiLoHand = (
 
   if (numOpponents <= 0) {
     let totalRank = 0;
+    let totalLowRank = 0;
     let validRuns = 0;
+    let validLowRuns = 0;
     for (let i = 0; i < config.runs; i++) {
-      const { highRank } = simulateSingleRun(hand.cards, deck, rng, evaluator);
+      const { highRank, lowRank } = simulateSingleRun(hand.cards, deck, rng, evaluator);
       if (highRank > 0) {
         totalRank += highRank;
         validRuns++;
+      }
+      if (lowRank !== -1) {
+        totalLowRank += lowRank;
+        validLowRuns++;
       }
     }
     return {
       key: hand.key,
       averageRank: validRuns > 0 ? totalRank / validRuns : 0,
+      averageLowRank: validLowRuns > 0 ? totalLowRank / validLowRuns : undefined,
       winPct: 0,
       tiePct: 0,
       runs: config.runs,
@@ -178,7 +185,9 @@ export const simulateStudHiLoHand = (
   let totalHighWins = 0;
   let totalLowWins = 0;
   let totalHighRank = 0;
+  let totalLowRank = 0;
   let validRuns = 0;
+  let validLowRuns = 0;
   let totalTies = 0;
 
   for (let i = 0; i < config.runs; i++) {
@@ -189,6 +198,10 @@ export const simulateStudHiLoHand = (
       totalHighWins += r.highWin;
       totalLowWins += r.lowWin;
       totalHighRank += r.highRank;
+      if (r.lowRank !== -1) {
+        totalLowRank += r.lowRank;
+        validLowRuns++;
+      }
       if (r.equity > 0 && r.equity < 1 && r.highWin < 1 && r.lowWin < 1) {
         totalTies++;
       }
@@ -201,6 +214,7 @@ export const simulateStudHiLoHand = (
   return {
     key: hand.key,
     averageRank: totalHighRank / validRuns,
+    averageLowRank: validLowRuns > 0 ? totalLowRank / validLowRuns : undefined,
     winPct: (totalEquity / validRuns) * 100,
     tiePct: (totalTies / validRuns) * 100,
     runs: config.runs,
