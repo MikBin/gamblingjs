@@ -31,7 +31,7 @@ export const categoryByRank = (rank: number): HandCategoryName => {
 };
 
 /** Category index for a rank (0 = high card, ..., 8 = straight flush). */
-const categoryIndex = (rank: number): number => {
+export const categoryIndex = (rank: number): number => {
   let i = 0;
   while (i < CATEGORY_THRESHOLDS.length - 1 && rank > CATEGORY_THRESHOLDS[i]!) {
     i++;
@@ -74,7 +74,7 @@ export type SevenCardEvalFn = (
  * Evaluate best 5-card hand from 6 cards.
  * Tests all C(6,5) = 6 combinations, returns the best rank.
  */
-const bestOfSix = (cards: number[], eval5: FiveCardEvalFn): number => {
+export const bestOfSix = (cards: number[], eval5: FiveCardEvalFn): number => {
   let best = -1;
   // Skip index i to get a 5-card hand from 6 cards
   for (let i = 0; i < 6; i++) {
@@ -235,7 +235,7 @@ const buildTextureEquity = (
 };
 
 /** Build street stats from per-run data. */
-const buildStreetStats = (
+export const buildStreetStats = (
   ranks: number[],
   catIndices: number[],
   textures: BoardTexture[],
