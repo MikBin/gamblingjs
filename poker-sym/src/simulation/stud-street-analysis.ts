@@ -44,29 +44,46 @@ interface RunData {
 }
 
 /**
- * Get the best 5-card rank from a subset of cards.
- * If less than 5 cards, it pads with bad cards just to get a valid rank category.
- * Actually, hold on. We only need "best 5 cards from 5 cards" for 5th street,
- * "best 5 cards from 6 cards" for 6th street,
- * "best 5 cards from 7 cards" for 7th street.
- * What about 3rd and 4th street?
- * Let's evaluate using dummy cards to make 5, but ensure they don't pair or make flushes.
- * E.g., pad with indices 52, 53, etc., but the evaluator might throw if out of bounds.
- * Actually, evaluating less than 5 cards doesn't fit standard evaluators.
- * How do we handle 3rd and 4th street ranks? We can pad them with the worst cards that don't help.
+ * Pad a partial hand to 5 cards for evaluation on early streets (3rd/4th).
+ *
+ * Strategy: use the worst possible filler cards that won't artificially improve
+ * the hand. We use low-ranked cards from ranks NOT present in the hand, and
+ * spread them across suits to avoid flush/straight contributions.
+ *
+ * Card encoding: index = suit * 13 + rank
+ *   suit: 0=spades, 1=diamonds, 2=hearts, 3=clubs
+ *   rank: 0=2, 1=3, ..., 8=T, 9=J, 10=Q, 11=K, 12=A
  */
-
-// Let's pad with 2c, 3d, 4h, 5s (indices 0, 14, 28, 42) if they aren't in the hand.
-const padToFive = (cards: number[]): number[] => {
+export const padToFive = (cards: number[]): number[] => {
   const result = [...cards];
-  const padding = [0, 14, 28, 42, 1, 15, 29]; // 2c, 3d, 4h, 5s, 3c, 4d, 5h
+  const presentRanks = new Set(cards.map((c) => c % 13));
+
+  // Candidate ranks to use for padding: iterate from rank 0 (deuce) upward.
+  // These are the worst ranks — they produce the lowest high-hand values.
+  // Pick one card per rank, cycling through suits.
   let i = 0;
   while (result.length < 5) {
-    if (!result.includes(padding[i]!)) {
-      result.push(padding[i]!);
+    const rank = i % 13;
+    const suit = Math.floor(i / 13) % 4;
+    const candidate = suit * 13 + rank;
+
+    // Skip if this card is already in the hand or if the rank is already
+    // present (to prevent pairing). Also skip if already added as padding.
+    if (
+      !cards.includes(candidate) &&
+      !presentRanks.has(rank) &&
+      !result.includes(candidate)
+    ) {
+      result.push(candidate);
+      // Don't add rank to presentRanks — the padding rank itself shouldn't
+      // block further padding with a different suit of the same rank.
+      // But we do need to avoid duplicates:
+      presentRanks.add(rank);
     }
     i++;
+    if (i >= 52) break; // safety: no infinite loop
   }
+
   return result;
 };
 

@@ -59,8 +59,12 @@ const lowRankValue = (card: number): number => {
  * and returns the category index (higher = better hand).
  *
  * Index 8 = Wheel (5-low), Index 0 = K-low
+ *
+ * For partial hands (3 or 4 cards), categorizes based on the highest
+ * existing card value — representing the best-possible qualifier for
+ * the eventual 5-card low.
  */
-const razzLowCategory = (cards: number[]): number => {
+export const razzLowCategory = (cards: number[]): number => {
   // Get unique rank values
   const seen = new Set<number>();
   const lowValues: number[] = [];
@@ -73,33 +77,56 @@ const razzLowCategory = (cards: number[]): number => {
   }
   lowValues.sort((a, b) => a - b);
 
-  if (lowValues.length < 5) {
-    return 0; // Can't make 5-card low → worst category
+  if (lowValues.length >= 5) {
+    // Full 5+ card hand: take 5 lowest distinct ranks
+    const maxLowValue = lowValues[4]!;
+    if (maxLowValue <= 4) return 8; // Wheel
+    return 12 - maxLowValue;
   }
 
-  // Take 5 lowest distinct ranks
-  const maxLowValue = lowValues[4]!;
-
-  // Map to inverted category index (higher = better)
-  // maxLowValue 0-4 → Wheel (5-low) → index 8
-  // maxLowValue 5 → 6-low → index 7
-  // ...
-  // maxLowValue 12 → K-low → index 0
-  if (maxLowValue <= 4) return 8; // Wheel
-  return 12 - maxLowValue;
+  // Partial hand (3 or 4 cards): categorize by highest existing card.
+  // This represents the best achievable qualifier for the eventual 5-card low.
+  // e.g., [A, 2, 3] → highest is 3 → strong category (near Wheel)
+  //       [K, Q, J] → highest is J(9) → weak category
+  const maxLowValue = lowValues[lowValues.length - 1]!;
+  return Math.min(8, Math.max(0, 12 - maxLowValue));
 };
 
-// Pad with low cards that don't improve the hand for early streets
-const padToFive = (cards: number[]): number[] => {
+/**
+ * Pad a partial Razz hand to 5 cards for rank evaluation on early streets.
+ *
+ * Strategy: use the worst possible cards for a low hand — high ranks (K, Q, J, T)
+ * from suits NOT already represented, and ranks NOT already present.
+ * This ensures padding never artificially improves the low value.
+ *
+ * Card encoding: index = suit * 13 + rank
+ *   suit: 0=spades, 1=diamonds, 2=hearts, 3=clubs
+ *   rank: 0=2, 1=3, ..., 8=T, 9=J, 10=Q, 11=K, 12=A
+ */
+export const razzPadToFive = (cards: number[]): number[] => {
   const result = [...cards];
-  const padding = [0, 14, 28, 42, 1, 15, 29];
-  let i = 0;
-  while (result.length < 5) {
-    if (!result.includes(padding[i]!)) {
-      result.push(padding[i]!);
+  const presentRanks = new Set(cards.map((c) => c % 13));
+
+  // Candidate ranks to use for padding: iterate from rank 11 (King) downward.
+  // Kings, Queens, Jacks, Tens are the worst cards for Razz (lowball).
+  // For each rank, try all 4 suits, picking the first one not in the hand.
+  const worstRanks = [11, 10, 9, 8, 7, 6, 5, 4, 3, 2, 1, 0, 12]; // K, Q, J, T, 9, ..., 2, A
+
+  for (const rank of worstRanks) {
+    if (presentRanks.has(rank)) continue;
+    if (result.length >= 5) break;
+
+    // Find a suit for this rank that isn't already in the hand
+    for (let suit = 0; suit < 4; suit++) {
+      const candidate = suit * 13 + rank;
+      if (!cards.includes(candidate)) {
+        result.push(candidate);
+        presentRanks.add(rank);
+        break;
+      }
     }
-    i++;
   }
+
   return result;
 };
 
@@ -140,7 +167,7 @@ const simulateSingleRazzStreetRun = (
 
   // Third street (3 cards) — pad to 5 for rank evaluation
   const thirdCards = [...holeCards];
-  const thirdPad = padToFive(thirdCards);
+  const thirdPad = razzPadToFive(thirdCards);
   const thirdRank = eval5(thirdPad[0]!, thirdPad[1]!, thirdPad[2]!, thirdPad[3]!, thirdPad[4]!);
   const thirdTexture = primaryTexture(thirdCards);
   const thirdCatIdx = razzLowCategory(thirdCards);
@@ -151,7 +178,7 @@ const simulateSingleRazzStreetRun = (
 
   // Fourth street (4 cards) — pad to 5
   const fourthCards = [...holeCards, board[0]!];
-  const fourthPad = padToFive(fourthCards);
+  const fourthPad = razzPadToFive(fourthCards);
   const fourthRank = eval5(fourthPad[0]!, fourthPad[1]!, fourthPad[2]!, fourthPad[3]!, fourthPad[4]!);
   const fourthTexture = primaryTexture(fourthCards);
   const fourthCatIdx = razzLowCategory(fourthCards);
