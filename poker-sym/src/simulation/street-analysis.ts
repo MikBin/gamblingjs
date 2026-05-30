@@ -379,3 +379,116 @@ export const analyzeHandStreets = (
     river: buildStreetStats(riverRanks, riverCatIndices, turnTextures, turnCatIndices, null, false),
   };
 };
+
+/**
+ * Evaluate best Omaha hand from 4 hole cards + 3, 4, or 5 board cards.
+ * Must use exactly 2 from hole cards and 3 from board.
+ */
+const bestOmahaOfN = (holeCards: number[], boardCards: number[], eval5: FiveCardEvalFn): number => {
+  let best = -1;
+  // Combinations of 2 from 4 hole cards
+  for (let i = 0; i < 4; i++) {
+    for (let j = i + 1; j < 4; j++) {
+      const h1 = holeCards[i]!;
+      const h2 = holeCards[j]!;
+
+      // Combinations of 3 from N board cards
+      for (let b1 = 0; b1 < boardCards.length; b1++) {
+        for (let b2 = b1 + 1; b2 < boardCards.length; b2++) {
+          for (let b3 = b2 + 1; b3 < boardCards.length; b3++) {
+            const rank = eval5(h1, h2, boardCards[b1]!, boardCards[b2]!, boardCards[b3]!);
+            if (rank > best) best = rank;
+          }
+        }
+      }
+    }
+  }
+  return best;
+};
+
+/**
+ * Run a single Monte Carlo simulation for Omaha street analysis.
+ */
+const simulateSingleOmahaStreetRun = (
+  holeCards: number[],
+  deck: number[],
+  rng: SeedableRNG,
+  eval5: FiveCardEvalFn,
+): RunData => {
+  const d = [...deck];
+  for (let i = d.length - 1; i > 0; i--) {
+    const j = rng.nextInt(i + 1);
+    [d[i], d[j]] = [d[j]!, d[i]!];
+  }
+
+  const board = d.slice(0, 5);
+
+  // --- Flop: 4 hole + 3 board ---
+  const flopBoard = board.slice(0, 3);
+  const flopRank = bestOmahaOfN(holeCards, flopBoard, eval5);
+  const flopTexture = primaryTexture(flopBoard);
+  const flopCatIdx = categoryIndex(flopRank);
+
+  // --- Turn: 4 hole + 4 board ---
+  const turnBoard = board.slice(0, 4);
+  const turnRank = bestOmahaOfN(holeCards, turnBoard, eval5);
+  const turnTexture = primaryTexture(turnBoard);
+  const turnCatIdx = categoryIndex(turnRank);
+
+  // --- River: 4 hole + 5 board ---
+  const riverRank = bestOmahaOfN(holeCards, board, eval5);
+  const riverCatIdx = categoryIndex(riverRank);
+
+  return {
+    flopRank,
+    turnRank,
+    riverRank,
+    flopTexture,
+    turnTexture,
+    flopCategoryIdx: flopCatIdx,
+    turnCategoryIdx: turnCatIdx,
+    riverCategoryIdx: riverCatIdx,
+  };
+};
+
+/**
+ * Run multi-street analysis for a single Omaha starting hand.
+ */
+export const analyzeOmahaHandStreets = (
+  hand: HandGroup,
+  runs: number,
+  eval5: FiveCardEvalFn,
+  seed?: number,
+): StreetHandResult => {
+  const rng = new SeedableRNG(seed ?? Date.now());
+  const deck = makeDeck(hand.cards);
+
+  const flopRanks: number[] = [];
+  const turnRanks: number[] = [];
+  const riverRanks: number[] = [];
+  const flopTextures: BoardTexture[] = [];
+  const turnTextures: BoardTexture[] = [];
+  const flopCatIndices: number[] = [];
+  const turnCatIndices: number[] = [];
+  const riverCatIndices: number[] = [];
+
+  for (let i = 0; i < runs; i++) {
+    const run = simulateSingleOmahaStreetRun(hand.cards, deck, rng, eval5);
+
+    flopRanks.push(run.flopRank);
+    turnRanks.push(run.turnRank);
+    riverRanks.push(run.riverRank);
+    flopTextures.push(run.flopTexture);
+    turnTextures.push(run.turnTexture);
+    flopCatIndices.push(run.flopCategoryIdx);
+    turnCatIndices.push(run.turnCategoryIdx);
+    riverCatIndices.push(run.riverCategoryIdx);
+  }
+
+  return {
+    hand: hand.key,
+    flop: buildStreetStats(flopRanks, flopCatIndices, flopTextures, null, riverCatIndices, true),
+    turn: buildStreetStats(turnRanks, turnCatIndices, turnTextures, flopCatIndices, riverCatIndices, true),
+    river: buildStreetStats(riverRanks, riverCatIndices, turnTextures, turnCatIndices, null, false),
+  };
+};

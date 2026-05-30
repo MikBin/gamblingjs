@@ -19,29 +19,237 @@
     .nav a { color: #3b82f6; text-decoration: none; font-size: 0.85rem; }
     .nav a:hover { text-decoration: underline; }
 
-    .coming-soon {
-      max-width: 500px;
-      margin: 4rem auto;
-      text-align: center;
+    .controls {
+      max-width: 700px;
+      margin: 0 auto 1.5rem;
+      display: flex;
+      gap: 1rem;
+      align-items: end;
+      flex-wrap: wrap;
+      justify-content: center;
     }
-    .coming-soon-icon { font-size: 4rem; margin-bottom: 1rem; }
-    .coming-soon h2 { font-size: 1.5rem; color: #f1f5f9; margin-bottom: 0.5rem; }
-    .coming-soon p { color: #94a3b8; line-height: 1.6; font-size: 0.95rem; }
-    .badge {
-      display: inline-block;
-      background: #8b5cf622;
-      color: #8b5cf6;
-      padding: 0.3rem 1rem;
-      border-radius: 999px;
-      font-size: 0.8rem;
+    .field { display: flex; flex-direction: column; gap: 0.25rem; }
+    .field label { font-size: 0.75rem; color: #94a3b8; text-transform: uppercase; letter-spacing: 0.05em; }
+    .field input {
+      background: #1e293b;
+      border: 1px solid #334155;
+      border-radius: 6px;
+      padding: 0.5rem 0.75rem;
+      color: #f1f5f9;
+      font-size: 1rem;
+      width: 120px;
+    }
+    .field input:focus { outline: none; border-color: #3b82f6; }
+
+    button#run {
+      background: #8b5cf6;
+      color: white;
+      border: none;
+      border-radius: 6px;
+      padding: 0.55rem 1.5rem;
+      font-size: 1rem;
+      cursor: pointer;
       font-weight: 600;
-      margin-top: 1.5rem;
+      transition: background 0.2s;
     }
+    button#run:hover { background: #7c3aed; }
+    button#run:disabled { background: #475569; cursor: not-allowed; }
+
+    .progress-container {
+      max-width: 700px;
+      margin: 0 auto 1rem;
+      display: none;
+    }
+    .progress-container.active { display: block; }
+    .progress-bar-bg {
+      background: #1e293b;
+      border-radius: 999px;
+      height: 8px;
+      overflow: hidden;
+    }
+    .progress-bar-fill {
+      background: #8b5cf6;
+      height: 100%;
+      width: 0%;
+      transition: width 0.15s;
+      border-radius: 999px;
+    }
+    .progress-text {
+      text-align: center;
+      font-size: 0.8rem;
+      color: #94a3b8;
+      margin-top: 0.25rem;
+    }
+
+    .init-status {
+      text-align: center;
+      font-size: 0.8rem;
+      color: #94a3b8;
+      margin-bottom: 0.5rem;
+    }
+    .init-status.ready { color: #22c55e; }
+
+    /* Summary Table */
+    .results-container {
+      max-width: 1100px;
+      margin: 0 auto;
+      overflow-x: auto;
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.8rem;
+    }
+    th {
+      background: #1e293b;
+      padding: 0.6rem 0.6rem;
+      text-align: left;
+      font-weight: 600;
+      color: #94a3b8;
+      text-transform: uppercase;
+      font-size: 0.65rem;
+      letter-spacing: 0.05em;
+      position: sticky;
+      top: 0;
+    }
+    th.sortable {
+      cursor: pointer;
+      user-select: none;
+    }
+    th.sortable:hover { color: #e2e8f0; }
+    td { padding: 0.4rem 0.6rem; border-bottom: 1px solid #1e293b; }
+    tr:hover td { background: #1e293b44; }
+    tr.selected td { background: #1e293b88; }
+    .hand-cell { font-weight: 700; font-family: 'Courier New', monospace; font-size: 0.95rem; cursor: pointer; }
+    .num { text-align: right; font-variant-numeric: tabular-nums; }
+
+    /* Detail Panel */
+    .detail-overlay {
+      display: none;
+      position: fixed;
+      top: 0; left: 0; right: 0; bottom: 0;
+      background: rgba(0,0,0,0.6);
+      z-index: 100;
+      justify-content: center;
+      align-items: center;
+    }
+    .detail-overlay.active { display: flex; }
+    .detail-panel {
+      background: #1e293b;
+      border-radius: 12px;
+      padding: 1.5rem 2rem;
+      max-width: 700px;
+      width: 90%;
+      max-height: 85vh;
+      overflow-y: auto;
+      position: relative;
+    }
+    .detail-close {
+      position: absolute;
+      top: 0.75rem;
+      right: 1rem;
+      background: none;
+      border: none;
+      color: #94a3b8;
+      font-size: 1.5rem;
+      cursor: pointer;
+    }
+    .detail-close:hover { color: #f1f5f9; }
+    .detail-hand { font-size: 1.5rem; font-weight: 700; font-family: 'Courier New', monospace; margin-bottom: 1rem; }
+
+    .street-section { margin-bottom: 1.5rem; }
+    .street-title {
+      font-size: 0.85rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      margin-bottom: 0.5rem;
+      padding-bottom: 0.25rem;
+      border-bottom: 1px solid #334155;
+    }
+    .street-title.flop-title { color: #22c55e; }
+    .street-title.turn-title { color: #eab308; }
+    .street-title.river-title { color: #3b82f6; }
+
+    .stat-row {
+      display: flex;
+      gap: 1.5rem;
+      margin-bottom: 0.25rem;
+      font-size: 0.8rem;
+    }
+    .stat-label { color: #94a3b8; min-width: 80px; }
+    .stat-value { font-weight: 600; font-variant-numeric: tabular-nums; }
+
+    /* Category bars */
+    .cat-bars { margin-top: 0.5rem; }
+    .cat-row {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      margin-bottom: 0.15rem;
+      font-size: 0.75rem;
+    }
+    .cat-name { min-width: 90px; color: #94a3b8; text-align: right; }
+    .cat-bar-bg {
+      flex: 1;
+      background: #0f172a;
+      height: 12px;
+      border-radius: 3px;
+      overflow: hidden;
+    }
+    .cat-bar-fill {
+      height: 100%;
+      border-radius: 3px;
+      transition: width 0.3s;
+    }
+    .cat-pct { min-width: 45px; text-align: right; font-variant-numeric: tabular-nums; }
+
+    .cat-fill-high-card { background: #64748b; }
+    .cat-fill-one-pair { background: #3b82f6; }
+    .cat-fill-two-pair { background: #22c55e; }
+    .cat-fill-three-of-a-kind { background: #84cc16; }
+    .cat-fill-straight { background: #eab308; }
+    .cat-fill-flush { background: #f97316; }
+    .cat-fill-full-house { background: #ef4444; }
+    .cat-fill-four-of-a-kind { background: #ec4899; }
+    .cat-fill-straight-flush { background: #a855f7; }
+
+    /* Equity curve mini-sparkline placeholder */
+    .realization-row {
+      display: flex;
+      gap: 1rem;
+      flex-wrap: wrap;
+      margin-top: 0.5rem;
+    }
+    .realization-chip {
+      background: #0f172a;
+      border-radius: 6px;
+      padding: 0.3rem 0.6rem;
+      font-size: 0.75rem;
+    }
+    .realization-chip .label { color: #94a3b8; }
+    .realization-chip .value { font-weight: 600; margin-left: 0.25rem; }
+
+    /* Texture breakdown */
+    .texture-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+      gap: 0.5rem;
+      margin-top: 0.5rem;
+    }
+    .texture-card {
+      background: #0f172a;
+      border-radius: 6px;
+      padding: 0.4rem 0.6rem;
+      font-size: 0.75rem;
+    }
+    .texture-name { color: #94a3b8; }
+    .texture-stat { font-weight: 600; font-variant-numeric: tabular-nums; }
   </style>
 </head>
 <body>
   <h1>♠ poker-sym — Street Analysis ♥</h1>
-  <p class="subtitle">Omaha Hi — Street-by-Street Analysis</p>
+  <p class="subtitle">Flop / Turn / River Evolution — Omaha Hi Starting Hands</p>
   <div class="nav">
     <a href="index.html">🏠 Home</a><span class="sep" style="color:#475569;margin:0 0.3rem">·</span>
     <a href="street.html">Hold'em</a><span class="sep" style="color:#475569;margin:0 0.3rem">·</span>
@@ -52,17 +260,36 @@
     <a href="street-razz.html">Razz</a>
   </div>
 
-  <div class="coming-soon">
-    <div class="coming-soon-icon">🌽</div>
-    <h2>Omaha Hi — Street Analysis</h2>
-    <p>Track how each Omaha Hi starting hand evolves through the Flop, Turn, and River with equity distributions, hand category breakdowns, and board texture analysis.</p>
-    <div class="badge">🚧 Coming Soon</div>
+  <div id="initStatus" class="init-status">Initializing evaluator...</div>
+
+  <div class="controls">
+    <div class="field">
+      <label for="runs">Runs / Hand</label>
+      <input type="number" id="runs" value="1000" min="100" max="100000" step="1000" />
+    </div>
+    <div class="field">
+      <label for="seed">Seed</label>
+      <input type="number" id="seed" value="" min="0" placeholder="random" />
+    </div>
+    <button id="run" disabled>Run Street Analysis</button>
   </div>
+
+  <div id="progressContainer" class="progress-container">
+    <div class="progress-bar-bg">
+      <div id="progressFill" class="progress-bar-fill"></div>
+    </div>
+    <div id="progressText" class="progress-text"></div>
+  </div>
+
+  <div id="results" class="results-container"></div>
+
+  <div id="detailOverlay" class="detail-overlay">
+    <div class="detail-panel">
+      <button class="detail-close" id="detailClose">&times;</button>
+      <div id="detailContent"></div>
+    </div>
+  </div>
+
+  <script type="module" src="/src/street-omaha-main.ts"></script>
 </body>
 </html>
-</task_progress>
-- [x] Create holdem.html (renamed from old index.html with updated nav)
-- [x] Create new dashboard landing page (`index.html`) with two cards
-- [x] Update navigation on all existing pages
-- [ ] Create 5 Coming Soon street analysis placeholder pages (1/5)
-</write_to_file>
