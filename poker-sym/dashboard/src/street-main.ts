@@ -73,7 +73,7 @@ function runStreetSimulation(runs: number, seed?: number): Promise<StreetAnalysi
 }
 
 // Find dominant category
-const dominantCat = (stats: { categories: Record<string, number> }): { name: string; pct: number } => {
+const dominantCat = (stats: { categories: Record<string, number> | any }): { name: string; pct: number } => {
   let best = 'high card';
   let bestPct = 0;
   for (const cat of HAND_CATEGORY_NAMES) {
@@ -199,7 +199,7 @@ function renderSummaryTable(result: StreetAnalysisResult) {
 // Render category bars for a street
 const catBarClass = (cat: string): string => `cat-fill-${cat.replace(/ /g, '-')}`;
 
-function renderCategoryBars(stats: { categories: Record<string, number> }): string {
+function renderCategoryBars(stats: { categories: Record<string, number> | any }): string {
   let html = '<div class="cat-bars">';
   for (const cat of HAND_CATEGORY_NAMES) {
     const pct = stats.categories[cat];
