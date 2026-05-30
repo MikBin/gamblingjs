@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>poker-sym — Stud Hi/Lo Starting Hand Ranking</title>
+  <title>poker-sym — Starting Hand Ranking — Hold'em</title>
   <style>
     * { margin: 0; padding: 0; box-sizing: border-box; }
     body {
@@ -84,7 +84,7 @@
     }
 
     .results-container {
-      max-width: 950px;
+      max-width: 800px;
       margin: 0 auto;
       overflow-x: auto;
     }
@@ -147,17 +147,16 @@
 </head>
 <body>
   <h1>♠ poker-sym ♥</h1>
-  <p class="subtitle">Monte Carlo Starting Hand Ranking — Stud Hi/Lo</p>
-
+  <p class="subtitle">Monte Carlo Starting Hand Ranking — Texas Hold'em</p>
   <div class="nav">
     <a href="index.html">🏠 Home</a><span class="sep">·</span>
-    <a href="holdem.html">Hold'em</a><span class="sep">·</span>
+    <strong style="color:#e2e8f0;font-size:0.85rem">Hold'em</strong><span class="sep">·</span>
     <a href="omaha.html">Omaha Hi</a><span class="sep">·</span>
     <a href="omaha-hi-lo.html">Omaha Hi/Lo</a><span class="sep">·</span>
     <a href="stud.html">Stud</a><span class="sep">·</span>
-    <strong style="color:#e2e8f0;font-size:0.85rem">Stud Hi/Lo</strong><span class="sep">·</span>
+    <a href="stud-hi-lo.html">Stud Hi/Lo</a><span class="sep">·</span>
     <a href="razz.html">Razz</a><span class="sep">·</span>
-    <a href="street.html">Street Analysis</a>
+    <a href="street.html" style="color:#8b5cf6">Street Analysis</a>
   </div>
 
   <div id="initStatus" class="init-status">Initializing evaluator...</div>
@@ -169,7 +168,7 @@
     </div>
     <div class="field">
       <label for="opponents">Opponents</label>
-      <input type="number" id="opponents" value="1" min="0" max="6" step="1" />
+      <input type="number" id="opponents" value="1" min="0" max="9" step="1" />
     </div>
     <button id="run" disabled>Run Simulation</button>
   </div>
@@ -183,6 +182,12 @@
 
   <div id="results" class="results-container"></div>
 
-  <script type="module" src="/src/stud-hi-lo-main.ts"></script>
+  <script type="module" src="/src/main.ts"></script>
 </body>
 </html>
+</task_progress>
+- [x] Create holdem.html (renamed from old index.html with updated nav)
+- [ ] Create new dashboard landing page (`index.html`) with two cards
+- [ ] Update navigation on all existing pages
+- [ ] Create 5 Coming Soon street analysis placeholder pages
+</write_to_file>

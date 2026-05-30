@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>poker-sym — Starting Hand Ranking</title>
+  <title>poker-sym — Dashboard</title>
   <style>
     * { margin: 0; padding: 0; box-sizing: border-box; }
     body {
@@ -12,170 +12,144 @@
       color: #e2e8f0;
       min-height: 100vh;
       padding: 2rem;
-    }
-    h1 { text-align: center; font-size: 1.5rem; margin-bottom: 0.25rem; color: #f1f5f9; }
-    .subtitle { text-align: center; color: #94a3b8; font-size: 0.85rem; margin-bottom: 1.5rem; }
-
-    .controls {
-      max-width: 600px;
-      margin: 0 auto 1.5rem;
       display: flex;
-      gap: 1rem;
-      align-items: end;
-      flex-wrap: wrap;
+      flex-direction: column;
+      align-items: center;
       justify-content: center;
     }
-    .field { display: flex; flex-direction: column; gap: 0.25rem; }
-    .field label { font-size: 0.75rem; color: #94a3b8; text-transform: uppercase; letter-spacing: 0.05em; }
-    .field input {
+    h1 { text-align: center; font-size: 2rem; margin-bottom: 0.25rem; color: #f1f5f9; }
+    .subtitle { text-align: center; color: #94a3b8; font-size: 0.9rem; margin-bottom: 3rem; }
+
+    .cards {
+      display: flex;
+      gap: 2rem;
+      flex-wrap: wrap;
+      justify-content: center;
+      max-width: 900px;
+      width: 100%;
+    }
+
+    .card {
       background: #1e293b;
       border: 1px solid #334155;
-      border-radius: 6px;
-      padding: 0.5rem 0.75rem;
-      color: #f1f5f9;
-      font-size: 1rem;
-      width: 120px;
+      border-radius: 16px;
+      padding: 2rem;
+      flex: 1;
+      min-width: 320px;
+      max-width: 420px;
+      transition: transform 0.2s, box-shadow 0.2s, border-color 0.2s;
     }
-    .field input:focus { outline: none; border-color: #3b82f6; }
+    .card:hover {
+      transform: translateY(-4px);
+      box-shadow: 0 8px 30px rgba(0, 0, 0, 0.3);
+    }
+    .card.ranking { border-top: 3px solid #3b82f6; }
+    .card.ranking:hover { border-color: #3b82f6; box-shadow: 0 8px 30px rgba(59, 130, 246, 0.15); }
+    .card.street { border-top: 3px solid #8b5cf6; }
+    .card.street:hover { border-color: #8b5cf6; box-shadow: 0 8px 30px rgba(139, 92, 246, 0.15); }
 
-    button#run {
-      background: #3b82f6;
-      color: white;
-      border: none;
-      border-radius: 6px;
-      padding: 0.55rem 1.5rem;
-      font-size: 1rem;
-      cursor: pointer;
-      font-weight: 600;
-      transition: background 0.2s;
-    }
-    button#run:hover { background: #2563eb; }
-    button#run:disabled { background: #475569; cursor: not-allowed; }
+    .card-icon { font-size: 2rem; margin-bottom: 0.75rem; }
+    .card-title { font-size: 1.25rem; font-weight: 700; margin-bottom: 0.5rem; color: #f1f5f9; }
+    .card-desc { font-size: 0.85rem; color: #94a3b8; margin-bottom: 1.5rem; line-height: 1.5; }
 
-    .progress-container {
-      max-width: 600px;
-      margin: 0 auto 1rem;
-      display: none;
+    .card-links { display: flex; flex-direction: column; gap: 0.5rem; }
+    .card-link {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      padding: 0.6rem 1rem;
+      background: #0f172a;
+      border: 1px solid #334155;
+      border-radius: 8px;
+      text-decoration: none;
+      color: #e2e8f0;
+      font-size: 0.9rem;
+      font-weight: 500;
+      transition: background 0.15s, border-color 0.15s;
     }
-    .progress-container.active { display: block; }
-    .progress-bar-bg {
-      background: #1e293b;
-      border-radius: 999px;
-      height: 8px;
-      overflow: hidden;
-    }
-    .progress-bar-fill {
-      background: #3b82f6;
-      height: 100%;
-      width: 0%;
-      transition: width 0.15s;
-      border-radius: 999px;
-    }
-    .progress-text {
-      text-align: center;
-      font-size: 0.8rem;
-      color: #94a3b8;
-      margin-top: 0.25rem;
-    }
+    .card-link:hover { background: #1e293b; border-color: #475569; }
+    .card-link .emoji { font-size: 1.1rem; }
 
-    .results-container {
-      max-width: 800px;
-      margin: 0 auto;
-      overflow-x: auto;
+    .card.ranking .card-link:hover { border-color: #3b82f6; }
+    .card.street .card-link:hover { border-color: #8b5cf6; }
+
+    .coming-soon {
+      color: #64748b;
+      font-size: 0.75rem;
+      font-style: italic;
+      margin-left: auto;
     }
-    table {
-      width: 100%;
-      border-collapse: collapse;
-      font-size: 0.85rem;
-    }
-    th {
-      background: #1e293b;
-      padding: 0.6rem 0.75rem;
-      text-align: left;
-      font-weight: 600;
-      color: #94a3b8;
-      text-transform: uppercase;
+    .available {
+      color: #22c55e;
       font-size: 0.7rem;
-      letter-spacing: 0.05em;
-      position: sticky;
-      top: 0;
+      margin-left: auto;
     }
-    td { padding: 0.45rem 0.75rem; border-bottom: 1px solid #1e293b; }
-    tr:hover td { background: #1e293b44; }
-    .hand-cell { font-weight: 700; font-family: 'Courier New', monospace; font-size: 0.95rem; }
-
-    .tier-1 { border-left: 3px solid #22c55e; }
-    .tier-2 { border-left: 3px solid #84cc16; }
-    .tier-3 { border-left: 3px solid #eab308; }
-    .tier-4 { border-left: 3px solid #f97316; }
-    .tier-5 { border-left: 3px solid #ef4444; }
-    .tier-6 { border-left: 3px solid #7f1d1d; }
-
-    .tier-badge {
-      display: inline-block;
-      padding: 0.1rem 0.5rem;
-      border-radius: 999px;
-      font-size: 0.7rem;
-      font-weight: 600;
-    }
-    .tier-badge-1 { background: #22c55e33; color: #22c55e; }
-    .tier-badge-2 { background: #84cc1633; color: #84cc16; }
-    .tier-badge-3 { background: #eab30833; color: #eab308; }
-    .tier-badge-4 { background: #f9731633; color: #f97316; }
-    .tier-badge-5 { background: #ef444433; color: #ef4444; }
-    .tier-badge-6 { background: #7f1d1d55; color: #fca5a5; }
-
-    th.sortable { cursor: pointer; user-select: none; }
-    th.sortable:hover { background: #334155; color: #e2e8f0; }
-    th.sortable.sort-active { color: #3b82f6; }
-    .sort-indicator { font-size: 0.6rem; opacity: 0.5; }
-    th.sortable.sort-active .sort-indicator { opacity: 1; }
-
-    .init-status {
-      text-align: center;
-      font-size: 0.8rem;
-      color: #94a3b8;
-      margin-bottom: 0.5rem;
-    }
-    .init-status.ready { color: #22c55e; }
   </style>
 </head>
 <body>
   <h1>♠ poker-sym ♥</h1>
-  <p class="subtitle">Monte Carlo Starting Hand Ranking — Texas Hold'em</p>
-  <div class="nav" style="text-align:center;margin-bottom:1.5rem">
-    <strong>Hold'em</strong><span class="sep" style="color:#475569;margin:0 0.3rem">·</span>
-    <a href="omaha.html" style="color:#3b82f6;font-size:0.85rem;text-decoration:none">Omaha Hi</a><span class="sep" style="color:#475569;margin:0 0.3rem">·</span>
-    <a href="omaha-hi-lo.html" style="color:#3b82f6;font-size:0.85rem;text-decoration:none">Omaha Hi/Lo</a><span class="sep" style="color:#475569;margin:0 0.3rem">·</span>
-    <a href="stud.html" style="color:#3b82f6;font-size:0.85rem;text-decoration:none">Stud</a><span class="sep" style="color:#475569;margin:0 0.3rem">·</span>
-    <a href="stud-hi-lo.html" style="color:#3b82f6;font-size:0.85rem;text-decoration:none">Stud Hi/Lo</a><span class="sep" style="color:#475569;margin:0 0.3rem">·</span>
-    <a href="razz.html" style="color:#3b82f6;font-size:0.85rem;text-decoration:none">Razz</a><span class="sep" style="color:#475569;margin:0 0.3rem">·</span>
-    <a href="street.html" style="color:#8b5cf6;font-size:0.85rem;text-decoration:none">Street Analysis</a>
-  </div>
+  <p class="subtitle">Poker Starting Hand Analysis Toolkit</p>
 
-  <div id="initStatus" class="init-status">Initializing evaluator...</div>
-
-  <div class="controls">
-    <div class="field">
-      <label for="runs">Runs / Hand</label>
-      <input type="number" id="runs" value="10000" min="100" max="100000" step="1000" />
+  <div class="cards">
+    <!-- Starting Hand Ranking Card -->
+    <div class="card ranking">
+      <div class="card-icon">🃏</div>
+      <div class="card-title">Starting Hand Ranking</div>
+      <div class="card-desc">Monte Carlo simulation to rank all starting hands by equity across game variants.</div>
+      <div class="card-links">
+        <a href="holdem.html" class="card-link">
+          <span class="emoji">🤠</span> Texas Hold'em <span class="available">✓</span>
+        </a>
+        <a href="omaha.html" class="card-link">
+          <span class="emoji">🌽</span> Omaha Hi <span class="available">✓</span>
+        </a>
+        <a href="omaha-hi-lo.html" class="card-link">
+          <span class="emoji">🔀</span> Omaha Hi/Lo <span class="available">✓</span>
+        </a>
+        <a href="stud.html" class="card-link">
+          <span class="emoji">🎰</span> 7-Card Stud <span class="available">✓</span>
+        </a>
+        <a href="stud-hi-lo.html" class="card-link">
+          <span class="emoji">🔀</span> Stud Hi/Lo <span class="available">✓</span>
+        </a>
+        <a href="razz.html" class="card-link">
+          <span class="emoji">aces-🂡</span> Razz <span class="available">✓</span>
+        </a>
+      </div>
     </div>
-    <div class="field">
-      <label for="opponents">Opponents</label>
-      <input type="number" id="opponents" value="1" min="0" max="9" step="1" />
+
+    <!-- Street Analysis Card -->
+    <div class="card street">
+      <div class="card-icon">📊</div>
+      <div class="card-title">Street-by-Street Analysis</div>
+      <div class="card-desc">Track how each starting hand evolves through Flop, Turn, and River with equity distributions and texture breakdowns.</div>
+      <div class="card-links">
+        <a href="street.html" class="card-link">
+          <span class="emoji">🤠</span> Texas Hold'em <span class="available">✓</span>
+        </a>
+        <a href="street-omaha.html" class="card-link">
+          <span class="emoji">🌽</span> Omaha Hi <span class="coming-soon">Coming Soon</span>
+        </a>
+        <a href="street-omaha-hi-lo.html" class="card-link">
+          <span class="emoji">🔀</span> Omaha Hi/Lo <span class="coming-soon">Coming Soon</span>
+        </a>
+        <a href="street-stud.html" class="card-link">
+          <span class="emoji">🎰</span> 7-Card Stud <span class="coming-soon">Coming Soon</span>
+        </a>
+        <a href="street-stud-hi-lo.html" class="card-link">
+          <span class="emoji">🔀</span> Stud Hi/Lo <span class="coming-soon">Coming Soon</span>
+        </a>
+        <a href="street-razz.html" class="card-link">
+          <span class="emoji">aces-🂡</span> Razz <span class="coming-soon">Coming Soon</span>
+        </a>
+      </div>
     </div>
-    <button id="run" disabled>Run Simulation</button>
   </div>
-
-  <div id="progressContainer" class="progress-container">
-    <div class="progress-bar-bg">
-      <div id="progressFill" class="progress-bar-fill"></div>
-    </div>
-    <div id="progressText" class="progress-text"></div>
-  </div>
-
-  <div id="results" class="results-container"></div>
-
-  <script type="module" src="/src/main.ts"></script>
 </body>
 </html>
+</task_progress>
+- [x] Create holdem.html (renamed from old index.html with updated nav)
+- [x] Create new dashboard landing page (`index.html`) with two cards
+- [ ] Update navigation on all existing pages
+- [ ] Create 5 Coming Soon street analysis placeholder pages
+</write_to_file>
