@@ -19,29 +19,112 @@
     .nav a { color: #3b82f6; text-decoration: none; font-size: 0.85rem; }
     .nav a:hover { text-decoration: underline; }
 
-    .coming-soon {
-      max-width: 500px;
-      margin: 4rem auto;
-      text-align: center;
+    .controls {
+      max-width: 700px;
+      margin: 0 auto 1.5rem;
+      display: flex;
+      gap: 1rem;
+      align-items: end;
+      flex-wrap: wrap;
+      justify-content: center;
     }
-    .coming-soon-icon { font-size: 4rem; margin-bottom: 1rem; }
-    .coming-soon h2 { font-size: 1.5rem; color: #f1f5f9; margin-bottom: 0.5rem; }
-    .coming-soon p { color: #94a3b8; line-height: 1.6; font-size: 0.95rem; }
-    .badge {
-      display: inline-block;
-      background: #8b5cf622;
-      color: #8b5cf6;
-      padding: 0.3rem 1rem;
-      border-radius: 999px;
-      font-size: 0.8rem;
+    .field { display: flex; flex-direction: column; gap: 0.25rem; }
+    .field label { font-size: 0.75rem; color: #94a3b8; text-transform: uppercase; letter-spacing: 0.05em; }
+    .field input {
+      background: #1e293b;
+      border: 1px solid #334155;
+      border-radius: 6px;
+      padding: 0.5rem 0.75rem;
+      color: #f1f5f9;
+      font-size: 1rem;
+      width: 120px;
+    }
+    .field input:focus { outline: none; border-color: #3b82f6; }
+
+    button#run {
+      background: #8b5cf6;
+      color: white;
+      border: none;
+      border-radius: 6px;
+      padding: 0.55rem 1.5rem;
+      font-size: 1rem;
+      cursor: pointer;
       font-weight: 600;
-      margin-top: 1.5rem;
+      transition: background 0.2s;
     }
+    button#run:hover { background: #7c3aed; }
+    button#run:disabled { background: #475569; cursor: not-allowed; }
+
+    .progress-container {
+      max-width: 700px;
+      margin: 0 auto 1rem;
+      display: none;
+    }
+    .progress-container.active { display: block; }
+    .progress-bar-bg {
+      background: #1e293b;
+      border-radius: 999px;
+      height: 8px;
+      overflow: hidden;
+    }
+    .progress-bar-fill {
+      background: #8b5cf6;
+      height: 100%;
+      width: 0%;
+      transition: width 0.15s;
+      border-radius: 999px;
+    }
+    .progress-text {
+      text-align: center;
+      font-size: 0.8rem;
+      color: #94a3b8;
+      margin-top: 0.25rem;
+    }
+
+    .init-status {
+      text-align: center;
+      font-size: 0.8rem;
+      color: #94a3b8;
+      margin-bottom: 0.5rem;
+    }
+    .init-status.ready { color: #22c55e; }
+
+    .results-container {
+      max-width: 1100px;
+      margin: 0 auto;
+      overflow-x: auto;
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.8rem;
+    }
+    th {
+      background: #1e293b;
+      padding: 0.6rem 0.6rem;
+      text-align: left;
+      font-weight: 600;
+      color: #94a3b8;
+      text-transform: uppercase;
+      font-size: 0.65rem;
+      letter-spacing: 0.05em;
+      position: sticky;
+      top: 0;
+    }
+    th.sortable {
+      cursor: pointer;
+      user-select: none;
+    }
+    th.sortable:hover { color: #e2e8f0; }
+    td { padding: 0.4rem 0.6rem; border-bottom: 1px solid #1e293b; }
+    tr:hover td { background: #1e293b44; }
+    .hand-cell { font-weight: 700; font-family: 'Courier New', monospace; font-size: 0.95rem; }
+    .num { text-align: right; font-variant-numeric: tabular-nums; }
   </style>
 </head>
 <body>
   <h1>♠ poker-sym — Street Analysis ♥</h1>
-  <p class="subtitle">Omaha Hi/Lo — Street-by-Street Analysis</p>
+  <p class="subtitle">Flop / Turn / River Evolution — Omaha Hi/Lo Starting Hands</p>
   <div class="nav">
     <a href="index.html">🏠 Home</a><span class="sep" style="color:#475569;margin:0 0.3rem">·</span>
     <a href="street.html">Hold'em</a><span class="sep" style="color:#475569;margin:0 0.3rem">·</span>
@@ -52,12 +135,33 @@
     <a href="street-razz.html">Razz</a>
   </div>
 
-  <div class="coming-soon">
-    <div class="coming-soon-icon">🔀</div>
-    <h2>Omaha Hi/Lo — Street Analysis</h2>
-    <p>Track how each Omaha Hi/Lo starting hand evolves through the Flop, Turn, and River with scoop/split equity distributions, high and low hand category breakdowns.</p>
-    <div class="badge">🚧 Coming Soon</div>
+  <div id="initStatus" class="init-status">Initializing evaluator...</div>
+
+  <div class="controls">
+    <div class="field">
+      <label for="runs">Runs / Hand</label>
+      <input type="number" id="runs" value="500" min="10" max="100000" step="100" />
+    </div>
+    <div class="field">
+      <label for="opponents">Opponents</label>
+      <input type="number" id="opponents" value="1" min="1" max="9" step="1" />
+    </div>
+    <div class="field">
+      <label for="seed">Seed</label>
+      <input type="number" id="seed" value="" min="0" placeholder="random" />
+    </div>
+    <button id="run" disabled>Run Street Analysis</button>
   </div>
+
+  <div id="progressContainer" class="progress-container">
+    <div class="progress-bar-bg">
+      <div id="progressFill" class="progress-bar-fill"></div>
+    </div>
+    <div id="progressText" class="progress-text"></div>
+  </div>
+
+  <div id="results" class="results-container"></div>
+
+  <script type="module" src="/src/street-omaha-hi-lo-main.ts"></script>
 </body>
 </html>
-</write_to_file>

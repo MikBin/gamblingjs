@@ -157,6 +157,34 @@ export interface StreetAnalysisResult {
   timestamp: string;
 }
 
+// ─── Omaha Hi/Lo Street Analysis Types ───────────────────────────────
+
+export interface StreetStatsHiLo {
+  winHiPct: number;
+  winLoPct: number;
+  scoopPct: number;
+  averageHighRank: number;
+  averageLowRank?: number;
+}
+
+export interface StreetHandResultHiLo {
+  hand: string;
+  flop: StreetStatsHiLo;
+  turn: StreetStatsHiLo;
+  river: StreetStatsHiLo;
+}
+
+export interface StreetAnalysisResultHiLo {
+  gameType: 'omaha-hi-lo';
+  config: {
+    runs: number;
+    opponents: number;
+    seed?: number;
+  };
+  hands: StreetHandResultHiLo[];
+  timestamp: string;
+}
+
 /** Category names in order matching handsRankingDelimiter_5cards thresholds. */
 export const HAND_CATEGORY_NAMES = [
   'high card',

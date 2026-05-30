@@ -18,6 +18,7 @@ export default defineConfig({
         'stud-hi-lo': resolve(__dirname, 'stud-hi-lo.html'),
         razz: resolve(__dirname, 'razz.html'),
         street: resolve(__dirname, 'street.html'),
+        'street-omaha-hi-lo': resolve(__dirname, 'street-omaha-hi-lo.html'),
       },
     },
   },
