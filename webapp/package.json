@@ -19,7 +19,7 @@
   "devDependencies": {
     "@types/node": "^24.10.1",
     "@vitejs/plugin-vue": "^5.0.4",
-    "@vitest/coverage-v8": "^1.4.0",
+    "@vitest/coverage-v8": "^4.1.8",
     "@vue/test-utils": "^2.4.5",
     "autoprefixer": "^10.4.19",
     "daisyui": "^4.7.3",
@@ -30,7 +30,7 @@
     "terser": "^5.48.0",
     "typescript": "^5.4.2",
     "vite": "^5.2.0",
-    "vitest": "^1.4.0",
+    "vitest": "^4.1.8",
     "vue-tsc": "^2.2.12"
   }
 }
