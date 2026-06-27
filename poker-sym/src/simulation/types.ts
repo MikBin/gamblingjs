@@ -185,6 +185,34 @@ export interface StreetAnalysisResultHiLo {
   timestamp: string;
 }
 
+// ─── Stud Hi/Lo Street Analysis Types ────────────────────────────────
+
+export interface StudHiLoStreetStats {
+  equity: number;
+  highWinPct: number;
+  lowWinPct: number;
+  scoopPct: number;
+  lowQualifyPct: number;
+}
+
+export interface StudHiLoStreetHandResult {
+  hand: string;
+  fifth: StudHiLoStreetStats;
+  sixth: StudHiLoStreetStats;
+  seventh: StudHiLoStreetStats;
+}
+
+export interface StudHiLoStreetAnalysisResult {
+  gameType: 'stud-hi-lo';
+  config: {
+    runs: number;
+    opponents: number;
+    seed?: number;
+  };
+  hands: StudHiLoStreetHandResult[];
+  timestamp: string;
+}
+
 /** Category names in order matching handsRankingDelimiter_5cards thresholds. */
 export const HAND_CATEGORY_NAMES = [
   'high card',

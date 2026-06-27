@@ -88,6 +88,24 @@
       margin-bottom: 0.5rem;
     }
     .init-status.ready { color: #22c55e; }
+    .btn-stop {
+      padding: 0.55rem 1.25rem;
+      background: #7f1d1d;
+      color: #fca5a5;
+      border: 1px solid #991b1b;
+      border-radius: 6px;
+      cursor: pointer;
+      font-size: 0.85rem;
+    }
+    .btn-stop:disabled { opacity: 0.4; cursor: not-allowed; }
+    .btn-stop:not(:disabled):hover { background: #991b1b; }
+    .eta-hint {
+      text-align: center;
+      font-size: 0.8rem;
+      color: #94a3b8;
+      margin-top: 0.35rem;
+      min-height: 1.2rem;
+    }
 
     .results-container {
       max-width: 1100px;
@@ -151,6 +169,11 @@
       <input type="number" id="seed" value="" min="0" placeholder="random" />
     </div>
     <button id="run" disabled>Run Street Analysis</button>
+    <button id="stop" class="btn-stop" disabled>Stop</button>
+  </div>
+
+  <div id="etaText" class="eta-hint"></div>
+
   </div>
 
   <div id="progressContainer" class="progress-container">

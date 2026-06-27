@@ -1,11 +1,8 @@
 #!/usr/bin/env node
 import { Command } from 'commander';
 import fs from 'fs';
-import os from 'os';
-import { Worker } from 'worker_threads';
 import { HighEvaluator } from '../../src/core/HighEvaluator.js';
 import { OmahaEvaluator } from '../../src/core/OmahaEvaluator.js';
-import { handOfFiveEvalIndexed } from '../../src/pokerEvaluator5.js';
 import { handOfSevenEvalHiLow8Indexed } from '../../src/pokerEvaluator7.js';
 import { fastHashesCreators } from '../../src/pokerHashes7.js';
 import { rankHoldemStartingHands } from './ranking/ranker.js';
@@ -13,19 +10,54 @@ import { rankOmahaStartingHands } from './ranking/omaha-ranker.js';
 import { rankStudStartingHands } from './ranking/stud-ranker.js';
 import { rankOmahaHiLoStartingHands } from './ranking/omaha-hilo-ranker.js';
 import { rankRazzStartingHands } from './ranking/razz-ranker.js';
-import { rankStreets } from './ranking/street-ranker.js';
 import { rankStudHiLoStartingHands } from './ranking/stud-hilo-ranker.js';
-import { SimulationConfig, SimulationResult, HandStrengthResult } from './simulation/types.js';
+import { SimulationConfig, SimulationResult } from './simulation/types.js';
 import { formatTable, formatJSON, formatCSV, formatMarkdown } from './output.js';
+import { runStreetAnalysisCli } from './cli-street.js';
 import {
-  formatStreetTable,
-  formatStreetTableDetailed,
-  formatStreetJSON,
-  formatStreetCSV,
-  formatStreetMarkdown,
-} from './output-street.js';
+  enumerateHoldemStartingHands,
+  enumerateOmahaStartingHands,
+  enumerateStudStartingHands,
+  logPreflopStart,
+  runPreflopWorkerPool,
+} from './cli-preflop-runner.js';
+import { getCliWorkerCount } from './workers/cli-worker-pool.js';
 
 const program = new Command();
+
+const writeSimulationOutput = (
+  result: SimulationResult,
+  format: string,
+  outputFile: string | undefined,
+): void => {
+  let output: string;
+  switch (format) {
+    case 'json':
+      output = formatJSON(result);
+      break;
+    case 'csv':
+      output = formatCSV(result);
+      break;
+    case 'md':
+      output = formatMarkdown(result);
+      break;
+    default:
+      output = formatTable(result);
+  }
+  if (outputFile) {
+    fs.writeFileSync(outputFile, output, 'utf-8');
+    console.error(`\nResults written to ${outputFile}`);
+  } else {
+    console.log(output);
+  }
+};
+
+const preflopProgress = (completed: number, total: number, hand: string): void => {
+  if (completed % 10 === 0 || completed === total) {
+    const pct = ((completed / total) * 100).toFixed(0);
+    process.stderr.write(`\r  Progress: ${completed}/${total} (${pct}%) — ${hand}    `);
+  }
+};
 
 program
   .name('poker-sym')
@@ -68,497 +100,149 @@ program
 
     const startTime = Date.now();
 
+    if (streetMode) {
+      if (
+        (game === 'stud' || game === '7card-stud' || game === 'stud-hi-lo') &&
+        config.opponents > 6
+      ) {
+        console.error(
+          'Error: Stud variants support a maximum of 6 opponents (52 cards total, 7 cards per player + 3 hole cards).',
+        );
+        process.exit(1);
+      }
+      if (game === 'razz') {
+        fastHashesCreators.Ato5();
+      }
+      if (game === 'omaha-hi-lo' || game === 'stud-hi-lo') {
+        fastHashesCreators.low8();
+      }
+
+      const streetGameNames: Record<string, string> = {
+        holdem: 'Texas Hold\'em',
+        omaha: 'Omaha Hi',
+        'omaha-hi-lo': 'Omaha Hi/Lo',
+        stud: '7-Card Stud',
+        '7card-stud': '7-Card Stud',
+        'stud-hi-lo': 'Stud Hi/Lo',
+        razz: 'Razz',
+      };
+      const streetHands: Record<string, string> = {
+        holdem: '169',
+        omaha: '~9,854',
+        'omaha-hi-lo': '~9,854',
+        stud: '1,755',
+        '7card-stud': '1,755',
+        'stud-hi-lo': '1,755',
+        razz: '1,755',
+      };
+
+      console.error(
+        `Running ${streetGameNames[game] ?? game} street-by-street analysis...\n` +
+          `  Hands: ${streetHands[game] ?? '?'} | Runs/hand: ${config.runs}` +
+          (config.opponents > 0 ? ` | Opponents: ${config.opponents}` : '') +
+          `\n  Using ${getCliWorkerCount()} worker threads`,
+      );
+
+      await runStreetAnalysisCli(
+        game,
+        { runs: config.runs, opponents: config.opponents, seed: config.seed },
+        format,
+        !!detailed,
+        outputFile,
+        evalFn7,
+      );
+
+      const elapsed = ((Date.now() - startTime) / 1000).toFixed(1);
+      process.stderr.write(`\n  Completed in ${elapsed}s\n`);
+      return;
+    }
+
     if (game === 'omaha-hi-lo') {
-      if (streetMode) {
-        console.error('Street analysis for Omaha Hi/Lo is not yet supported.');
-        process.exit(1);
-      }
-
-      console.error(
-        `Running Omaha Hi/Lo preflop simulation...\n` +
-          `  Hands: ~9,854 | Runs/hand: ${config.runs} | Opponents: ${config.opponents}\n` +
-          `  Using ${Math.max(1, Math.floor(os.cpus().length / 2))} worker threads`,
+      logPreflopStart('Omaha Hi/Lo', 9854, config, 'omaha-hilo-preflop');
+      const result = await runPreflopWorkerPool(
+        'omaha-hilo-preflop',
+        'omaha-hi-lo',
+        enumerateOmahaStartingHands(),
+        new URL('./workers/omaha-hilo-cli-worker.ts', import.meta.url).href,
+        config,
+        () => rankOmahaHiLoStartingHands(config, preflopProgress),
       );
-
-      let result: SimulationResult;
-      try {
-        result = await runOmahaHiLoWorkerPool(config, (completed, total, hand) => {
-          if (completed % 10 === 0 || completed === total) {
-            const pct = ((completed / total) * 100).toFixed(0);
-            process.stderr.write(`\r  Progress: ${completed}/${total} (${pct}%) — ${hand}    `);
-          }
-        });
-      } catch {
-        console.error('\n  Worker pool failed, falling back to single-threaded...');
-        result = rankOmahaHiLoStartingHands(config, (completed, total, hand) => {
-          if (completed % 10 === 0 || completed === total) {
-            const pct = ((completed / total) * 100).toFixed(0);
-            process.stderr.write(`\r  Progress: ${completed}/${total} (${pct}%) — ${hand}    `);
-          }
-        });
-      }
-
-      const elapsed = ((Date.now() - startTime) / 1000).toFixed(1);
-      process.stderr.write(`\n  Completed in ${elapsed}s\n`);
-
-      let output: string;
-      switch (format) {
-        case 'json':
-          output = formatJSON(result);
-          break;
-        case 'csv':
-          output = formatCSV(result);
-          break;
-        case 'md':
-          output = formatMarkdown(result);
-          break;
-        default:
-          output = formatTable(result);
-      }
-
-      if (outputFile) {
-        fs.writeFileSync(outputFile, output, 'utf-8');
-        console.error(`\nResults written to ${outputFile}`);
-      } else {
-        console.log(output);
-      }
+      process.stderr.write(`\n  Completed in ${((Date.now() - startTime) / 1000).toFixed(1)}s\n`);
+      writeSimulationOutput(result, format, outputFile);
     } else if (game === 'stud-hi-lo') {
-      if (streetMode) {
-        console.error('Street analysis for Stud Hi/Lo is not supported.');
+      if (config.opponents > 6) {
+        console.error('Error: Stud Hi/Lo supports a maximum of 6 opponents (52 cards total, 7 cards per player + 3 hole cards).');
         process.exit(1);
       }
 
-      console.error(
-        `Running Stud Hi/Lo simulation...\n` +
-          `  Hands: 1,755 | Runs/hand: ${config.runs} | Opponents: ${config.opponents}`
+      logPreflopStart('Stud Hi/Lo', 1755, config, 'stud-hilo-preflop');
+      const result = await runPreflopWorkerPool(
+        'stud-hilo-preflop',
+        'stud-hi-lo',
+        enumerateStudStartingHands(),
+        new URL('./workers/stud-hilo-cli-worker.ts', import.meta.url).href,
+        config,
+        () => rankStudHiLoStartingHands(handOfSevenEvalHiLow8Indexed, config, preflopProgress),
       );
-
-      const result = rankStudHiLoStartingHands(handOfSevenEvalHiLow8Indexed, config, (completed, total, hand) => {
-        if (completed % 10 === 0 || completed === total) {
-          const pct = ((completed / total) * 100).toFixed(0);
-          process.stderr.write(`\r  Progress: ${completed}/${total} (${pct}%) — ${hand}    `);
-        }
-      });
-
-      const elapsed = ((Date.now() - startTime) / 1000).toFixed(1);
-      process.stderr.write(`\n  Completed in ${elapsed}s\n`);
-
-      let output: string;
-      switch (format) {
-        case 'json':
-          output = formatJSON(result);
-          break;
-        case 'csv':
-          output = formatCSV(result);
-          break;
-        case 'md':
-          output = formatMarkdown(result);
-          break;
-        default:
-          output = formatTable(result);
-      }
-
-      if (outputFile) {
-        fs.writeFileSync(outputFile, output, 'utf-8');
-        console.error(`\nResults written to ${outputFile}`);
-      } else {
-        console.log(output);
-      }
+      process.stderr.write(`\n  Completed in ${((Date.now() - startTime) / 1000).toFixed(1)}s\n`);
+      writeSimulationOutput(result, format, outputFile);
     } else if (game === 'omaha') {
-      if (streetMode) {
-        console.error('Street analysis for Omaha is not yet supported.');
-        process.exit(1);
-      }
-
-      console.error(
-        `Running Omaha Hi preflop simulation...\n` +
-          `  Hands: ~9,854 | Runs/hand: ${config.runs} | Opponents: ${config.opponents}\n` +
-          `  Using ${Math.max(1, Math.floor(os.cpus().length / 2))} worker threads`,
+      logPreflopStart('Omaha Hi', 9854, config, 'omaha-preflop');
+      const omahaEvaluator = new OmahaEvaluator();
+      const result = await runPreflopWorkerPool(
+        'omaha-preflop',
+        'omaha-hi',
+        enumerateOmahaStartingHands(),
+        new URL('./workers/omaha-cli-worker.ts', import.meta.url).href,
+        config,
+        () => rankOmahaStartingHands(omahaEvaluator, config, preflopProgress),
       );
-
-      let result: SimulationResult;
-      try {
-        result = await runOmahaWorkerPool(config, (completed, total, hand) => {
-          if (completed % 10 === 0 || completed === total) {
-            const pct = ((completed / total) * 100).toFixed(0);
-            process.stderr.write(`\r  Progress: ${completed}/${total} (${pct}%) — ${hand}    `);
-          }
-        });
-      } catch {
-        // Fallback to single-threaded
-        console.error('\n  Worker pool failed, falling back to single-threaded...');
-        const omahaEvaluator = new OmahaEvaluator();
-        result = rankOmahaStartingHands(omahaEvaluator, config, (completed, total, hand) => {
-          if (completed % 10 === 0 || completed === total) {
-            const pct = ((completed / total) * 100).toFixed(0);
-            process.stderr.write(`\r  Progress: ${completed}/${total} (${pct}%) — ${hand}    `);
-          }
-        });
-      }
-
-      const elapsed = ((Date.now() - startTime) / 1000).toFixed(1);
-      process.stderr.write(`\n  Completed in ${elapsed}s\n`);
-
-      let output: string;
-      switch (format) {
-        case 'json':
-          output = formatJSON(result);
-          break;
-        case 'csv':
-          output = formatCSV(result);
-          break;
-        case 'md':
-          output = formatMarkdown(result);
-          break;
-        default:
-          output = formatTable(result);
-      }
-
-      if (outputFile) {
-        fs.writeFileSync(outputFile, output, 'utf-8');
-        console.error(`\nResults written to ${outputFile}`);
-      } else {
-        console.log(output);
-      }
+      process.stderr.write(`\n  Completed in ${((Date.now() - startTime) / 1000).toFixed(1)}s\n`);
+      writeSimulationOutput(result, format, outputFile);
     } else if (game === 'razz') {
-      if (streetMode) {
-        console.error('Street analysis for Razz is not yet supported.');
-        process.exit(1);
-      }
-
-      console.error(
-        `Running Razz preflop simulation...\n` +
-          `  Hands: 455 | Runs/hand: ${config.runs} | Opponents: ${config.opponents}`,
-      );
 
       fastHashesCreators.Ato5();
-
-      const result = rankRazzStartingHands(config, (completed, total, hand) => {
-        if (completed % 10 === 0 || completed === total) {
-          const pct = ((completed / total) * 100).toFixed(0);
-          process.stderr.write(`\r  Progress: ${completed}/${total} (${pct}%) — ${hand}    `);
-        }
-      });
-
-      const elapsed = ((Date.now() - startTime) / 1000).toFixed(1);
-      process.stderr.write(`\n  Completed in ${elapsed}s\n`);
-
-      let output: string;
-      switch (format) {
-        case 'json':
-          output = formatJSON(result);
-          break;
-        case 'csv':
-          output = formatCSV(result);
-          break;
-        case 'md':
-          output = formatMarkdown(result);
-          break;
-        default:
-          output = formatTable(result);
-      }
-
-      if (outputFile) {
-        fs.writeFileSync(outputFile, output, 'utf-8');
-        console.error(`\nResults written to ${outputFile}`);
-      } else {
-        console.log(output);
-      }
+      logPreflopStart('Razz', 1755, config, 'razz-preflop');
+      const result = await runPreflopWorkerPool(
+        'razz-preflop',
+        'razz',
+        enumerateStudStartingHands(),
+        new URL('./workers/razz-cli-worker.ts', import.meta.url).href,
+        config,
+        () => rankRazzStartingHands(config, preflopProgress),
+      );
+      process.stderr.write(`\n  Completed in ${((Date.now() - startTime) / 1000).toFixed(1)}s\n`);
+      writeSimulationOutput(result, format, outputFile);
     } else if (game === 'stud' || game === '7card-stud') {
       if (config.opponents > 6) {
         console.error('Error: 7-Card Stud supports a maximum of 6 opponents (52 cards total, 7 cards per player + 3 hole cards).');
         process.exit(1);
       }
-      if (streetMode) {
-        console.error('Street analysis for 7-Card Stud is not yet supported.');
-        process.exit(1);
-      }
 
-      console.error(
-        `Running 7-Card Stud starting hand simulation...\n` +
-          `  Hands: 1,755 | Runs/hand: ${config.runs} | Opponents: ${config.opponents}`
+      logPreflopStart('7-Card Stud', 1755, config, 'stud-preflop');
+      const result = await runPreflopWorkerPool(
+        'stud-preflop',
+        '7card-stud',
+        enumerateStudStartingHands(),
+        new URL('./workers/stud-cli-worker.ts', import.meta.url).href,
+        config,
+        () => rankStudStartingHands(evalFn7, config, preflopProgress),
       );
-
-      const result = rankStudStartingHands(evalFn7, config, (completed, total, hand) => {
-        if (completed % 10 === 0 || completed === total) {
-          const pct = ((completed / total) * 100).toFixed(0);
-          process.stderr.write(`\r  Progress: ${completed}/${total} (${pct}%) — ${hand}    `);
-        }
-      });
-
-      const elapsed = ((Date.now() - startTime) / 1000).toFixed(1);
-      process.stderr.write(`\n  Completed in ${elapsed}s\n`);
-
-      let output: string;
-      switch (format) {
-        case 'json':
-          output = formatJSON(result);
-          break;
-        case 'csv':
-          output = formatCSV(result);
-          break;
-        case 'md':
-          output = formatMarkdown(result);
-          break;
-        default:
-          output = formatTable(result);
-      }
-
-      if (outputFile) {
-        fs.writeFileSync(outputFile, output, 'utf-8');
-        console.error(`\nResults written to ${outputFile}`);
-      } else {
-        console.log(output);
-      }
+      process.stderr.write(`\n  Completed in ${((Date.now() - startTime) / 1000).toFixed(1)}s\n`);
+      writeSimulationOutput(result, format, outputFile);
     } else {
-      if (streetMode) {
-        // Street-by-street analysis mode
-        console.error(
-          `Running Texas Hold'em street-by-street analysis...\n` +
-            `  Hands: 169 | Runs/hand: ${config.runs}`,
-        );
-
-        const result = rankStreets(
-          handOfFiveEvalIndexed,
-          evalFn7,
-          config.runs,
-          config.seed,
-          (completed, total, hand) => {
-            if (completed % 10 === 0 || completed === total) {
-              const pct = ((completed / total) * 100).toFixed(0);
-              process.stderr.write(`\r  Progress: ${completed}/${total} (${pct}%) — ${hand}    `);
-            }
-          },
-        );
-
-        const elapsed = ((Date.now() - startTime) / 1000).toFixed(1);
-        process.stderr.write(`\n  Completed in ${elapsed}s\n`);
-
-        let output: string;
-        switch (format) {
-          case 'json':
-            output = formatStreetJSON(result);
-            break;
-          case 'csv':
-            output = formatStreetCSV(result);
-            break;
-          case 'md':
-            output = formatStreetMarkdown(result);
-            break;
-          default:
-            output = detailed ? formatStreetTableDetailed(result) : formatStreetTable(result);
-        }
-
-        if (outputFile) {
-          fs.writeFileSync(outputFile, output, 'utf-8');
-          console.error(`\nResults written to ${outputFile}`);
-        } else {
-          console.log(output);
-        }
-      } else {
-        // Original preflop simulation mode
-        console.error(
-          `Running Texas Hold'em preflop simulation...\n` +
-            `  Hands: 169 | Runs/hand: ${config.runs} | Opponents: ${config.opponents}`,
-        );
-
-        const result = rankHoldemStartingHands(evalFn7, config, (completed, total, hand) => {
-          if (completed % 10 === 0 || completed === total) {
-            const pct = ((completed / total) * 100).toFixed(0);
-            process.stderr.write(`\r  Progress: ${completed}/${total} (${pct}%) — ${hand}    `);
-          }
-        });
-
-        const elapsed = ((Date.now() - startTime) / 1000).toFixed(1);
-        process.stderr.write(`\n  Completed in ${elapsed}s\n`);
-
-        let output: string;
-        switch (format) {
-          case 'json':
-            output = formatJSON(result);
-            break;
-          case 'csv':
-            output = formatCSV(result);
-            break;
-          case 'md':
-            output = formatMarkdown(result);
-            break;
-          default:
-            output = formatTable(result);
-        }
-
-        if (outputFile) {
-          fs.writeFileSync(outputFile, output, 'utf-8');
-          console.error(`\nResults written to ${outputFile}`);
-        } else {
-          console.log(output);
-        }
-      }
+      logPreflopStart('Texas Hold\'em', 169, config, 'holdem-preflop');
+      const result = await runPreflopWorkerPool(
+        'holdem-preflop',
+        'texas-holdem',
+        enumerateHoldemStartingHands(),
+        new URL('./workers/holdem-cli-worker.ts', import.meta.url).href,
+        config,
+        () => rankHoldemStartingHands(evalFn7, config, preflopProgress),
+      );
+      process.stderr.write(`\n  Completed in ${((Date.now() - startTime) / 1000).toFixed(1)}s\n`);
+      writeSimulationOutput(result, format, outputFile);
     }
   });
-
-/**
- * Run Omaha simulation across a pool of worker threads.
- * Shards the canonical hand list across N/2 CPU workers.
- */
-async function runOmahaWorkerPool(
-  config: SimulationConfig,
-  onProgress: (completed: number, total: number, hand: string) => void,
-): Promise<SimulationResult> {
-  const { enumerateOmahaStartingHands } = await import('./hands/omaha.js');
-  const hands = enumerateOmahaStartingHands();
-  const numWorkers = Math.max(1, Math.floor(os.cpus().length / 2));
-  const workerPath = new URL('./workers/omaha-cli-worker.ts', import.meta.url).href;
-
-  interface WorkerMsg {
-    type: 'progress' | 'done';
-    completed?: number;
-    total?: number;
-    results?: HandStrengthResult[];
-  }
-
-  const allResults: HandStrengthResult[] = [];
-  let completedHands = 0;
-  const totalHands = hands.length;
-  const workerLastProgress: number[] = new Array(numWorkers).fill(0);
-
-  const workers: Worker[] = [];
-  const promises: Promise<void>[] = [];
-
-  for (let w = 0; w < numWorkers; w++) {
-    const start = Math.floor((w / numWorkers) * hands.length);
-    const end = Math.floor(((w + 1) / numWorkers) * hands.length);
-    const batch = hands.slice(start, end);
-
-    const worker = new Worker(workerPath);
-    workers.push(worker);
-
-    const promise = new Promise<void>((resolve, reject) => {
-      worker.on('message', (msg: WorkerMsg) => {
-        if (msg.type === 'progress' && msg.completed != null) {
-          const delta = msg.completed - workerLastProgress[w]!;
-          workerLastProgress[w] = msg.completed;
-          completedHands += delta;
-          const hand = batch[(msg.completed ?? 1) - 1]?.key ?? '';
-          onProgress(Math.min(completedHands, totalHands), totalHands, hand);
-        } else if (msg.type === 'done' && msg.results) {
-          allResults.push(...msg.results);
-          resolve();
-        }
-      });
-
-      worker.on('error', reject);
-      worker.on('exit', (code) => {
-        if (code !== 0) reject(new Error(`Worker exited with code ${code}`));
-      });
-    });
-
-    promises.push(promise);
-
-    worker.postMessage({
-      hands: batch,
-      config,
-      seedOffset: w * 1_000_000,
-    });
-  }
-
-  await Promise.all(promises);
-  workers.forEach((w) => w.terminate());
-
-  // Sort results
-  if (config.opponents > 0) {
-    allResults.sort((a, b) => b.winPct - a.winPct || b.averageRank - a.averageRank);
-  } else {
-    allResults.sort((a, b) => b.averageRank - a.averageRank);
-  }
-
-  return {
-    gameType: 'omaha-hi',
-    config,
-    hands: allResults,
-    timestamp: new Date().toISOString(),
-  };
-}
-
-/**
- * Run Omaha Hi/Lo simulation across a pool of worker threads.
- */
-async function runOmahaHiLoWorkerPool(
-  config: SimulationConfig,
-  onProgress: (completed: number, total: number, hand: string) => void,
-): Promise<SimulationResult> {
-  const { enumerateOmahaStartingHands } = await import('./hands/omaha.js');
-  const hands = enumerateOmahaStartingHands();
-  const numWorkers = Math.max(1, Math.floor(os.cpus().length / 2));
-  const workerPath = new URL('./workers/omaha-hilo-cli-worker.ts', import.meta.url).href;
-
-  interface WorkerMsg {
-    type: 'progress' | 'done';
-    completed?: number;
-    total?: number;
-    results?: HandStrengthResult[];
-  }
-
-  const allResults: HandStrengthResult[] = [];
-  let completedHands = 0;
-  const totalHands = hands.length;
-  const workerLastProgress: number[] = new Array(numWorkers).fill(0);
-
-  const workers: Worker[] = [];
-  const promises: Promise<void>[] = [];
-
-  for (let w = 0; w < numWorkers; w++) {
-    const start = Math.floor((w / numWorkers) * hands.length);
-    const end = Math.floor(((w + 1) / numWorkers) * hands.length);
-    const batch = hands.slice(start, end);
-
-    const worker = new Worker(workerPath);
-    workers.push(worker);
-
-    const promise = new Promise<void>((resolve, reject) => {
-      worker.on('message', (msg: WorkerMsg) => {
-        if (msg.type === 'progress' && msg.completed != null) {
-          const delta = msg.completed - workerLastProgress[w]!;
-          workerLastProgress[w] = msg.completed;
-          completedHands += delta;
-          const hand = batch[(msg.completed ?? 1) - 1]?.key ?? '';
-          onProgress(Math.min(completedHands, totalHands), totalHands, hand);
-        } else if (msg.type === 'done' && msg.results) {
-          allResults.push(...msg.results);
-          resolve();
-        }
-      });
-
-      worker.on('error', reject);
-      worker.on('exit', (code) => {
-        if (code !== 0) reject(new Error(`Worker exited with code ${code}`));
-      });
-    });
-
-    promises.push(promise);
-
-    worker.postMessage({
-      hands: batch,
-      config,
-      seedOffset: w * 1_000_000,
-    });
-  }
-
-  await Promise.all(promises);
-  workers.forEach((w) => w.terminate());
-
-  if (config.opponents > 0) {
-    allResults.sort((a, b) => b.winPct - a.winPct || b.averageRank - a.averageRank);
-  } else {
-    allResults.sort((a, b) => b.averageRank - a.averageRank);
-  }
-
-  return {
-    gameType: 'omaha-hi-lo',
-    config,
-    hands: allResults,
-    timestamp: new Date().toISOString(),
-  };
-}
 
 program.parse();

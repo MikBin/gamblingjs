@@ -1,24 +1,47 @@
 import { fastHashesCreators } from '../../../src/pokerHashes7.js';
-import { LowAto5Evaluator } from '../../../src/core/LowEvaluator.js';
-import { handOfFiveEvalLow_Ato5Indexed } from '../../../src/pokerEvaluator5.js';
 import { enumerateStudStartingHands } from '../../src/hands/stud.js';
-import { analyzeRazzHandStreets, RazzStreetHandResult, RazzStreetAnalysisResult, RAZZ_CATEGORY_NAMES } from '../../src/simulation/razz-street-analysis.js';
-import { FiveCardEvalFn, SevenCardEvalFn } from '../../src/simulation/street-analysis.js';
+import { RazzStreetHandResult, RazzStreetAnalysisResult, RAZZ_CATEGORY_NAMES } from '../../src/simulation/razz-street-analysis.js';
+import { runWorkerPool } from './worker-pool.js';
+import {
+  beginAnalysisRun,
+  bindPreRunEta,
+  finishAnalysisRun,
+  updateAnalysisProgress,
+} from './analysis-controls.js';
+import { HAND_COUNTS } from './eta.js';
 
-// DOM
+const PAGE_KEY = 'razz-street';
+
 const initStatus = document.getElementById('initStatus')!;
 const runsInput = document.getElementById('runs') as HTMLInputElement;
 const seedInput = document.getElementById('seed') as HTMLInputElement;
 const runBtn = document.getElementById('run') as HTMLButtonElement;
+const stopBtn = document.getElementById('stop') as HTMLButtonElement;
 const progressContainer = document.getElementById('progressContainer')!;
 const progressFill = document.getElementById('progressFill')!;
 const progressText = document.getElementById('progressText')!;
+const etaText = document.getElementById('etaText')!;
 const resultsDiv = document.getElementById('results')!;
 const detailOverlay = document.getElementById('detailOverlay')!;
 const detailContent = document.getElementById('detailContent')!;
 const detailClose = document.getElementById('detailClose')!;
 
+const analysisEls = {
+  runBtn, stopBtn, progressContainer, progressFill, progressText, etaText,
+  paramInputs: [runsInput, seedInput],
+};
+
+let activeController: AbortController | null = null;
+let runState = { startTime: 0, handCount: HAND_COUNTS.stud };
 let currentResult: RazzStreetAnalysisResult | null = null;
+
+const getParams = () => ({
+  runs: parseInt(runsInput.value, 10) || 5000,
+  opponents: 0,
+});
+
+bindPreRunEta(PAGE_KEY, HAND_COUNTS.stud, { etaText, paramInputs: analysisEls.paramInputs }, getParams);
+stopBtn.addEventListener('click', () => activeController?.abort());
 
 // Init
 async function init() {
@@ -29,48 +52,19 @@ async function init() {
   runBtn.disabled = false;
 }
 
-// Run simulation in chunks
-function runStreetSimulation(runs: number, seed?: number): Promise<RazzStreetAnalysisResult> {
-  return new Promise((resolve) => {
-    const evaluator = new LowAto5Evaluator();
-    const evalFn7: SevenCardEvalFn = (c1, c2, c3, c4, c5, c6, c7) =>
-      evaluator.evaluate([c1, c2, c3, c4, c5, c6, c7]);
-    const evalFn5: FiveCardEvalFn = handOfFiveEvalLow_Ato5Indexed;
-
-    const hands = enumerateStudStartingHands();
-    const results: RazzStreetHandResult[] = [];
-    let i = 0;
-    const chunkSize = 3;
-
-    function processChunk() {
-      const end = Math.min(i + chunkSize, hands.length);
-      for (; i < end; i++) {
-        const hand = hands[i]!;
-        const handSeed = seed != null ? seed + i : undefined;
-        const result = analyzeRazzHandStreets(hand, runs, evalFn5, evalFn7, handSeed);
-        results.push(result);
-      }
-
-      const pct = (i / hands.length) * 100;
-      progressFill.style.width = pct + '%';
-      progressText.textContent = i + '/' + hands.length + ' hands (' + pct.toFixed(0) + '%)';
-
-      if (i < hands.length) {
-        setTimeout(processChunk, 0);
-      } else {
-        // Sort by 7th street average rank (higher = better low hand in A-5)
-        results.sort((a, b) => b.seventh.averageRank - a.seventh.averageRank);
-        resolve({
-          gameType: 'razz',
-          config: { runs, opponents: 0, seed },
-          hands: results,
-          timestamp: new Date().toISOString(),
-        });
-      }
-    }
-
-    processChunk();
-  });
+function buildStreetResult(
+  results: RazzStreetHandResult[],
+  runs: number,
+  seed?: number,
+): RazzStreetAnalysisResult {
+  const sorted = [...results];
+  sorted.sort((a, b) => b.seventh.averageRank - a.seventh.averageRank);
+  return {
+    gameType: 'razz',
+    config: { runs, opponents: 0, seed },
+    hands: sorted,
+    timestamp: new Date().toISOString(),
+  };
 }
 
 // Find dominant category using Razz category names
@@ -265,31 +259,53 @@ detailOverlay.addEventListener('click', (e) => {
 
 // Run button
 runBtn.addEventListener('click', async () => {
-  const runs = parseInt(runsInput.value, 10) || 5000;
+  const runs = Math.max(100, Math.min(100000, parseInt(runsInput.value, 10) || 5000));
   const seedVal = seedInput.value ? parseInt(seedInput.value, 10) : undefined;
+  const params = { runs, opponents: 0 };
 
-  runBtn.disabled = true;
-  runBtn.textContent = 'Running...';
-  progressContainer.classList.add('active');
-  progressFill.style.width = '0%';
-  progressText.textContent = 'Starting...';
   resultsDiv.innerHTML = '';
+  activeController = beginAnalysisRun(analysisEls, 'Run Street Analysis');
+  runState = { startTime: performance.now(), handCount: HAND_COUNTS.stud };
 
-  const startTime = performance.now();
-  const result = await runStreetSimulation(
-    Math.max(100, Math.min(100000, runs)),
-    seedVal,
+  let cancelled = false;
+  let completed = 0;
+  let result: RazzStreetAnalysisResult | null = null;
+  try {
+    const pool = await runWorkerPool<RazzStreetHandResult>({
+      workerUrl: new URL('./street-razz-worker.ts', import.meta.url),
+      hands: enumerateStudStartingHands(),
+      postBatch: (worker, batch, _w, seedOffset) => {
+        worker.postMessage({ hands: batch, runs, seed: seedVal, seedOffset });
+      },
+      signal: activeController.signal,
+      onProgress: (c, total) => {
+        completed = c;
+        updateAnalysisProgress(analysisEls, runState, c, total);
+      },
+    });
+    cancelled = pool.cancelled;
+    completed = pool.completed;
+    if (pool.results.length > 0) {
+      result = buildStreetResult(pool.results, runs, seedVal);
+    }
+  } catch {
+    cancelled = true;
+  }
+
+  finishAnalysisRun(
+    PAGE_KEY,
+    analysisEls,
+    runState,
+    completed,
+    params,
+    cancelled,
+    'Click any hand for details',
   );
-  const elapsed = ((performance.now() - startTime) / 1000).toFixed(1);
-
-  progressFill.style.width = '100%';
-  progressText.textContent = '✓ Completed in ' + elapsed + 's — Click any hand for details';
-
-  currentResult = result;
-  renderSummaryTable(result);
-
-  runBtn.disabled = false;
-  runBtn.textContent = 'Run Street Analysis';
+  if (result) {
+    currentResult = result;
+    renderSummaryTable(result);
+  }
+  activeController = null;
 });
 
 init();

@@ -1,18 +1,44 @@
 import { fastHashesCreators } from '../../../src/pokerHashes7.js';
 import { enumerateOmahaStartingHands } from '../../src/hands/omaha.js';
-import { analyzeOmahaHiLoHandStreets } from '../../src/simulation/street-analysis-omaha-hilo.js';
 import { StreetHandResultHiLo, StreetAnalysisResultHiLo } from '../../src/simulation/types.js';
+import { runWorkerPool } from './worker-pool.js';
+import {
+  beginAnalysisRun,
+  bindPreRunEta,
+  finishAnalysisRun,
+  updateAnalysisProgress,
+} from './analysis-controls.js';
+import { HAND_COUNTS } from './eta.js';
 
-// DOM
+const PAGE_KEY = 'omaha-hilo-street';
+
 const initStatus = document.getElementById('initStatus')!;
 const runsInput = document.getElementById('runs') as HTMLInputElement;
 const opponentsInput = document.getElementById('opponents') as HTMLInputElement;
 const seedInput = document.getElementById('seed') as HTMLInputElement;
 const runBtn = document.getElementById('run') as HTMLButtonElement;
+const stopBtn = document.getElementById('stop') as HTMLButtonElement;
 const progressContainer = document.getElementById('progressContainer')!;
 const progressFill = document.getElementById('progressFill')!;
 const progressText = document.getElementById('progressText')!;
+const etaText = document.getElementById('etaText')!;
 const resultsDiv = document.getElementById('results')!;
+
+const analysisEls = {
+  runBtn, stopBtn, progressContainer, progressFill, progressText, etaText,
+  paramInputs: [runsInput, opponentsInput, seedInput],
+};
+
+let activeController: AbortController | null = null;
+let runState = { startTime: 0, handCount: HAND_COUNTS.omaha };
+
+const getParams = () => ({
+  runs: parseInt(runsInput.value, 10) || 1000,
+  opponents: parseInt(opponentsInput.value, 10) || 1,
+});
+
+bindPreRunEta(PAGE_KEY, HAND_COUNTS.omaha, { etaText, paramInputs: analysisEls.paramInputs }, getParams);
+stopBtn.addEventListener('click', () => activeController?.abort());
 
 // Sort state
 let sortKey = 'flop-scoop';
@@ -28,42 +54,20 @@ async function init() {
   runBtn.disabled = false;
 }
 
-// Run simulation in chunks
-function runStreetSimulation(runs: number, opponents: number, seed?: number): Promise<StreetAnalysisResultHiLo> {
-  return new Promise((resolve) => {
-    const hands = enumerateOmahaStartingHands();
-    const results: StreetHandResultHiLo[] = [];
-    let i = 0;
-    const chunkSize = 3; // Keep small to not freeze the UI too long
-
-    function processChunk() {
-      const end = Math.min(i + chunkSize, hands.length);
-      for (; i < end; i++) {
-        const hand = hands[i]!;
-        const handSeed = seed != null ? seed + i : undefined;
-        const result = analyzeOmahaHiLoHandStreets(hand, runs, opponents, handSeed);
-        results.push(result);
-      }
-
-      const pct = (i / hands.length) * 100;
-      progressFill.style.width = pct + '%';
-      progressText.textContent = i + '/' + hands.length + ' hands (' + pct.toFixed(0) + '%)';
-
-      if (i < hands.length) {
-        setTimeout(processChunk, 0);
-      } else {
-        results.sort((a, b) => b.flop.scoopPct - a.flop.scoopPct); // Default sort
-        resolve({
-          gameType: 'omaha-hi-lo',
-          config: { runs, opponents, seed },
-          hands: results,
-          timestamp: new Date().toISOString(),
-        });
-      }
-    }
-
-    processChunk();
-  });
+function buildStreetResult(
+  results: StreetHandResultHiLo[],
+  runs: number,
+  opponents: number,
+  seed?: number,
+): StreetAnalysisResultHiLo {
+  const sorted = [...results];
+  sorted.sort((a, b) => b.flop.scoopPct - a.flop.scoopPct);
+  return {
+    gameType: 'omaha-hi-lo',
+    config: { runs, opponents, seed },
+    hands: sorted,
+    timestamp: new Date().toISOString(),
+  };
 }
 
 const sortValue = (h: StreetHandResultHiLo, key: string): number => {
@@ -147,32 +151,43 @@ function renderSummaryTable(result: StreetAnalysisResultHiLo) {
 }
 
 runBtn.addEventListener('click', async () => {
-  const runs = parseInt(runsInput.value, 10) || 1000;
-  const opponents = parseInt(opponentsInput.value, 10) || 1;
+  const runs = Math.max(10, Math.min(100000, parseInt(runsInput.value, 10) || 1000));
+  const opponents = Math.max(1, Math.min(9, parseInt(opponentsInput.value, 10) || 1));
   const seedVal = seedInput.value ? parseInt(seedInput.value, 10) : undefined;
+  const params = { runs, opponents };
 
-  runBtn.disabled = true;
-  runBtn.textContent = 'Running...';
-  progressContainer.classList.add('active');
-  progressFill.style.width = '0%';
-  progressText.textContent = 'Starting...';
   resultsDiv.innerHTML = '';
+  activeController = beginAnalysisRun(analysisEls, 'Run Street Analysis');
+  runState = { startTime: performance.now(), handCount: HAND_COUNTS.omaha };
 
-  const startTime = performance.now();
-  const result = await runStreetSimulation(
-    Math.max(10, Math.min(100000, runs)),
-    Math.max(1, Math.min(9, opponents)),
-    seedVal
-  );
-  const elapsed = ((performance.now() - startTime) / 1000).toFixed(1);
+  let cancelled = false;
+  let completed = 0;
+  let result: StreetAnalysisResultHiLo | null = null;
+  try {
+    const pool = await runWorkerPool<StreetHandResultHiLo>({
+      workerUrl: new URL('./street-omaha-hi-lo-worker.ts', import.meta.url),
+      hands: enumerateOmahaStartingHands(),
+      postBatch: (worker, batch, _w, seedOffset) => {
+        worker.postMessage({ hands: batch, runs, opponents, seed: seedVal, seedOffset });
+      },
+      signal: activeController.signal,
+      onProgress: (c, total) => {
+        completed = c;
+        updateAnalysisProgress(analysisEls, runState, c, total);
+      },
+    });
+    cancelled = pool.cancelled;
+    completed = pool.completed;
+    if (pool.results.length > 0) {
+      result = buildStreetResult(pool.results, runs, opponents, seedVal);
+    }
+  } catch {
+    cancelled = true;
+  }
 
-  progressFill.style.width = '100%';
-  progressText.textContent = '✓ Completed in ' + elapsed + 's';
-
-  renderSummaryTable(result);
-
-  runBtn.disabled = false;
-  runBtn.textContent = 'Run Street Analysis';
+  finishAnalysisRun(PAGE_KEY, analysisEls, runState, completed, params, cancelled);
+  if (result) renderSummaryTable(result);
+  activeController = null;
 });
 
 init();

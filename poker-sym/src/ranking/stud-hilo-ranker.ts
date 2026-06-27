@@ -1,11 +1,18 @@
 import { SimulationConfig, SimulationResult, HandStrengthResult } from '../simulation/types.js';
 import { enumerateStudStartingHands } from '../hands/stud.js';
 import { simulateStudHiLoHand, StudHiLoEvaluator } from '../simulation/stud-hilo-montecarlo.js';
+import { ProgressCallback } from './ranker.js';
 
+/**
+ * Run a full ranking simulation for Stud Hi/Lo starting hands.
+ *
+ * Simulates all canonical starting hands using Monte Carlo method,
+ * ranks them by strength, and returns the complete result.
+ */
 export const rankStudHiLoStartingHands = (
   evaluator: StudHiLoEvaluator,
   config: SimulationConfig,
-  onProgress?: (completed: number, total: number, hand: string) => void,
+  onProgress?: ProgressCallback,
 ): SimulationResult => {
   const hands = enumerateStudStartingHands();
   const results: HandStrengthResult[] = [];
@@ -13,7 +20,13 @@ export const rankStudHiLoStartingHands = (
 
   for (let i = 0; i < total; i++) {
     const hand = hands[i]!;
-    const result = simulateStudHiLoHand(hand, config, evaluator);
+
+    const handConfig = {
+      ...config,
+      seed: config.seed !== undefined ? config.seed + i : undefined,
+    };
+
+    const result = simulateStudHiLoHand(hand, handConfig, evaluator);
     results.push(result);
 
     if (onProgress) {

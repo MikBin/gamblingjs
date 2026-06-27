@@ -11,9 +11,9 @@ Monte Carlo simulation tool for evaluating poker starting hand strength. Part of
 | Texas Hold'em | 169 | 2-card starting hands |
 | Omaha Hi | 9,854 | 4-card starting hands |
 | Omaha Hi/Lo | 9,854 | 4-card hands, split pot (high/low 8) |
-| 7-Card Stud | 1,098 | 3-card starting hands |
-| Stud Hi/Lo | 1,098 | 3-card hands, split pot (high/low 8) |
-| Razz | 1,098 | 3-card hands, lowball (A-5) |
+| 7-Card Stud | 1,755 | 3-card starting hands (suit-aware) |
+| Stud Hi/Lo | 1,755 | 3-card hands, split pot (high/low 8) |
+| Razz | 1,755 | 3-card hands, lowball (A-5) |
 
 Each simulation:
 1. Enumerates all canonical starting hands
@@ -48,13 +48,22 @@ npx vite build
 ```
 
 ### Pages
-- `index.html` — Texas Hold'em
+
+**Preflop ranking:**
+- `holdem.html` — Texas Hold'em
 - `omaha.html` — Omaha Hi (uses Web Workers)
 - `omaha-hi-lo.html` — Omaha Hi/Lo (uses Web Workers)
 - `stud.html` — 7-Card Stud
 - `stud-hi-lo.html` — Stud Hi/Lo
 - `razz.html` — Razz
-- `street.html` — Street-by-street analysis
+
+**Street-by-street analysis:**
+- `street.html` — Texas Hold'em (flop/turn/river)
+- `street-omaha.html` — Omaha Hi
+- `street-omaha-hi-lo.html` — Omaha Hi/Lo
+- `street-stud.html` — 7-Card Stud (3rd–7th street)
+- `street-stud-hi-lo.html` — Stud Hi/Lo (5th–7th street)
+- `street-razz.html` — Razz (3rd–7th street)
 
 ## CLI
 
@@ -73,6 +82,17 @@ npx tsx src/cli.ts --runs 50000 --opponents 9 --format json --output ranking.jso
 
 # Reproducible results with seed
 npx tsx src/cli.ts --runs 10000 --seed 42 --format csv
+
+# Street-by-street analysis (all 6 variants)
+npx tsx src/cli.ts --street --runs 1000 --format table
+npx tsx src/cli.ts --game omaha --street --runs 500 --format table
+npx tsx src/cli.ts --game omaha-hi-lo --street --runs 500 --opponents 1 --format table
+npx tsx src/cli.ts --game stud --street --runs 1000 --format table
+npx tsx src/cli.ts --game stud-hi-lo --street --runs 500 --opponents 1 --format table
+npx tsx src/cli.ts --game razz --street --runs 1000 --format table
+
+# Detailed Hold'em street breakdown (top 20 hands)
+npx tsx src/cli.ts --street --detailed --runs 1000 --format table
 ```
 
 ## CLI Options
@@ -85,6 +105,8 @@ npx tsx src/cli.ts --runs 10000 --seed 42 --format csv
 | `--seed` | `-s` | random | Random seed for reproducibility |
 | `--format` | `-f` | table | Output format: `table`, `json`, `csv`, `md` |
 | `--output` | `-O` | stdout | Write output to file |
+| `--street` | | off | Run street-by-street analysis instead of preflop ranking |
+| `--detailed` | | off | Detailed per-hand breakdown (Hold'em street mode) |
 
 ## Output Formats
 
@@ -126,19 +148,28 @@ poker-sym/
 │   │   ├── canonical.ts          # Canonical hand grouping
 │   │   ├── holdem.ts             # 169 Texas Hold'em starting hands
 │   │   ├── omaha.ts              # 9,854 Omaha starting hands
-│   │   └── stud.ts               # 1,098 Stud/Razz starting hands
+│   │   └── stud.ts               # 1,755 Stud/Razz starting hands
 │   ├── simulation/
 │   │   ├── types.ts              # Shared interfaces
 │   │   ├── montecarlo.ts         # Hold'em simulation engine
+│   │   ├── street-analysis.ts    # Hold'em/Omaha street analysis
+│   │   ├── stud-street-analysis.ts
+│   │   ├── stud-hilo-street-analysis.ts
+│   │   ├── razz-street-analysis.ts
+│   │   ├── street-analysis-omaha-hilo.ts
 │   │   ├── omaha-montecarlo.ts   # Omaha Hi simulation engine
 │   │   ├── omaha-hilo-montecarlo.ts  # Omaha Hi/Lo simulation
 │   │   ├── stud-montecarlo.ts    # 7-Card Stud simulation
 │   │   ├── stud-hilo-montecarlo.ts   # Stud Hi/Lo simulation
 │   │   └── razz-montecarlo.ts    # Razz simulation
 │   ├── ranking/
-│   │   ├── ranker.ts             # Orchestrator
+│   │   ├── ranker.ts             # Preflop rankers
+│   │   ├── street-ranker.ts      # Hold'em street ranker
+│   │   ├── *-street-ranker.ts    # Street rankers per variant
 │   │   └── tiers.ts              # Tier classification
-│   └── output.ts                 # Formatters (table/json/csv/md)
+│   ├── cli-street.ts             # Street analysis CLI runner
+│   ├── output-street.ts          # Hold'em street formatters
+│   └── output-street-variants.ts # Street formatters for all variants
 ├── dashboard/
 │   ├── index.html                # Hold'em dashboard page
 │   ├── omaha.html                # Omaha Hi dashboard page
