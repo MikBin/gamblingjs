@@ -1,12 +1,16 @@
 export type {
   Action,
+  ActionRecord,
   ActionType,
-  DecisionContext,
   GameEvent,
   GameEventType,
   GameState,
   HandResult,
+  Observation,
+  PlayerPublicView,
   PotWinner,
+  PublicObservation,
+  PublicUpCards,
   SeatState,
   SeatStatus,
 } from './engine/state';
@@ -33,6 +37,7 @@ export type { RngSource } from './engine/rng';
 export { bigBlindOf, computeLegalActions, streetMaxWager, toCallFor } from './engine/actions';
 
 export {
+  advanceToNextDecision,
   applyAction,
   cloneState,
   countNonFolded,
@@ -40,6 +45,8 @@ export {
   firstToAct,
   hydrateState,
   initHand,
+  observe,
+  observePublic,
   refundUncalled,
   resumeHand,
   runBettingRound,
@@ -52,6 +59,6 @@ export { ensureHighHashes, resolveHand } from './evaluation/resolver';
 export type { PlayerAgent } from './agents/types';
 export { alwaysCallAgent, alwaysFoldAgent } from './agents/stub';
 
-export { playHand, replayHand, toReplayAgent } from './table';
+export { playHand, replayHand, Table, toReplayAgent } from './table';
 export { standardHoldem } from './config/presets';
 export type { HoldemPreset } from './config/presets';

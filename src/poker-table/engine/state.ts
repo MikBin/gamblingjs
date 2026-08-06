@@ -65,16 +65,46 @@ export interface GameEvent {
   winners?: PotWinner[];
 }
 
-export interface DecisionContext {
+export interface PlayerPublicView {
+  seat: number;
+  stack: number;
+  bet: number;
+  wagered: number;
+  status: SeatStatus;
+}
+
+export interface PublicUpCards {
+  seat: number;
+  cards: number[];
+}
+
+export interface ActionRecord {
   seat: number;
   streetIndex: number;
+  type: ActionType;
+  amount?: number;
+  to?: number;
+}
+
+export interface PublicObservation {
+  streetIndex: number;
   streetName: string;
-  myHole: number[];
   community: number[];
-  myStack: number;
+  up: PublicUpCards[];
+  players: PlayerPublicView[];
+  actionLog: ActionRecord[];
   pot: number;
+}
+
+export interface Observation extends PublicObservation {
+  seat: number;
+  actingSeat: number;
+  buttonSeat: number;
+  myHole: number[];
   toCall: number;
   legalActions: Action[];
+  isTerminal: boolean;
+  revealedHole?: PublicUpCards[];
 }
 
 export interface HandResult {

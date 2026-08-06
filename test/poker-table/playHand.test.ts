@@ -97,14 +97,14 @@ describe('computeLegalActions (heads-up NL after blinds)', () => {
 });
 
 const raiseToAgent = (to: number): PlayerAgent => ({
-  decide: (ctx: { seat: number; streetIndex: number; legalActions: Action[] }): Action => {
-    const raise = ctx.legalActions.find((a) => a.type === 'raise');
-    if (raise) return { type: 'raise', seat: ctx.seat, streetIndex: ctx.streetIndex, to };
-    const call = ctx.legalActions.find((a) => a.type === 'call');
+  decide: (obs) => {
+    const raise = obs.legalActions.find((a) => a.type === 'raise');
+    if (raise) return { type: 'raise', seat: obs.seat, streetIndex: obs.streetIndex, to };
+    const call = obs.legalActions.find((a) => a.type === 'call');
     if (call) return call;
-    const check = ctx.legalActions.find((a) => a.type === 'check');
+    const check = obs.legalActions.find((a) => a.type === 'check');
     if (check) return check;
-    return { type: 'fold', seat: ctx.seat, streetIndex: ctx.streetIndex };
+    return { type: 'fold', seat: obs.seat, streetIndex: obs.streetIndex };
   },
 });
 
@@ -159,14 +159,14 @@ describe('playHand — heads-up NL skeleton', () => {
 
   it('handles a preflop all-in that is called (runs it out, zero-sum)', () => {
     const allInAgent: PlayerAgent = {
-      decide: (ctx) => {
-        const allin = ctx.legalActions.find((a) => a.type === 'allin');
+      decide: (obs) => {
+        const allin = obs.legalActions.find((a) => a.type === 'allin');
         if (allin) return allin;
-        const call = ctx.legalActions.find((a) => a.type === 'call');
+        const call = obs.legalActions.find((a) => a.type === 'call');
         if (call) return call;
-        const check = ctx.legalActions.find((a) => a.type === 'check');
+        const check = obs.legalActions.find((a) => a.type === 'check');
         if (check) return check;
-        return { type: 'fold', seat: ctx.seat, streetIndex: ctx.streetIndex };
+        return { type: 'fold', seat: obs.seat, streetIndex: obs.streetIndex };
       },
     };
     const res = playHand(hu.table, hu.hand, [allInAgent, alwaysCallAgent], 88);

@@ -1,6 +1,6 @@
-import type { Action, DecisionContext, GameEvent } from '../engine/state';
+import type { Action, GameEvent, Observation } from '../engine/state';
 
 export interface PlayerAgent {
-  decide(ctx: DecisionContext, legalActions: Action[]): Action;
+  decide(observation: Observation): Action;
   onEvent?(event: GameEvent): void;
 }

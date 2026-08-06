@@ -1,5 +1,16 @@
 import type { HandConfig, TableConfig } from '../config/types';
-import type { Action, DecisionContext, GameEvent, GameState, PotWinner, SeatState } from './state';
+import type {
+  Action,
+  ActionRecord,
+  GameEvent,
+  GameState,
+  Observation,
+  PlayerPublicView,
+  PotWinner,
+  PublicObservation,
+  PublicUpCards,
+  SeatState,
+} from './state';
 import { bigBlindOf, computeLegalActions, streetMaxWager, toCallFor } from './actions';
 import { resolveHand } from '../evaluation/resolver';
 import type { PlayerAgent } from '../agents/types';
@@ -253,21 +264,90 @@ function needsAction(state: GameState, idx: number): boolean {
   return seat.wageredThisStreet < streetMaxWager(state);
 }
 
-function buildContext(state: GameState): DecisionContext {
-  const seat = state.seats[state.actingSeat]!;
+export function observePublic(state: GameState): PublicObservation {
   let pot = 0;
-  for (const s of state.seats) pot += s.wageredTotal;
+  const players: PlayerPublicView[] = state.seats.map((s) => {
+    pot += s.wageredTotal;
+    return {
+      seat: s.index,
+      stack: s.stack,
+      bet: s.wageredThisStreet,
+      wagered: s.wageredTotal,
+      status: s.status,
+    };
+  });
+  const up: PublicUpCards[] = state.seats
+    .filter((s) => s.up.length > 0)
+    .map((s) => ({ seat: s.index, cards: [...s.up] }));
+  const actionLog: ActionRecord[] = state.actions.map((a) => {
+    const r: ActionRecord = { seat: a.seat, streetIndex: a.streetIndex, type: a.type };
+    if (a.amount !== undefined) r.amount = a.amount;
+    if (a.to !== undefined) r.to = a.to;
+    return r;
+  });
   return {
-    seat: seat.index,
     streetIndex: state.streetIndex,
     streetName: state.handCfg.streets[state.streetIndex]?.name ?? `street-${state.streetIndex}`,
-    myHole: [...seat.hole],
     community: [...state.community],
-    myStack: seat.stack,
+    up,
+    players,
+    actionLog,
     pot,
-    toCall: toCallFor(state, seat.index),
-    legalActions: computeLegalActions(state, state.handCfg),
   };
+}
+
+export function observe(state: GameState, seat: number): Observation {
+  const mySeat = state.seats[seat];
+  if (!mySeat) throw new Error(`invalid seat ${seat}`);
+  const obs: Observation = {
+    ...observePublic(state),
+    seat,
+    actingSeat: state.actingSeat,
+    buttonSeat: state.buttonSeat,
+    myHole: [...mySeat.hole],
+    toCall: toCallFor(state, seat),
+    legalActions:
+      seat === state.actingSeat && !state.isTerminal
+        ? computeLegalActions(state, state.handCfg)
+        : [],
+    isTerminal: state.isTerminal,
+  };
+  if (state.isTerminal) {
+    obs.revealedHole = state.seats
+      .filter((s) => s.status !== 'folded' && s.status !== 'out')
+      .map((s) => ({ seat: s.index, cards: [...s.hole] }));
+  }
+  return obs;
+}
+
+function nextSeatNeedingAction(state: GameState, afterSeat: number): number {
+  const n = state.seats.length;
+  for (let k = 1; k <= n; k++) {
+    const idx = (afterSeat + k) % n;
+    if (needsAction(state, idx)) return idx;
+  }
+  return -1;
+}
+
+export function advanceToNextDecision(input: GameState, emit?: (e: GameEvent) => void): GameState {
+  let st = input;
+  const handCfg = st.handCfg;
+  let justActed = st.actingSeat;
+  for (;;) {
+    if (countNonFolded(st) <= 1) return settleAndEmit(st, handCfg, emit);
+    const next = nextSeatNeedingAction(st, justActed);
+    if (next !== -1) {
+      st.actingSeat = next;
+      return st;
+    }
+    emit?.({ type: 'betting-complete', streetIndex: st.streetIndex });
+    st = refundUncalled(st);
+    const nextSi = st.streetIndex + 1;
+    if (nextSi >= handCfg.streets.length) return settleAndEmit(st, handCfg, emit);
+    st = dealStreet(st, nextSi);
+    emit?.({ type: 'dealt', streetIndex: nextSi });
+    justActed = (st.actingSeat + st.seats.length - 1) % st.seats.length;
+  }
 }
 
 export function refundUncalled(state: GameState): GameState {
@@ -312,8 +392,8 @@ export function runBettingRound(
     }
     if (seatIdx === -1) break;
     s.actingSeat = seatIdx;
-    const ctx = buildContext(s);
-    const action = agents[seatIdx]!.decide(ctx, ctx.legalActions);
+    const obs = observe(s, seatIdx);
+    const action = agents[seatIdx]!.decide(obs);
     s = applyAction(s, action, handCfg);
     emit?.({ type: 'action', streetIndex: s.streetIndex, action });
     cursor = (seatIdx + 1) % n;

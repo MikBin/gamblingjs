@@ -1,5 +1,7 @@
 # Slice 03 — Step Observation/Action Surface (RL API)
 
+**Status: ✅ DONE** · 8 new tests (31 total) · coverage 100/96/100/100 · type-check + lint clean
+
 **Feature:** configurable-poker-table · **Effort:** ~5h · **Depends on:** 02
 
 ## Goal

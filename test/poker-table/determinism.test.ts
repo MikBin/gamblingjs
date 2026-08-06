@@ -70,7 +70,7 @@ describe('onEvent ordering', () => {
   it('emits every state change in order (heads-up always-call)', () => {
     const events: GameEvent[] = [];
     const recorder: PlayerAgent = {
-      decide: (ctx, legal) => alwaysCallAgent.decide(ctx, legal),
+      decide: (obs) => alwaysCallAgent.decide(obs),
       onEvent: (e) => events.push(e),
     };
     playHand(hu.table, hu.hand, [recorder, alwaysCallAgent], 4242);
