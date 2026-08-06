@@ -278,3 +278,22 @@ export function omahaHiLo(opts: { sb?: number; bb?: number; stack?: number } = {
   };
   return g;
 }
+
+// Invented variant: a pair must come from the hole cards and trips from the
+// community board. Defined entirely in config — zero engine branching.
+export function pairTripsGame(opts: { sb?: number; bb?: number; stack?: number } = {}): GamePreset {
+  const g = standardHoldem(opts);
+  g.table.gameId = 'pair-from-hole-trips-from-board';
+  g.hand.evaluation = {
+    evaluator: 'high',
+    ranking: 'high-wins',
+    composition: {
+      total: 5,
+      pools: [
+        { pool: 'hole', exactly: 2, pattern: 'pair' },
+        { pool: 'community', exactly: 3, pattern: 'trips' },
+      ],
+    },
+  };
+  return g;
+}

@@ -27,6 +27,7 @@ export type {
   EvaluatorKind,
   ForcedBetConfig,
   HandConfig,
+  HandPattern,
   RankingDirection,
   StreetConfig,
   TableConfig,
@@ -78,6 +79,7 @@ export {
   canUseSevenCardFastPath,
   combinedCards,
   enumerateCompositions,
+  patternOk,
   poolCards,
 } from './evaluation/composition';
 export type { ResolvedPools } from './evaluation/composition';
@@ -91,6 +93,7 @@ export {
   fixedLimitHoldem,
   omahaHi,
   omahaHiLo,
+  pairTripsGame,
   potLimitHoldem,
   razz,
   sevenStud,

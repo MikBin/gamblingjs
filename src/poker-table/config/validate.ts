@@ -59,6 +59,16 @@ export function validateHandConfig(handCfg: HandConfig): void {
       minTotal += lo;
       maxTotal += hi;
     }
+    if (typeof p.pattern === 'string') {
+      const selectable = p.exactly ?? p.max ?? a;
+      const required =
+        p.pattern === 'pair' ? 2 : p.pattern === 'trips' ? 3 : p.pattern === 'straight' ? 5 : 0;
+      if (required > 0 && selectable < required) {
+        throw new Error(
+          `pool "${p.pool}" pattern "${p.pattern}" needs >= ${required} selectable cards (got ${selectable})`,
+        );
+      }
+    }
   }
   if (selector.total < minTotal || selector.total > maxTotal) {
     throw new Error(
