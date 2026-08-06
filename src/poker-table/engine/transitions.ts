@@ -1,5 +1,5 @@
 import type { HandConfig, TableConfig } from '../config/types';
-import type { Action, DecisionContext, GameState, PotWinner, SeatState } from './state';
+import type { Action, DecisionContext, GameEvent, GameState, PotWinner, SeatState } from './state';
 import { bigBlindOf, computeLegalActions, streetMaxWager, toCallFor } from './actions';
 import { resolveHand } from '../evaluation/resolver';
 import type { PlayerAgent } from '../agents/types';
@@ -295,6 +295,7 @@ export function runBettingRound(
   state: GameState,
   handCfg: HandConfig,
   agents: PlayerAgent[],
+  emit?: (e: GameEvent) => void,
 ): GameState {
   let s = state;
   let cursor = s.actingSeat;
@@ -314,10 +315,62 @@ export function runBettingRound(
     const ctx = buildContext(s);
     const action = agents[seatIdx]!.decide(ctx, ctx.legalActions);
     s = applyAction(s, action, handCfg);
+    emit?.({ type: 'action', streetIndex: s.streetIndex, action });
     cursor = (seatIdx + 1) % n;
     if (++guard > 100000) throw new Error('betting round did not converge');
   }
+  emit?.({ type: 'betting-complete', streetIndex: s.streetIndex });
   return refundUncalled(s);
+}
+
+function settleAndEmit(
+  state: GameState,
+  handCfg: HandConfig,
+  emit?: (e: GameEvent) => void,
+): GameState {
+  void handCfg;
+  const alive = countNonFolded(state);
+  const s = settle(state);
+  if (alive > 1) emit?.({ type: 'showdown', winners: s.winners });
+  emit?.({ type: 'hand-ended', winners: s.winners });
+  return s;
+}
+
+export function resumeHand(
+  state: GameState,
+  handCfg: HandConfig,
+  agents: PlayerAgent[],
+  emit?: (e: GameEvent) => void,
+): GameState {
+  let s = state;
+  if (s.isTerminal) return s;
+
+  const runCurrentStreet = (): boolean => {
+    if (countNonFolded(s) <= 1) return false;
+    if (anyActive(s)) {
+      s = runBettingRound(s, handCfg, agents, emit);
+      if (countNonFolded(s) <= 1) return false;
+    }
+    return true;
+  };
+
+  if (!runCurrentStreet()) return settleAndEmit(s, handCfg, emit);
+
+  for (let si = s.streetIndex + 1; si < handCfg.streets.length; si++) {
+    if (countNonFolded(s) <= 1) break;
+    s = dealStreet(s, si);
+    emit?.({ type: 'dealt', streetIndex: si });
+    if (!runCurrentStreet()) break;
+  }
+  return settleAndEmit(s, handCfg, emit);
+}
+
+export function serializeState(state: GameState): string {
+  return JSON.stringify(state);
+}
+
+export function hydrateState(json: string): GameState {
+  return JSON.parse(json) as GameState;
 }
 
 export function settle(state: GameState): GameState {

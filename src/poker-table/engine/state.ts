@@ -50,6 +50,21 @@ export interface PotWinner {
   rank: number;
 }
 
+export type GameEventType =
+  | 'hand-started'
+  | 'dealt'
+  | 'action'
+  | 'betting-complete'
+  | 'showdown'
+  | 'hand-ended';
+
+export interface GameEvent {
+  type: GameEventType;
+  streetIndex?: number;
+  action?: Action;
+  winners?: PotWinner[];
+}
+
 export interface DecisionContext {
   seat: number;
   streetIndex: number;

@@ -1,5 +1,7 @@
 # Slice 02 — Deterministic Replay
 
+**Status: ✅ DONE** · 6 new tests (23 total) · type-check + lint clean
+
 **Feature:** configurable-poker-table · **Effort:** ~3h · **Depends on:** 01
 
 ## Goal

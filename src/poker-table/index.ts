@@ -2,6 +2,8 @@ export type {
   Action,
   ActionType,
   DecisionContext,
+  GameEvent,
+  GameEventType,
   GameState,
   HandResult,
   PotWinner,
@@ -36,9 +38,12 @@ export {
   countNonFolded,
   dealStreet,
   firstToAct,
+  hydrateState,
   initHand,
   refundUncalled,
+  resumeHand,
   runBettingRound,
+  serializeState,
   settle,
 } from './engine/transitions';
 
@@ -47,6 +52,6 @@ export { ensureHighHashes, resolveHand } from './evaluation/resolver';
 export type { PlayerAgent } from './agents/types';
 export { alwaysCallAgent, alwaysFoldAgent } from './agents/stub';
 
-export { playHand } from './table';
+export { playHand, replayHand, toReplayAgent } from './table';
 export { standardHoldem } from './config/presets';
 export type { HoldemPreset } from './config/presets';
