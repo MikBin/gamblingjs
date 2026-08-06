@@ -8,7 +8,8 @@ coverage
 compiled
 .awcache
 .rpt2_cache
-docs
+docs/*
+!docs/feature/
 *.map
 dist
 # Ensure no transpiled artifacts live under source trees
