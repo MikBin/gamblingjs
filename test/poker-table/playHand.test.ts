@@ -43,12 +43,33 @@ describe('createRng', () => {
 });
 
 describe('resolveHand', () => {
+  const sel = {
+    total: 5,
+    pools: [
+      { pool: 'hole' as const, min: 0, max: 5 },
+      { pool: 'community' as const, min: 0, max: 5 },
+    ],
+  };
+
   it('returns a numeric rank for high', () => {
-    expect(typeof resolveHand([0, 13], [1, 2, 3, 4, 5], 'high')).toBe('number');
+    const r = resolveHand(
+      { hole: [0, 13], door: [], community: [1, 2, 3, 4, 5] },
+      sel,
+      'high',
+      'high-wins',
+    );
+    expect(typeof r.rank).toBe('number');
   });
 
-  it('throws for non-high evaluators in slice 01', () => {
-    expect(() => resolveHand([0, 13], [1, 2, 3, 4, 5], 'low8')).toThrow();
+  it('throws for non-high evaluators in slice 04', () => {
+    expect(() =>
+      resolveHand(
+        { hole: [0, 13], door: [], community: [1, 2, 3, 4, 5] },
+        sel,
+        'low8',
+        'high-wins',
+      ),
+    ).toThrow();
   });
 });
 
