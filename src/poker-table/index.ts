@@ -55,10 +55,19 @@ export {
 } from './engine/transitions';
 
 export { ensureHighHashes, resolveHand } from './evaluation/resolver';
+export type { HandResolution } from './evaluation/resolver';
+export {
+  canUseSevenCardFastPath,
+  combinedCards,
+  enumerateCompositions,
+  poolCards,
+} from './evaluation/composition';
+export type { ResolvedPools } from './evaluation/composition';
 
 export type { PlayerAgent } from './agents/types';
 export { alwaysCallAgent, alwaysFoldAgent } from './agents/stub';
 
 export { playHand, replayHand, Table, toReplayAgent } from './table';
-export { standardHoldem } from './config/presets';
-export type { HoldemPreset } from './config/presets';
+export { omahaHi, sevenStud, standardHoldem } from './config/presets';
+export type { GamePreset } from './config/presets';
+export { dealtCounts, validateHandConfig } from './config/validate';

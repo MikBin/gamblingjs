@@ -20,6 +20,7 @@ function toResult(state: GameState): HandResult {
     finalStacks: state.seats.map((s) => s.stack),
     dealt: {
       hole: state.seats.map((s) => [...s.hole]),
+      up: state.seats.map((s) => [...s.up]),
       community: [...state.community],
     },
     isTerminal: state.isTerminal,

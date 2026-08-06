@@ -1,14 +1,28 @@
 import { performance } from 'node:perf_hooks';
-import { playHand, standardHoldem, alwaysCallAgent } from '../src/poker-table';
+import {
+  alwaysCallAgent,
+  omahaHi,
+  playHand,
+  sevenStud,
+  standardHoldem,
+} from '../src/poker-table';
 import { fastHashesCreators } from '../src/pokerHashes7';
 
 fastHashesCreators.high();
 
-const hu = standardHoldem({ sb: 1, bb: 2, stack: 200 });
-const N = 100000;
-const t0 = performance.now();
-for (let i = 0; i < N; i++) {
-  playHand(hu.table, hu.hand, [alwaysCallAgent, alwaysCallAgent], i);
+const variants = [
+  { name: 'holdem', preset: standardHoldem() },
+  { name: 'omaha', preset: omahaHi() },
+  { name: 'stud', preset: sevenStud() },
+];
+const N = 50000;
+
+for (const v of variants) {
+  const t0 = performance.now();
+  for (let i = 0; i < N; i++) {
+    playHand(v.preset.table, v.preset.hand, [alwaysCallAgent, alwaysCallAgent], i);
+  }
+  const dt = performance.now() - t0;
+  console.log(`${v.name.padEnd(7)} ${N} hands in ${dt.toFixed(0)} ms -> ${Math.round((N / dt) * 1000)} hands/sec`);
 }
-const dt = performance.now() - t0;
-console.log(`${N} hands in ${dt.toFixed(0)} ms -> ${Math.round((N / dt) * 1000)} hands/sec`);
+

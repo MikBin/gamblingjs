@@ -13,8 +13,10 @@ import type {
 } from './state';
 import { bigBlindOf, computeLegalActions, streetMaxWager, toCallFor } from './actions';
 import { resolveHand } from '../evaluation/resolver';
+import type { ResolvedPools } from '../evaluation/composition';
 import type { PlayerAgent } from '../agents/types';
 import type { RngSource } from './rng';
+import { validateHandConfig } from '../config/validate';
 
 export function cloneState(s: GameState): GameState {
   return {
@@ -103,6 +105,7 @@ export function initHand(
   rng: RngSource,
   seatStacks?: number[],
 ): GameState {
+  validateHandConfig(handCfg);
   const n = tableCfg.seats.min;
   const deck = shuffleDeck(rng);
   const seats: SeatState[] = Array.from({ length: n }, (_, i) => ({
@@ -465,13 +468,17 @@ export function settle(state: GameState): GameState {
     w.stack += pot;
     winners.push({ seat: w.index, amount: pot, rank: -1 });
   } else {
-    const kind = s.handCfg.evaluation.evaluator;
-    const evaluated = alive.map((seat) => ({
-      seat,
-      rank: resolveHand(seat.hole, s.community, kind),
-    }));
+    const { evaluator: kind, ranking, composition } = s.handCfg.evaluation;
+    const preferLower = ranking === 'low-wins';
+    const evaluated = alive.map((seat) => {
+      const pools: ResolvedPools = { hole: seat.hole, door: seat.up, community: s.community };
+      const { rank } = resolveHand(pools, composition, kind, ranking);
+      return { seat, rank };
+    });
     let best = evaluated[0]!.rank;
-    for (const e of evaluated) if (e.rank > best) best = e.rank;
+    for (const e of evaluated) {
+      if ((preferLower && e.rank < best) || (!preferLower && e.rank > best)) best = e.rank;
+    }
     const tops = evaluated.filter((e) => e.rank === best);
     tops.sort((a, b) => a.seat.index - b.seat.index);
     const share = Math.floor(pot / tops.length);

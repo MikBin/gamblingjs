@@ -1,5 +1,7 @@
 # Slice 04 — Composition Generalization
 
+**Status: ✅ DONE** · 11 new tests (42 total) · coverage 100/96/100/100 · holdem ~50k / stud ~44k / omaha ~14k hands/sec
+
 **Feature:** configurable-poker-table · **Effort:** ~4h · **Depends on:** 01
 
 ## Goal

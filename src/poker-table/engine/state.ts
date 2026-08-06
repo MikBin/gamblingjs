@@ -111,6 +111,6 @@ export interface HandResult {
   winners: PotWinner[];
   actions: Action[];
   finalStacks: number[];
-  dealt: { hole: number[][]; community: number[] };
+  dealt: { hole: number[][]; up: number[][]; community: number[] };
   isTerminal: boolean;
 }
