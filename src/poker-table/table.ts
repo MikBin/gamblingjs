@@ -18,6 +18,11 @@ function toResult(state: GameState): HandResult {
     winners: state.winners,
     actions: state.actions,
     finalStacks: state.seats.map((s) => s.stack),
+    pots: state.pots.map((p) => ({
+      amount: p.amount,
+      eligible: [...p.eligible],
+      winners: [...p.winners],
+    })),
     dealt: {
       hole: state.seats.map((s) => [...s.hole]),
       up: state.seats.map((s) => [...s.up]),

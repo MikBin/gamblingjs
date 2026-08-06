@@ -236,3 +236,45 @@ export function studBringIn(
   }));
   return stud;
 }
+
+export function razz(opts: { ante?: number; bringIn?: number; stack?: number } = {}): GamePreset {
+  const g = studBringIn(opts);
+  g.table.gameId = 'razz';
+  g.hand.evaluation = {
+    evaluator: 'A5-low',
+    ranking: 'low-wins',
+    composition: { total: 5, pools: [{ pool: 'hand', min: 0, max: 5 }] },
+  };
+  return g;
+}
+
+export function deuceSeven(
+  opts: { ante?: number; bringIn?: number; stack?: number } = {},
+): GamePreset {
+  const g = studBringIn(opts);
+  g.table.gameId = '2-7-lowball';
+  g.hand.evaluation = {
+    evaluator: '2-7-low',
+    ranking: 'low-wins',
+    composition: { total: 5, pools: [{ pool: 'hand', min: 0, max: 5 }] },
+  };
+  return g;
+}
+
+export function omahaHiLo(opts: { sb?: number; bb?: number; stack?: number } = {}): GamePreset {
+  const g = omahaHi(opts);
+  g.table.gameId = 'omaha-hilo';
+  g.hand.evaluation = {
+    evaluator: 'hi-lo',
+    ranking: 'high-wins',
+    lowQualify: 8,
+    composition: {
+      total: 5,
+      pools: [
+        { pool: 'hole', exactly: 2 },
+        { pool: 'community', exactly: 3 },
+      ],
+    },
+  };
+  return g;
+}

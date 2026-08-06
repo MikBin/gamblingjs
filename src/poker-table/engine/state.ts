@@ -41,13 +41,22 @@ export interface GameState {
   actions: Action[];
   deck: number[];
   winners: PotWinner[];
+  pots: PotTier[];
   isTerminal: boolean;
+}
+
+export interface PotTier {
+  amount: number;
+  eligible: number[];
+  winners: number[];
 }
 
 export interface PotWinner {
   seat: number;
   amount: number;
   rank: number;
+  potIndex?: number;
+  half?: 'high' | 'low';
 }
 
 export type GameEventType =
@@ -111,6 +120,7 @@ export interface HandResult {
   winners: PotWinner[];
   actions: Action[];
   finalStacks: number[];
+  pots: PotTier[];
   dealt: { hole: number[][]; up: number[][]; community: number[] };
   isTerminal: boolean;
 }

@@ -61,12 +61,12 @@ describe('resolveHand', () => {
     expect(typeof r.rank).toBe('number');
   });
 
-  it('throws for non-high evaluators in slice 04', () => {
+  it('throws for hi-lo from resolveHand (use resolveHiLo instead)', () => {
     expect(() =>
       resolveHand(
         { hole: [0, 13], door: [], community: [1, 2, 3, 4, 5] },
         sel,
-        'low8',
+        'hi-lo',
         'high-wins',
       ),
     ).toThrow();

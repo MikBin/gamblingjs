@@ -20,8 +20,8 @@ beforeAll(() => {
   fastHashesCreators.high();
 });
 
-// card index -> (rank=i%13, suit=floor(i/13)); lower key == lower exposed card
-const cardKey = (c: number): number => (c % 13) * 4 + Math.floor(c / 13);
+// cards are encoded rank*4+suit (rank=c>>2, 0='2' ... 12='A'); lower index == lower card
+const cardKey = (c: number): number => c;
 const zeroSum = (final: number[]): number => final.reduce((a, b) => a + b, 0);
 
 describe('antes (forced bets)', () => {

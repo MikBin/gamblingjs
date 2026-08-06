@@ -6,13 +6,15 @@ import type {
   GameState,
   Observation,
   PlayerPublicView,
+  PotTier,
   PotWinner,
   PublicObservation,
   PublicUpCards,
   SeatState,
 } from './state';
 import { bigBlindOf, computeLegalActions, streetMaxWager, toCallFor } from './actions';
-import { resolveHand } from '../evaluation/resolver';
+import { buildPots } from './pot';
+import { resolveHand, resolveHiLo, splitHiLo } from '../evaluation/resolver';
 import type { ResolvedPools } from '../evaluation/composition';
 import type { PlayerAgent } from '../agents/types';
 import type { RngSource } from './rng';
@@ -30,6 +32,11 @@ export function cloneState(s: GameState): GameState {
     deck: [...s.deck],
     actions: [...s.actions],
     winners: [...s.winners],
+    pots: s.pots.map((p) => ({
+      amount: p.amount,
+      eligible: [...p.eligible],
+      winners: [...p.winners],
+    })),
   };
 }
 
@@ -65,9 +72,10 @@ function nextActive(state: GameState, from: number): number {
   return -1;
 }
 
-// card index -> (rank=i%13, suit=floor(i/13)); lower key == lower exposed card
+// cards are encoded as rank*4+suit (rank = c>>2, 0='2' ... 12='A'); the index
+// itself is therefore rank-primary / suit-secondary, so lower index == lower card.
 function cardKey(c: number): number {
-  return (c % 13) * 4 + Math.floor(c / 13);
+  return c;
 }
 
 function qualifyingSeat(state: GameState, lowest: boolean): number {
@@ -182,6 +190,7 @@ export function initHand(
     actions: [],
     deck,
     winners: [],
+    pots: [],
     isTerminal: false,
   };
   const preflop = handCfg.streets[0]?.deal;
@@ -515,39 +524,84 @@ export function hydrateState(json: string): GameState {
 
 export function settle(state: GameState): GameState {
   const s = cloneState(state);
-  let pot = 0;
-  for (const seat of s.seats) pot += seat.wageredTotal;
-  const alive = s.seats.filter((seat) => seat.status !== 'folded' && seat.status !== 'out');
-  const winners: PotWinner[] = [];
+  const wagered = s.seats.map((seat) => seat.wageredTotal);
+  const eligibleFor = s.seats.map((seat) => seat.status !== 'folded' && seat.status !== 'out');
+  const alive = s.seats.filter((seat) => eligibleFor[seat.index]);
+  const { tiers, refund } = buildPots(wagered, eligibleFor);
+  if (refund) s.seats[refund.seat]!.stack += refund.amount;
 
-  if (alive.length === 1) {
-    const w = alive[0]!;
-    w.stack += pot;
-    winners.push({ seat: w.index, amount: pot, rank: -1 });
-  } else {
-    const { evaluator: kind, ranking, composition } = s.handCfg.evaluation;
-    const preferLower = ranking === 'low-wins';
-    const evaluated = alive.map((seat) => {
+  const { evaluator: kind, ranking, composition, lowQualify } = s.handCfg.evaluation;
+  const isHiLo = kind === 'hi-lo';
+
+  const rankOf = new Map<number, number>(); // normalized: higher is better
+  const hiloOf = new Map<number, { high: number; low: number }>();
+  if (alive.length > 1) {
+    for (const seat of alive) {
       const pools: ResolvedPools = { hole: seat.hole, door: seat.up, community: s.community };
-      const { rank } = resolveHand(pools, composition, kind, ranking);
-      return { seat, rank };
-    });
-    let best = evaluated[0]!.rank;
-    for (const e of evaluated) {
-      if ((preferLower && e.rank < best) || (!preferLower && e.rank > best)) best = e.rank;
+      if (isHiLo) {
+        hiloOf.set(seat.index, resolveHiLo(pools, composition, lowQualify ?? 8));
+      } else {
+        rankOf.set(seat.index, resolveHand(pools, composition, kind, ranking).rank);
+      }
     }
-    const tops = evaluated.filter((e) => e.rank === best);
-    tops.sort((a, b) => a.seat.index - b.seat.index);
-    const share = Math.floor(pot / tops.length);
-    const remainder = pot - share * tops.length;
-    tops.forEach((e, i) => {
-      const amount = share + (i === 0 ? remainder : 0);
-      e.seat.stack += amount;
-      winners.push({ seat: e.seat.index, amount, rank: e.rank });
-    });
   }
 
+  const winners: PotWinner[] = [];
+  const pots: PotTier[] = [];
+
+  tiers.forEach((tier, idx) => {
+    const resolved = tier.eligible; // buildPots guarantees a non-empty eligible set
+
+    if (!isHiLo) {
+      let best = rankOf.get(resolved[0]!) ?? Number.NEGATIVE_INFINITY;
+      for (const si of resolved) {
+        const r = rankOf.get(si) ?? Number.NEGATIVE_INFINITY;
+        if (r > best) best = r;
+      }
+      const tops = resolved
+        .filter((si) => (rankOf.get(si) ?? Number.NEGATIVE_INFINITY) === best)
+        .sort((a, b) => a - b);
+      const share = Math.floor(tier.amount / tops.length);
+      const remainder = tier.amount - share * tops.length;
+      tops.forEach((si, i) => {
+        const amount = share + (i === 0 ? remainder : 0);
+        s.seats[si]!.stack += amount;
+        winners.push({ seat: si, amount, rank: rankOf.get(si) ?? -1, potIndex: idx });
+      });
+      pots.push({ amount: tier.amount, eligible: [...tier.eligible], winners: tops });
+      return;
+    }
+
+    // hi-lo: split the tier into high and low halves
+    const { highWinners, lowWinners, hasLow, awards } = splitHiLo(resolved, hiloOf, tier.amount);
+    awards.forEach((amount, seat) => {
+      s.seats[seat]!.stack += amount;
+    });
+    highWinners.forEach((si) =>
+      winners.push({
+        seat: si,
+        amount: awards.get(si) ?? 0,
+        rank: hiloOf.get(si)!.high,
+        potIndex: idx,
+        half: 'high',
+      }),
+    );
+    lowWinners.forEach((si) =>
+      winners.push({
+        seat: si,
+        amount: awards.get(si) ?? 0,
+        rank: hiloOf.get(si)!.low,
+        potIndex: idx,
+        half: 'low',
+      }),
+    );
+    void hasLow;
+    const tierWinners = Array.from(new Set([...highWinners, ...lowWinners])).sort((a, b) => a - b);
+    pots.push({ amount: tier.amount, eligible: [...tier.eligible], winners: tierWinners });
+  });
+
   s.winners = winners;
+  s.pots = pots;
   s.phase = 'terminal';
   s.isTerminal = true;
   return s;

@@ -9,6 +9,7 @@ export type {
   Observation,
   PlayerPublicView,
   PotWinner,
+  PotTier,
   PublicObservation,
   PublicUpCards,
   SeatState,
@@ -44,6 +45,8 @@ export {
   streetMaxWager,
   toCallFor,
 } from './engine/actions';
+export { buildPots } from './engine/pot';
+export type { BuiltTier, PotBuildResult, PotRefund } from './engine/pot';
 
 export {
   advanceToNextDecision,
@@ -63,8 +66,14 @@ export {
   settle,
 } from './engine/transitions';
 
-export { ensureHighHashes, resolveHand } from './evaluation/resolver';
-export type { HandResolution } from './evaluation/resolver';
+export {
+  ensureHighHashes,
+  lowRankA5,
+  resolveHand,
+  resolveHiLo,
+  splitHiLo,
+} from './evaluation/resolver';
+export type { HandResolution, HiLoResolution, HiLoSplit } from './evaluation/resolver';
 export {
   canUseSevenCardFastPath,
   combinedCards,
@@ -78,9 +87,12 @@ export { alwaysCallAgent, alwaysFoldAgent } from './agents/stub';
 
 export { playHand, replayHand, Table, toReplayAgent } from './table';
 export {
+  deuceSeven,
   fixedLimitHoldem,
   omahaHi,
+  omahaHiLo,
   potLimitHoldem,
+  razz,
   sevenStud,
   standardHoldem,
   studBringIn,
