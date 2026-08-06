@@ -1,5 +1,7 @@
 # Slice 01 — NL Heads-Up Skeleton (Walking Skeleton)
 
+**Status: ✅ DONE** · 17 tests green · coverage 100/90/100/100 · ~48k hands/sec · type-check + lint clean
+
 **Feature:** configurable-poker-table · **Effort:** ~6h · **Depends on:** —
 
 ## Goal
