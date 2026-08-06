@@ -65,8 +65,31 @@ function nextActive(state: GameState, from: number): number {
   return -1;
 }
 
+// card index -> (rank=i%13, suit=floor(i/13)); lower key == lower exposed card
+function cardKey(c: number): number {
+  return (c % 13) * 4 + Math.floor(c / 13);
+}
+
+function qualifyingSeat(state: GameState, lowest: boolean): number {
+  let best = -1;
+  let bestKey = lowest ? Number.POSITIVE_INFINITY : Number.NEGATIVE_INFINITY;
+  for (const s of state.seats) {
+    if (s.status === 'out' || s.up.length === 0) continue;
+    const k = cardKey(s.up[0]!);
+    if ((lowest && k < bestKey) || (!lowest && k > bestKey)) {
+      best = s.index;
+      bestKey = k;
+    }
+  }
+  return best === -1 ? state.buttonSeat : best;
+}
+
 export function firstToAct(state: GameState, streetIndex: number): number {
   const n = state.seats.length;
+  const order = state.handCfg.streets[streetIndex]?.actionOrder;
+  if (order === 'low-upcard' || order === 'high-hand') {
+    return qualifyingSeat(state, order === 'low-upcard');
+  }
   if (streetIndex === 0) {
     if (n === 2) return state.buttonSeat;
     return nextActive(state, (state.buttonSeat + 3) % n);
@@ -83,7 +106,7 @@ function postBet(seat: SeatState, amount: number): void {
 }
 
 function postBlinds(state: GameState): GameState {
-  const s = cloneState(state);
+  const s = state;
   const cfg = s.handCfg.forcedBets;
   const sb = cfg.blinds?.sb ?? 1;
   const bb = cfg.blinds?.bb ?? 2;
@@ -97,6 +120,33 @@ function postBlinds(state: GameState): GameState {
   }
   s.lastRaiseSize = bb;
   return s;
+}
+
+function postAntes(state: GameState): void {
+  const ante = state.handCfg.forcedBets.ante;
+  if (!ante || ante <= 0) return;
+  for (const seat of state.seats) {
+    if (seat.status === 'out') continue;
+    const amt = Math.min(ante, seat.stack);
+    seat.stack -= amt;
+    seat.wageredTotal += amt;
+    if (seat.stack === 0) seat.status = 'allin';
+  }
+}
+
+function postBringIn(state: GameState): void {
+  const bringIn = state.handCfg.forcedBets.bringIn;
+  if (!bringIn || bringIn <= 0) return;
+  const rule = state.handCfg.streets[0]?.actionOrder;
+  const seatIdx = qualifyingSeat(state, rule !== 'high-hand');
+  const seat = state.seats[seatIdx];
+  if (!seat) return;
+  const amt = Math.min(bringIn, seat.stack);
+  seat.stack -= amt;
+  seat.wageredThisStreet += amt;
+  seat.wageredTotal += amt;
+  if (seat.stack === 0) seat.status = 'allin';
+  if (amt > state.lastRaiseSize) state.lastRaiseSize = amt;
 }
 
 export function initHand(
@@ -142,7 +192,14 @@ export function initHand(
     }
     for (let k = 0; k < preflop.community; k++) base.community.push(draw(base));
   }
-  let state = postBlinds(base);
+  postAntes(base);
+  const hasBringIn = (base.handCfg.forcedBets.bringIn ?? 0) > 0;
+  if (hasBringIn) {
+    postBringIn(base);
+  } else {
+    postBlinds(base);
+  }
+  let state = base;
   state.actingSeat = firstToAct(state, 0);
   return state;
 }

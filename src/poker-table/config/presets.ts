@@ -1,4 +1,4 @@
-import type { HandConfig, TableConfig } from './types';
+import type { BettingConfig, HandConfig, TableConfig } from './types';
 
 export interface GamePreset {
   table: TableConfig;
@@ -14,12 +14,14 @@ export function standardHoldem(
     sb?: number;
     bb?: number;
     stack?: number;
+    ante?: number;
   } = {},
 ): GamePreset {
   const seats = opts.seats ?? 2;
   const sb = opts.sb ?? 1;
   const bb = opts.bb ?? 2;
   const stack = opts.stack ?? 200;
+  const ante = opts.ante;
   return {
     table: {
       gameId: 'texas-holdem',
@@ -27,7 +29,11 @@ export function standardHoldem(
       deck: 'standard52',
     },
     hand: {
-      forcedBets: { blinds: { sb, bb }, postRule: seats === 2 ? 'heads-up' : 'standard' },
+      forcedBets: {
+        blinds: { sb, bb },
+        ...(ante ? { ante } : {}),
+        postRule: seats === 2 ? 'heads-up' : 'standard',
+      },
       stacks: { min: 1, max: 1_000_000, buyIn: stack },
       streets: [
         {
@@ -168,4 +174,65 @@ export function sevenStud(opts: { sb?: number; bb?: number; stack?: number } = {
       },
     },
   };
+}
+
+export function potLimitHoldem(
+  opts: { sb?: number; bb?: number; stack?: number; minBet?: number; minRaise?: number } = {},
+): GamePreset {
+  const sb = opts.sb ?? 1;
+  const bb = opts.bb ?? 2;
+  const stack = opts.stack ?? 200;
+  const preset = standardHoldem({ seats: 2, sb, bb, stack });
+  const potLimit: BettingConfig = {
+    type: 'pot-limit',
+    ...(opts.minBet !== undefined ? { minBet: opts.minBet } : {}),
+    ...(opts.minRaise !== undefined ? { minRaise: opts.minRaise } : {}),
+  };
+  preset.table.gameId = 'texas-holdem-pl';
+  preset.hand.streets = preset.hand.streets.map((s) => ({ ...s, betting: potLimit }));
+  return preset;
+}
+
+export function fixedLimitHoldem(
+  opts: {
+    sb?: number;
+    bb?: number;
+    smallBet?: number;
+    bigBet?: number;
+    maxRaises?: number;
+    stack?: number;
+  } = {},
+): GamePreset {
+  const sb = opts.sb ?? 1;
+  const smallBet = opts.smallBet ?? 2;
+  const bb = opts.bb ?? smallBet;
+  const bigBet = opts.bigBet ?? smallBet * 2;
+  const stack = opts.stack ?? 200;
+  const preset = standardHoldem({ seats: 2, sb, bb, stack });
+  const fl = (): BettingConfig => ({
+    type: 'fixed-limit',
+    smallBet,
+    bigBet,
+    ...(opts.maxRaises !== undefined ? { maxRaisesPerStreet: opts.maxRaises } : {}),
+  });
+  preset.table.gameId = 'texas-holdem-fl';
+  preset.hand.streets = preset.hand.streets.map((s) => ({ ...s, betting: fl() }));
+  return preset;
+}
+
+export function studBringIn(
+  opts: { ante?: number; bringIn?: number; stack?: number; sb?: number; bb?: number } = {},
+): GamePreset {
+  const ante = opts.ante ?? 1;
+  const bringIn = opts.bringIn ?? 1;
+  const stack = opts.stack ?? 200;
+  const stud = sevenStud({ stack });
+  stud.table.gameId = 'seven-card-stud-bringin';
+  stud.hand.forcedBets = { ante, bringIn, postRule: 'stud' };
+  stud.hand.streets = stud.hand.streets.map((s, i) => ({
+    ...s,
+    betting: noLimit,
+    actionOrder: i === 0 ? 'low-upcard' : 'left-of-button',
+  }));
+  return stud;
 }

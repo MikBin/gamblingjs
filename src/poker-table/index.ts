@@ -34,7 +34,16 @@ export type {
 export { createRng } from './engine/rng';
 export type { RngSource } from './engine/rng';
 
-export { bigBlindOf, computeLegalActions, streetMaxWager, toCallFor } from './engine/actions';
+export {
+  bigBlindOf,
+  computeLegalActions,
+  flBetUnit,
+  potLimitRaiseTo,
+  potTotal,
+  raisesThisStreet,
+  streetMaxWager,
+  toCallFor,
+} from './engine/actions';
 
 export {
   advanceToNextDecision,
@@ -68,6 +77,13 @@ export type { PlayerAgent } from './agents/types';
 export { alwaysCallAgent, alwaysFoldAgent } from './agents/stub';
 
 export { playHand, replayHand, Table, toReplayAgent } from './table';
-export { omahaHi, sevenStud, standardHoldem } from './config/presets';
+export {
+  fixedLimitHoldem,
+  omahaHi,
+  potLimitHoldem,
+  sevenStud,
+  standardHoldem,
+  studBringIn,
+} from './config/presets';
 export type { GamePreset } from './config/presets';
 export { dealtCounts, validateHandConfig } from './config/validate';
