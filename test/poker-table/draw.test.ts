@@ -1,5 +1,13 @@
 import { describe, it, expect } from 'vitest';
-import { alwaysCallAgent, playHand, replayHandSteps, Table } from '../../src/poker-table';
+import {
+  alwaysCallAgent,
+  playHand,
+  replayHandSteps,
+  standardHoldem,
+  Table,
+} from '../../src/poker-table';
+import { initHand } from '../../src/poker-table/engine/transitions';
+import { createRng } from '../../src/poker-table/engine/rng';
 import type { Action, Observation, PlayerAgent } from '../../src/poker-table';
 import type { HandConfig, TableConfig } from '../../src/poker-table/config/types';
 
@@ -164,5 +172,26 @@ describe('draw engine — 5-card draw mechanics', () => {
       if (++guard > 2000) throw new Error('step loop did not terminate');
     }
     expect(t.stacks().reduce((a, b) => a + b, 0)).toBe(400);
+  });
+});
+
+describe('edge: all-in from posting (no empty-action prompt)', () => {
+  it('heads-up: an all-in button/SB is skipped, not prompted', () => {
+    // Seat 0 (button/SB heads-up) has stack 1, less than the SB (5): it posts
+    // all-in. firstToAct must not return the all-in seat (would yield no legal
+    // actions and stall the hand).
+    const g = standardHoldem({ seats: 2, sb: 5, bb: 10, stack: 1000 });
+    const s = initHand(g.table, g.hand, createRng(42), [1, 1000]);
+    expect(s.seats[0]!.stack).toBe(0);
+    expect(s.seats[0]!.status).toBe('allin');
+    expect(s.actingSeat).not.toBe(0);
+  });
+
+  it('heads-up all-in-from-blind hand plays to completion (no stall)', () => {
+    const g = standardHoldem({ seats: 2, sb: 5, bb: 10, stack: 1000 });
+    // seat 0 all-in on the SB; both bots so the engine drives it to showdown.
+    const res = playHand(g.table, g.hand, [alwaysCallAgent, alwaysCallAgent], 7, [1, 1000]);
+    expect(res.isTerminal).toBe(true);
+    expect(res.finalStacks.reduce((a, b) => a + b, 0)).toBe(1001);
   });
 });

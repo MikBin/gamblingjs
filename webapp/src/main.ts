@@ -13,6 +13,7 @@ import EvaluatorView from './views/EvaluatorView.vue'
 import DocumentationView from './views/DocumentationView.vue'
 import TableView from './views/TableView.vue'
 import SitAndGoView from './views/SitAndGoView.vue'
+import InteractiveSngView from './views/InteractiveSngView.vue'
 
 const router = createRouter({
   history: createWebHistory(),
@@ -21,6 +22,7 @@ const router = createRouter({
     { path: '/evaluator', component: EvaluatorView },
     { path: '/table', component: TableView },
     { path: '/sng', component: SitAndGoView },
+    { path: '/play', component: InteractiveSngView },
     { path: '/docs', component: DocumentationView }
   ]
 })

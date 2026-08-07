@@ -42,6 +42,8 @@ export interface GameState {
   lastRaiseSize: number;
   actions: Action[];
   deck: number[];
+  /** Cards discarded during the current draw round; refilled into the deck if it runs out. */
+  drawMuck: number[];
   /** Seats that have discarded during the current draw phase (imperative step API). */
   drawnThisStreet: boolean[];
   winners: PotWinner[];

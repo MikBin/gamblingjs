@@ -10,6 +10,7 @@
           <li><router-link to="/evaluator">Evaluator</router-link></li>
           <li><router-link to="/table">Live Table</router-link></li>
           <li><router-link to="/sng">Sit &amp; Go</router-link></li>
+          <li><router-link to="/play">🎯 Play 8-Game</router-link></li>
           <li><router-link to="/docs">Docs</router-link></li>
         </ul>
         <button class="btn btn-ghost btn-circle" @click="uiStore.toggleTheme">

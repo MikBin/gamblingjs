@@ -48,6 +48,17 @@ describe('draw + omaha presets', () => {
     expect(res.finalStacks.reduce((a, b) => a + b, 0)).toBe(400);
   });
 
+  it('completes an 8-handed Triple Draw hand without deck-exhaustion failure', () => {
+    // 8-handed Triple Draw drains the 52-card deck; the engine must refill from
+    // the muck so the hand always completes (never throws "deck exhausted").
+    const g = tripleDraw27({ sb: 5, bb: 10, smallBet: 10, bigBet: 20, maxRaises: 4 });
+    g.table.seats = { min: 8, max: 8 };
+    const bots = Array.from({ length: 8 }, () => alwaysCallAgent);
+    const res = playHand(g.table, g.hand, bots, 99);
+    expect(res.isTerminal).toBe(true);
+    expect(res.finalStacks.reduce((a, b) => a + b, 0)).toBe(8 * 200);
+  });
+
   it('rejects an invalid draw config (max exceeds hole cards)', () => {
     const g = fiveCardDraw({ sb: 1, bb: 2 });
     // Tamper: ask to discard 6 from a 5-card hand.

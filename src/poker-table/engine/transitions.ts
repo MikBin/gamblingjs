@@ -32,6 +32,7 @@ export function cloneState(s: GameState): GameState {
     deck: [...s.deck],
     actions: [...s.actions],
     drawnThisStreet: [...s.drawnThisStreet],
+    drawMuck: [...s.drawMuck],
     winners: [...s.winners],
     pots: s.pots.map((p) => ({
       amount: p.amount,
@@ -104,7 +105,7 @@ export function firstToAct(state: GameState, streetIndex: number): number {
     return qualifyingSeat(state, order === 'low-upcard');
   }
   if (streetIndex === 0) {
-    if (n === 2) return state.buttonSeat;
+    if (n === 2) return nextActive(state, state.buttonSeat);
     return nextActive(state, (state.buttonSeat + 3) % n);
   }
   return nextActive(state, (state.buttonSeat + 1) % n);
@@ -195,6 +196,7 @@ export function initHand(
     actions: [],
     deck,
     drawnThisStreet: seats.map(() => false),
+    drawMuck: [],
     winners: [],
     pots: [],
     isTerminal: false,
@@ -247,6 +249,7 @@ export function dealStreet(state: GameState, streetIndex: number): GameState {
     seat.hasActedThisStreet = false;
   }
   s.drawnThisStreet = s.seats.map(() => false);
+  s.drawMuck = [];
   s.phase = s.handCfg.streets[streetIndex]?.draw ? 'drawing' : 'betting';
   s.lastRaiseSize = bigBlindOf(s.handCfg);
   s.lastAggressor = null;
@@ -354,10 +357,18 @@ export function applyAction(state: GameState, action: Action, handCfg: HandConfi
         seen.add(ix);
       }
       // Remove discarded cards (highest index first so earlier indices stay
-      // valid), then draw the same number of replacements from the deck.
+      // valid), then draw the same number of replacements from the deck. If the
+      // deck runs out mid-draw, refill it from this round's discards (the muck),
+      // so a hand always completes — never throws on deck exhaustion.
       const order = [...idxs].sort((a, b) => b - a);
-      for (const ix of order) seat.hole.splice(ix, 1);
-      for (let k = 0; k < idxs.length; k++) seat.hole.push(draw(s));
+      for (const ix of order) s.drawMuck.push(seat.hole.splice(ix, 1)[0]!);
+      for (let k = 0; k < idxs.length; k++) {
+        if (s.deck.length === 0 && s.drawMuck.length > 0) {
+          for (const c of s.drawMuck) s.deck.push(c);
+          s.drawMuck = [];
+        }
+        seat.hole.push(draw(s));
+      }
       s.drawnThisStreet[seat.index] = true;
       break;
     }
