@@ -1,6 +1,6 @@
-import type { HandConfig, TableConfig } from '../config/types';
+import type { EvaluatorKind, HandConfig, TableConfig } from '../config/types';
 
-export type ActionType = 'fold' | 'check' | 'call' | 'bet' | 'raise' | 'allin';
+export type ActionType = 'fold' | 'check' | 'call' | 'bet' | 'raise' | 'allin' | 'discard';
 
 export interface Action {
   type: ActionType;
@@ -10,6 +10,8 @@ export interface Action {
   to?: number;
   min?: number;
   max?: number;
+  /** For 'discard' actions: positions within the player's hole cards to drop (empty = stand pat). */
+  discardIndices?: number[];
 }
 
 export type SeatStatus = 'active' | 'folded' | 'allin' | 'out';
@@ -25,7 +27,7 @@ export interface SeatState {
   wageredTotal: number;
 }
 
-export type GamePhase = 'dealing' | 'betting' | 'showdown' | 'payout' | 'terminal';
+export type GamePhase = 'dealing' | 'betting' | 'drawing' | 'showdown' | 'payout' | 'terminal';
 
 export interface GameState {
   tableCfg: TableConfig;
@@ -40,6 +42,8 @@ export interface GameState {
   lastRaiseSize: number;
   actions: Action[];
   deck: number[];
+  /** Seats that have discarded during the current draw phase (imperative step API). */
+  drawnThisStreet: boolean[];
   winners: PotWinner[];
   pots: PotTier[];
   isTerminal: boolean;
@@ -93,11 +97,15 @@ export interface ActionRecord {
   type: ActionType;
   amount?: number;
   to?: number;
+  /** Public count of cards discarded on a 'discard' action (the only public tell of a draw). */
+  discardCount?: number;
 }
 
 export interface PublicObservation {
   streetIndex: number;
   streetName: string;
+  /** Ranking objective of the current hand — lets agents play high vs low games correctly. */
+  evaluator: EvaluatorKind;
   community: number[];
   up: PublicUpCards[];
   players: PlayerPublicView[];

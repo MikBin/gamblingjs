@@ -56,6 +56,14 @@ export function computeLegalActions(state: GameState, handCfg: HandConfig): Acti
   const seat = state.seats[state.actingSeat];
   if (!seat || seat.status !== 'active') return [];
   const si = state.streetIndex;
+
+  // Draw phase: the only legal action is to discard (stand pat = empty indices).
+  if (state.phase === 'drawing') {
+    const draw = handCfg.streets[si]?.draw;
+    if (!draw) return [];
+    return [{ type: 'discard', seat: seat.index, streetIndex: si, max: draw.max }];
+  }
+
   const betting = handCfg.streets[si]?.betting;
   const type = betting?.type ?? 'no-limit';
   const bb = bigBlindOf(handCfg);

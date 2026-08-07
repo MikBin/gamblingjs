@@ -43,9 +43,24 @@ export interface DealConfig {
   community: number;
 }
 
+/**
+ * A draw phase config attached to a street. When present, the engine runs a
+ * discard-and-replace round (each active player discards cards, then draws the
+ * same number from the deck) BEFORE that street's betting round. The initial
+ * deal street never carries a draw.
+ */
+export interface DrawConfig {
+  /** Which private pool players may discard from. */
+  from: 'hole';
+  /** Max cards a player may discard in this draw phase. Stand pat (discard 0) is always allowed. */
+  max: number;
+}
+
 export interface StreetConfig {
   name: string;
   deal: DealConfig;
+  /** Optional draw phase; see DrawConfig. */
+  draw?: DrawConfig;
   betting: BettingConfig;
   actionOrder: ActionOrderRule;
 }

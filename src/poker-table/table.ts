@@ -162,11 +162,49 @@ export function replayHandSteps(
     return refundUncalled(cur);
   };
 
+  // Draw round with per-action capture (mirrors runDrawRound in transitions).
+  const runDrawRound = (state: GameState): GameState => {
+    let cur = state;
+    cur.phase = 'drawing';
+    const n = cur.seats.length;
+    let cursor = cur.actingSeat;
+    const drawn = new Set<number>();
+    let guard = 0;
+    for (;;) {
+      let seatIdx = -1;
+      for (let k = 0; k < n; k++) {
+        const idx = (cursor + k) % n;
+        const seat = cur.seats[idx];
+        if (seat && seat.status === 'active' && !drawn.has(idx)) {
+          seatIdx = idx;
+          break;
+        }
+      }
+      if (seatIdx === -1) break;
+      cur.actingSeat = seatIdx;
+      const obs = observe(cur, seatIdx);
+      const action = agents[seatIdx]!.decide(obs);
+      cur = applyAction(cur, action, handCfg);
+      emit({ type: 'action', streetIndex: cur.streetIndex, action });
+      capture(cur);
+      drawn.add(seatIdx);
+      cursor = (seatIdx + 1) % n;
+      if (++guard > 100000) throw new Error('draw round did not converge');
+    }
+    cur.phase = 'betting';
+    return cur;
+  };
+
   let s = initHand(tableCfg, handCfg, rng, seatStacks);
   capture(s); // street 0 already dealt
 
   const runCurrentStreet = (): boolean => {
     if (countNonFolded(s) <= 1) return false;
+    const street = handCfg.streets[s.streetIndex];
+    if (street?.draw && anyActive(s)) {
+      s = runDrawRound(s);
+      if (countNonFolded(s) <= 1) return false;
+    }
     if (anyActive(s)) {
       s = runBettingRound(s);
       if (countNonFolded(s) <= 1) return false;

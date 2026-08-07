@@ -14,4 +14,6 @@ export type {
 } from './types';
 export { fastHorseLevels, horseGame, horseRotation } from './horse';
 export type { HorseLetter } from './horse';
+export { eightGameGame, eightGameRotation, fastEightGameLevels } from './eightgame';
+export type { EightGameLetter } from './eightgame';
 export { runSitAndGo } from './sng';

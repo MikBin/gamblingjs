@@ -94,11 +94,14 @@ export {
   createRandomAgent,
   createTightAgent,
 } from './agents/stub';
+export { chooseDiscard, discardAction } from './agents/discard';
 
 export { playHand, replayHand, replayHandSteps, Table, toReplayAgent } from './table';
 export type { HandReplayStep } from './table';
 export {
+  aFiveTripleDraw,
   deuceSeven,
+  fiveCardDraw,
   fixedLimitHoldem,
   fixedLimitRazz,
   fixedLimitStud,
@@ -106,11 +109,13 @@ export {
   omahaHiLo,
   pairTripsGame,
   potLimitHoldem,
+  potLimitOmaha,
   razz,
   sevenStud,
   standardHoldem,
   studBringIn,
   studHiLo,
+  tripleDraw27,
 } from './config/presets';
 export type { GamePreset } from './config/presets';
 export { dealtCounts, validateHandConfig } from './config/validate';
@@ -130,4 +135,6 @@ export type {
 } from './session/types';
 export { fastHorseLevels, horseGame, horseRotation } from './session/horse';
 export type { HorseLetter } from './session/horse';
+export { eightGameGame, eightGameRotation, fastEightGameLevels } from './session/eightgame';
+export type { EightGameLetter } from './session/eightgame';
 export { runSitAndGo } from './session/sng';

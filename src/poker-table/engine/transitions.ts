@@ -31,6 +31,7 @@ export function cloneState(s: GameState): GameState {
     community: [...s.community],
     deck: [...s.deck],
     actions: [...s.actions],
+    drawnThisStreet: [...s.drawnThisStreet],
     winners: [...s.winners],
     pots: s.pots.map((p) => ({
       amount: p.amount,
@@ -187,12 +188,13 @@ export function initHand(
     seats,
     community: [],
     streetIndex: 0,
-    phase: 'betting',
+    phase: handCfg.streets[0]?.draw ? 'drawing' : 'betting',
     actingSeat: 0,
     lastAggressor: null,
     lastRaiseSize: bigBlindOf(handCfg),
     actions: [],
     deck,
+    drawnThisStreet: seats.map(() => false),
     winners: [],
     pots: [],
     isTerminal: false,
@@ -244,6 +246,8 @@ export function dealStreet(state: GameState, streetIndex: number): GameState {
     seat.wageredThisStreet = 0;
     seat.hasActedThisStreet = false;
   }
+  s.drawnThisStreet = s.seats.map(() => false);
+  s.phase = s.handCfg.streets[streetIndex]?.draw ? 'drawing' : 'betting';
   s.lastRaiseSize = bigBlindOf(s.handCfg);
   s.lastAggressor = null;
   s.streetIndex = streetIndex;
@@ -272,7 +276,7 @@ export function applyAction(state: GameState, action: Action, handCfg: HandConfi
   }
   const bb = bigBlindOf(handCfg);
   const curMax = streetMaxWager(s);
-  seat.hasActedThisStreet = true;
+  if (action.type !== 'discard') seat.hasActedThisStreet = true;
 
   switch (action.type) {
     case 'fold':
@@ -334,6 +338,29 @@ export function applyAction(state: GameState, action: Action, handCfg: HandConfi
       }
       break;
     }
+    case 'discard': {
+      const drawCfg = s.handCfg.streets[s.streetIndex]?.draw;
+      const max = match.max ?? drawCfg?.max ?? 0;
+      const idxs = action.discardIndices ?? [];
+      if (idxs.length > max) {
+        throw new Error(`discard ${idxs.length} exceeds max ${max}`);
+      }
+      const seen = new Set<number>();
+      for (const ix of idxs) {
+        if (!Number.isInteger(ix) || ix < 0 || ix >= seat.hole.length) {
+          throw new Error(`invalid discard index ${ix}`);
+        }
+        if (seen.has(ix)) throw new Error(`duplicate discard index ${ix}`);
+        seen.add(ix);
+      }
+      // Remove discarded cards (highest index first so earlier indices stay
+      // valid), then draw the same number of replacements from the deck.
+      const order = [...idxs].sort((a, b) => b - a);
+      for (const ix of order) seat.hole.splice(ix, 1);
+      for (let k = 0; k < idxs.length; k++) seat.hole.push(draw(s));
+      s.drawnThisStreet[seat.index] = true;
+      break;
+    }
     default:
       throw new Error(`unknown action type`);
   }
@@ -368,11 +395,13 @@ export function observePublic(state: GameState): PublicObservation {
     const r: ActionRecord = { seat: a.seat, streetIndex: a.streetIndex, type: a.type };
     if (a.amount !== undefined) r.amount = a.amount;
     if (a.to !== undefined) r.to = a.to;
+    if (a.type === 'discard') r.discardCount = a.discardIndices?.length ?? 0;
     return r;
   });
   return {
     streetIndex: state.streetIndex,
     streetName: state.handCfg.streets[state.streetIndex]?.name ?? `street-${state.streetIndex}`,
+    evaluator: state.handCfg.evaluation.evaluator,
     community: [...state.community],
     up,
     players,
@@ -414,12 +443,32 @@ function nextSeatNeedingAction(state: GameState, afterSeat: number): number {
   return -1;
 }
 
+// During a draw phase: the next active seat that has not yet discarded.
+function nextSeatNeedingDraw(state: GameState, afterSeat: number): number {
+  const n = state.seats.length;
+  for (let k = 0; k < n; k++) {
+    const idx = (afterSeat + 1 + k) % n;
+    const seat = state.seats[idx];
+    if (seat && seat.status === 'active' && !state.drawnThisStreet[idx]) return idx;
+  }
+  return -1;
+}
+
 export function advanceToNextDecision(input: GameState, emit?: (e: GameEvent) => void): GameState {
   let st = input;
   const handCfg = st.handCfg;
   let justActed = st.actingSeat;
   for (;;) {
     if (countNonFolded(st) <= 1) return settleAndEmit(st, handCfg, emit);
+    // Draw phase first: route each active seat to discard before any betting.
+    if (st.phase === 'drawing') {
+      const drawNext = nextSeatNeedingDraw(st, justActed);
+      if (drawNext !== -1) {
+        st.actingSeat = drawNext;
+        return st;
+      }
+      st.phase = 'betting';
+    }
     const next = nextSeatNeedingAction(st, justActed);
     if (next !== -1) {
       st.actingSeat = next;
@@ -488,6 +537,45 @@ export function runBettingRound(
   return refundUncalled(s);
 }
 
+// Draw phase: each active (non-all-in) seat discards once, in firstToAct order,
+// drawing replacements from the deck. All-in hands are frozen (no discard). This
+// runs as a closed loop (like runBettingRound) for the resumeHand/playHand path.
+export function runDrawRound(
+  state: GameState,
+  handCfg: HandConfig,
+  agents: PlayerAgent[],
+  emit?: (e: GameEvent) => void,
+): GameState {
+  let s = state;
+  s.phase = 'drawing';
+  const n = s.seats.length;
+  let cursor = s.actingSeat;
+  const drawn = new Set<number>();
+  let guard = 0;
+  for (;;) {
+    let seatIdx = -1;
+    for (let k = 0; k < n; k++) {
+      const idx = (cursor + k) % n;
+      const seat = s.seats[idx];
+      if (seat && seat.status === 'active' && !drawn.has(idx)) {
+        seatIdx = idx;
+        break;
+      }
+    }
+    if (seatIdx === -1) break;
+    s.actingSeat = seatIdx;
+    const obs = observe(s, seatIdx);
+    const action = agents[seatIdx]!.decide(obs);
+    s = applyAction(s, action, handCfg);
+    emit?.({ type: 'action', streetIndex: s.streetIndex, action });
+    drawn.add(seatIdx);
+    cursor = (seatIdx + 1) % n;
+    if (++guard > 100000) throw new Error('draw round did not converge');
+  }
+  s.phase = 'betting';
+  return s;
+}
+
 function settleAndEmit(
   state: GameState,
   handCfg: HandConfig,
@@ -512,6 +600,11 @@ export function resumeHand(
 
   const runCurrentStreet = (): boolean => {
     if (countNonFolded(s) <= 1) return false;
+    const street = handCfg.streets[s.streetIndex];
+    if (street?.draw && anyActive(s)) {
+      s = runDrawRound(s, handCfg, agents, emit);
+      if (countNonFolded(s) <= 1) return false;
+    }
     if (anyActive(s)) {
       s = runBettingRound(s, handCfg, agents, emit);
       if (countNonFolded(s) <= 1) return false;

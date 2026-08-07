@@ -1,6 +1,7 @@
 import type { Action, Observation } from '../engine/state';
 import type { PlayerAgent } from './types';
 import { createRng } from '../engine/rng';
+import { discardAction } from './discard';
 
 type Rng = ReturnType<typeof createRng>;
 
@@ -63,6 +64,8 @@ const findType = (legal: Action[], type: Action['type']): Action | undefined =>
 
 export const alwaysCallAgent: PlayerAgent = {
   decide(obs: Observation): Action {
+    const disc = discardAction(obs);
+    if (disc) return disc;
     const call = findType(obs.legalActions, 'call');
     if (call) return call;
     const check = findType(obs.legalActions, 'check');
@@ -73,6 +76,8 @@ export const alwaysCallAgent: PlayerAgent = {
 
 export const alwaysFoldAgent: PlayerAgent = {
   decide(obs: Observation): Action {
+    const disc = discardAction(obs);
+    if (disc) return disc;
     const fold = findType(obs.legalActions, 'fold');
     if (fold) return fold;
     const check = findType(obs.legalActions, 'check');
@@ -87,6 +92,8 @@ export function createRandomAgent(seed: number): PlayerAgent {
   const rng = createRng(seed);
   return {
     decide(obs: Observation): Action {
+      const disc = discardAction(obs);
+      if (disc) return disc;
       const legal = obs.legalActions;
       if (legal.length === 0) return fallback(obs);
       const shove = maybeShove(legal, obs, rng);
@@ -105,6 +112,8 @@ export function createAggressiveAgent(seed: number): PlayerAgent {
   const rng = createRng(seed);
   return {
     decide(obs: Observation): Action {
+      const disc = discardAction(obs);
+      if (disc) return disc;
       const legal = obs.legalActions;
       const shove = maybeShove(legal, obs, rng);
       if (shove) return shove;
@@ -140,6 +149,8 @@ export function createManiacAgent(seed: number): PlayerAgent {
   const rng = createRng(seed);
   return {
     decide(obs: Observation): Action {
+      const disc = discardAction(obs);
+      if (disc) return disc;
       const legal = obs.legalActions;
       const r = findType(legal, 'raise');
       if (r) return withSizing(r, rng, 0.7, 0.15);
@@ -161,6 +172,8 @@ export function createCallingStationAgent(seed: number): PlayerAgent {
   const rng = createRng(seed);
   return {
     decide(obs: Observation): Action {
+      const disc = discardAction(obs);
+      if (disc) return disc;
       const legal = obs.legalActions;
       const shove = maybeShove(legal, obs, rng);
       if (shove) return shove;
@@ -188,6 +201,8 @@ export function createTightAgent(seed: number): PlayerAgent {
   const rng = createRng(seed);
   return {
     decide(obs: Observation): Action {
+      const disc = discardAction(obs);
+      if (disc) return disc;
       const legal = obs.legalActions;
       const shove = maybeShove(legal, obs, rng);
       if (shove) return shove;

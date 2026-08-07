@@ -26,6 +26,27 @@ export function validateHandConfig(handCfg: HandConfig): void {
   if (handCfg.stacks.buyIn <= 0) {
     throw new Error('stacks.buyIn must be positive');
   }
+
+  // Validate any draw phases. A draw from 'hole' needs hole cards to have been
+  // dealt (through this street's own deal, since the deal precedes the draw).
+  let cumulativeHole = 0;
+  handCfg.streets.forEach((s) => {
+    cumulativeHole += s.deal.holeDown;
+    const draw = s.draw;
+    if (!draw) return;
+    if (draw.from !== 'hole') {
+      throw new Error(`draw.from "${draw.from}" is not supported (only "hole")`);
+    }
+    if (!Number.isInteger(draw.max) || draw.max < 0) {
+      throw new Error(`draw.max must be a non-negative integer (got ${draw.max})`);
+    }
+    if (cumulativeHole <= 0) {
+      throw new Error('draw from "hole" but no hole cards have been dealt');
+    }
+    if (draw.max > cumulativeHole) {
+      throw new Error(`draw.max (${draw.max}) exceeds available hole cards (${cumulativeHole})`);
+    }
+  });
   const counts = dealtCounts(handCfg);
   const available: Record<string, number> = {
     hole: counts.hole,

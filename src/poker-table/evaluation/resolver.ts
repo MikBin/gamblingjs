@@ -1,5 +1,6 @@
 import { HighEvaluator } from '../../core/HighEvaluator';
 import { LowAto5Evaluator } from '../../core/LowEvaluator';
+import { handOfFiveEvalLowBall27Indexed } from '../../pokerEvaluator5';
 import { handOfSevenEvalLowBall27Indexed } from '../../pokerEvaluator7';
 import { fastHashesCreators } from '../../pokerHashes7';
 import type { CompositionSelector, EvaluatorKind, RankingDirection } from '../config/types';
@@ -53,13 +54,16 @@ function specFor(kind: EvaluatorKind): EvalSpec {
       return {
         ensure: () => ensure('2to7'),
         rank5: (c) => {
+          if (c.length === 5)
+            return handOfFiveEvalLowBall27Indexed(c[0]!, c[1]!, c[2]!, c[3]!, c[4]!);
           if (c.length === 7)
             return handOfSevenEvalLowBall27Indexed(c[0]!, c[1]!, c[2]!, c[3]!, c[4]!, c[5]!, c[6]!);
-          throw new Error('2-7 lowball requires a 7-card pool');
+          throw new Error('2-7 lowball requires a 5- or 7-card pool');
         },
         rank7: (c) =>
           handOfSevenEvalLowBall27Indexed(c[0]!, c[1]!, c[2]!, c[3]!, c[4]!, c[5]!, c[6]!),
-        better: 'lower',
+        // The 2-7 evaluators return HIGHER = better low, so 'higher' (not 'lower').
+        better: 'higher',
       };
     case 'low8':
       return { ensure: () => undefined, rank5: (c) => lowRankA5(c, 8), better: 'lower' };

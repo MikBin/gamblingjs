@@ -373,3 +373,159 @@ export function fixedLimitRazz(
   g.hand.streets = g.hand.streets.map((s) => ({ ...s, betting: fl() }));
   return g;
 }
+
+// Shared builder for fixed-limit lowball draw games (2-7 Triple Draw and A-5
+// Triple Draw). Five hole cards, button + blinds, three draw rounds, small bets
+// on the first two betting rounds and big bets on the last two.
+function lowDrawGame(
+  evalKind: '2-7-low' | 'A5-low',
+  gameId: string,
+  opts: {
+    sb?: number;
+    bb?: number;
+    smallBet?: number;
+    bigBet?: number;
+    maxRaises?: number;
+    stack?: number;
+    ante?: number;
+  } = {},
+): GamePreset {
+  const sb = opts.sb ?? 1;
+  const bb = opts.bb ?? 2;
+  const smallBet = opts.smallBet ?? bb;
+  const bigBet = opts.bigBet ?? smallBet * 2;
+  const stack = opts.stack ?? 200;
+  const fl = (): BettingConfig => ({
+    type: 'fixed-limit',
+    smallBet,
+    bigBet,
+    bigBetFromStreet: 2,
+    ...(opts.maxRaises !== undefined ? { maxRaisesPerStreet: opts.maxRaises } : {}),
+  });
+  const draw = { from: 'hole' as const, max: 5 };
+  const drawStreet = (name: string): HandConfig['streets'][number] => ({
+    name,
+    deal: { ...post },
+    draw,
+    betting: fl(),
+    actionOrder: 'left-of-button',
+  });
+  return {
+    table: { gameId, seats: { min: 2, max: 2 }, deck: 'standard52' },
+    hand: {
+      forcedBets: {
+        blinds: { sb, bb },
+        ...(opts.ante ? { ante: opts.ante } : {}),
+        postRule: 'heads-up',
+      },
+      stacks: { min: 1, max: 1_000_000, buyIn: stack },
+      streets: [
+        {
+          name: 'predraw',
+          deal: { holeDown: 5, playerUp: 0, community: 0 },
+          betting: fl(),
+          actionOrder: 'left-of-button',
+        },
+        drawStreet('draw1'),
+        drawStreet('draw2'),
+        drawStreet('draw3'),
+      ],
+      evaluation: {
+        evaluator: evalKind,
+        ranking: 'low-wins',
+        composition: { total: 5, pools: [{ pool: 'hole', min: 0, max: 5 }] },
+      },
+    },
+  };
+}
+
+// Fixed-limit 2-7 Triple Draw: lowest 2-7 lowball hand wins (straights/flushes
+// count against, aces high). One of the eight games in the standard 8-Game mix.
+export function tripleDraw27(
+  opts: {
+    sb?: number;
+    bb?: number;
+    smallBet?: number;
+    bigBet?: number;
+    maxRaises?: number;
+    stack?: number;
+    ante?: number;
+  } = {},
+): GamePreset {
+  return lowDrawGame('2-7-low', '2-7-triple-draw', opts);
+}
+
+// Fixed-limit A-5 Triple Draw: lowest A-5 lowball hand wins (aces low; straights
+// and flushes do NOT count against). Demonstrates the draw engine's generality.
+export function aFiveTripleDraw(
+  opts: {
+    sb?: number;
+    bb?: number;
+    smallBet?: number;
+    bigBet?: number;
+    maxRaises?: number;
+    stack?: number;
+    ante?: number;
+  } = {},
+): GamePreset {
+  return lowDrawGame('A5-low', 'a-5-triple-draw', opts);
+}
+
+// No-limit 5-Card Draw: five hole cards, one draw round, high hand wins.
+export function fiveCardDraw(
+  opts: { sb?: number; bb?: number; stack?: number; ante?: number } = {},
+): GamePreset {
+  const sb = opts.sb ?? 1;
+  const bb = opts.bb ?? 2;
+  const stack = opts.stack ?? 200;
+  return {
+    table: { gameId: 'five-card-draw', seats: { min: 2, max: 2 }, deck: 'standard52' },
+    hand: {
+      forcedBets: {
+        blinds: { sb, bb },
+        ...(opts.ante ? { ante: opts.ante } : {}),
+        postRule: 'heads-up',
+      },
+      stacks: { min: 1, max: 1_000_000, buyIn: stack },
+      streets: [
+        {
+          name: 'predraw',
+          deal: { holeDown: 5, playerUp: 0, community: 0 },
+          betting: noLimit,
+          actionOrder: 'left-of-button',
+        },
+        {
+          name: 'draw',
+          deal: { ...post },
+          draw: { from: 'hole', max: 5 },
+          betting: noLimit,
+          actionOrder: 'left-of-button',
+        },
+      ],
+      evaluation: {
+        evaluator: 'high',
+        ranking: 'high-wins',
+        composition: { total: 5, pools: [{ pool: 'hole', min: 0, max: 5 }] },
+      },
+    },
+  };
+}
+
+// Pot-Limit Omaha: four hole cards (use exactly 2) + 5 community (use exactly 3),
+// pot-limit betting. One of the eight games in the standard 8-Game mix.
+export function potLimitOmaha(
+  opts: { sb?: number; bb?: number; stack?: number; minBet?: number; minRaise?: number } = {},
+): GamePreset {
+  const sb = opts.sb ?? 1;
+  const bb = opts.bb ?? 2;
+  const stack = opts.stack ?? 200;
+  const g = omahaHi({ sb, bb, stack });
+  const potLimit: BettingConfig = {
+    type: 'pot-limit',
+    ...(opts.minBet !== undefined ? { minBet: opts.minBet } : {}),
+    ...(opts.minRaise !== undefined ? { minRaise: opts.minRaise } : {}),
+  };
+  g.table.gameId = 'omaha-pl';
+  g.hand.streets = g.hand.streets.map((s) => ({ ...s, betting: potLimit }));
+  return g;
+}

@@ -3,7 +3,7 @@ import {
   ensureHighHashes,
   runSitAndGo,
   fastHorseLevels,
-  horseRotation,
+  eightGameRotation,
   createRandomAgent,
   createAggressiveAgent,
   createManiacAgent,
@@ -33,16 +33,16 @@ const CYCLE: ((seed: number) => PlayerAgent)[] = [
   createTightAgent,
 ];
 
-// A deliberately fast 8-handed HORSE turbo: ~40-55 hands, resolves in a couple
-// of minutes of playback. Blinds/antes grow every `handsPerLevel` hands; the
-// game rotates once per orbit (authentic HORSE cadence).
+// A deliberately fast 8-handed 8-Game turbo: the full WSOP mix (2-7 Triple Draw,
+// FL Hold'em, FL Omaha Hi/Lo, Razz, Stud, Stud Hi/Lo, NL Hold'em, PLO). Blinds
+// grow every `handsPerLevel` hands; the game rotates once per orbit.
 export function defaultSngConfig(seed = 2024): SitAndGoConfig {
   return {
     seats: 8,
     startingStack: 3000,
     levels: fastHorseLevels(),
     handsPerLevel: 5,
-    rotation: horseRotation(),
+    rotation: eightGameRotation(),
     rotationCadence: 'orbit',
     payouts: [0.5, 0.3, 0.2],
     seed,
@@ -134,6 +134,8 @@ export function useSitAndGo() {
         return `${name} raises to ${a.to}`;
       case 'allin':
         return `${name} is all-in${a.amount !== undefined ? ` ${a.amount}` : ''}`;
+      case 'discard':
+        return `${name} discards ${a.discardIndices?.length ?? 0}`;
       default:
         return `${name} ${a.type}`;
     }

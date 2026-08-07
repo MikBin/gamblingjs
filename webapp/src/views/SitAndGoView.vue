@@ -4,7 +4,7 @@
     <div class="card bg-base-100 shadow">
       <div class="card-body !py-3 px-4">
         <div class="flex flex-wrap items-center gap-x-4 gap-y-1 text-sm">
-          <span class="font-bold">🏇 Sit &amp; Go — 8-max HORSE (turbo)</span>
+          <span class="font-bold">🏇 Sit &amp; Go — 8-max 8-Game (turbo)</span>
           <span v-if="current" class="font-semibold">Hand {{ current.handNumber }} / {{ totalHands }}</span>
           <span v-if="current" class="badge badge-primary badge-lg">{{ current.gameLabel }}</span>
           <span v-if="current" class="badge badge-outline">Level {{ current.levelIndex + 1 }} / {{ config.levels.length }}</span>
@@ -132,7 +132,7 @@
     <div v-else class="card bg-base-100 shadow">
       <div class="card-body items-center text-center">
         <span class="text-5xl">🏇</span>
-        <p class="opacity-70">Press <b>Start SNG</b> to run a complete 8-handed HORSE Sit &amp; Go from start to finish.</p>
+        <p class="opacity-70">Press <b>Start SNG</b> to run a complete 8-handed 8-Game Sit &amp; Go from start to finish.</p>
       </div>
     </div>
 

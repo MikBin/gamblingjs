@@ -165,7 +165,7 @@ describe('2-7 lowball (low-wins)', () => {
     const ranks = res.dealt.hole.map((h, seat) =>
       handOfSevenEvalLowBall27Indexed(...[...h, ...res.dealt.up[seat]!]),
     );
-    const best = Math.min(...ranks); // 2-7: lower value = better low
+    const best = Math.max(...ranks); // 2-7: higher value = better low
     const expected = ranks
       .map((r, seat) => (r === best ? seat : -1))
       .filter((s) => s >= 0)
