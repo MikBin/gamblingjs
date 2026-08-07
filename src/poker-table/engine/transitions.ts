@@ -74,16 +74,20 @@ function nextActive(state: GameState, from: number): number {
 
 // canonical encoding: rank = c % 13 (0='2' ... 12='A'), suit = floor(c/13).
 // lower key == lower card (rank-primary, then suit) — for bring-in ordering.
-function cardKey(c: number): number {
-  return (c % 13) * 4 + Math.floor(c / 13);
+// aceLow (A-5 lowball / Razz): ace ranks below the deuce for the bring-in.
+function cardKey(c: number, aceLow = false): number {
+  const r = c % 13;
+  const rank = aceLow ? (r === 12 ? 0 : r + 1) : r;
+  return rank * 4 + Math.floor(c / 13);
 }
 
 function qualifyingSeat(state: GameState, lowest: boolean): number {
+  const aceLow = state.handCfg.evaluation.evaluator === 'A5-low';
   let best = -1;
   let bestKey = lowest ? Number.POSITIVE_INFINITY : Number.NEGATIVE_INFINITY;
   for (const s of state.seats) {
     if (s.status === 'out' || s.up.length === 0) continue;
-    const k = cardKey(s.up[0]!);
+    const k = cardKey(s.up[0]!, aceLow);
     if ((lowest && k < bestKey) || (!lowest && k > bestKey)) {
       best = s.index;
       bestKey = k;

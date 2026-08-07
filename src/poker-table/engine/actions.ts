@@ -43,7 +43,7 @@ export function flBetUnit(
 ): number {
   const small = betting.smallBet ?? bb;
   const big = betting.bigBet ?? small;
-  const bigFrom = Math.ceil(streetCount / 2);
+  const bigFrom = betting.bigBetFromStreet ?? Math.ceil(streetCount / 2);
   return streetIndex >= bigFrom ? big : small;
 }
 

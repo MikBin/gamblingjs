@@ -99,6 +99,8 @@ export { playHand, replayHand, Table, toReplayAgent } from './table';
 export {
   deuceSeven,
   fixedLimitHoldem,
+  fixedLimitRazz,
+  fixedLimitStud,
   omahaHi,
   omahaHiLo,
   pairTripsGame,
@@ -107,6 +109,7 @@ export {
   sevenStud,
   standardHoldem,
   studBringIn,
+  studHiLo,
 } from './config/presets';
 export type { GamePreset } from './config/presets';
 export { dealtCounts, validateHandConfig } from './config/validate';

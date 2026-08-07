@@ -26,6 +26,8 @@ export interface BettingConfig {
   maxRaisesPerStreet?: number;
   minBet?: number;
   minRaise?: number;
+  // fixed-limit: street index at which the big bet kicks in (default: ceil(streetCount/2))
+  bigBetFromStreet?: number;
 }
 
 export interface ForcedBetConfig {

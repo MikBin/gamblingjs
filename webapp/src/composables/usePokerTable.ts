@@ -11,11 +11,14 @@ import {
   standardHoldem,
   potLimitHoldem,
   fixedLimitHoldem,
+  fixedLimitRazz,
+  fixedLimitStud,
   omahaHi,
   omahaHiLo,
   razz,
   deuceSeven,
   studBringIn,
+  studHiLo,
   pairTripsGame,
   type Action,
   type GameEvent,
@@ -64,8 +67,17 @@ export const PRESETS: PresetOption[] = [
     },
   },
   { name: 'Razz (A-5 low)', build: (s, st) => withSeats(razz({ ante: 1, bringIn: 1, stack: st }), s) },
+  {
+    name: 'FL Razz',
+    build: (s, st) => withSeats(fixedLimitRazz({ ante: 1, bringIn: 1, smallBet: 2, bigBet: 4, maxRaises: 4, stack: st }), s),
+  },
   { name: '2-7 Lowball', build: (s, st) => withSeats(deuceSeven({ ante: 1, bringIn: 1, stack: st }), s) },
   { name: 'Stud (NL, bring-in)', build: (s, st) => withSeats(studBringIn({ ante: 1, bringIn: 1, stack: st }), s) },
+  { name: 'Stud Hi/Lo (NL)', build: (s, st) => withSeats(studHiLo({ ante: 1, bringIn: 1, stack: st }), s) },
+  {
+    name: 'FL Stud Hi',
+    build: (s, st) => withSeats(fixedLimitStud({ ante: 1, bringIn: 1, smallBet: 2, bigBet: 4, maxRaises: 4, stack: st }), s),
+  },
   { name: 'Invented (pair+trips)', build: (s, st) => withSeats(pairTripsGame({ sb: 1, bb: 2, stack: st }), s) },
 ];
 

@@ -261,6 +261,22 @@ export function deuceSeven(
   return g;
 }
 
+// No-limit 7-card Stud Hi/Lo (8-qualify split): ante + bring-in (lowest upcard),
+// NL betting, pot split into high and low halves at showdown.
+export function studHiLo(
+  opts: { ante?: number; bringIn?: number; stack?: number } = {},
+): GamePreset {
+  const g = studBringIn(opts);
+  g.table.gameId = 'seven-card-stud-hilo';
+  g.hand.evaluation = {
+    evaluator: 'hi-lo',
+    ranking: 'high-wins',
+    lowQualify: 8,
+    composition: { total: 5, pools: [{ pool: 'hand', min: 0, max: 5 }] },
+  };
+  return g;
+}
+
 export function omahaHiLo(opts: { sb?: number; bb?: number; stack?: number } = {}): GamePreset {
   const g = omahaHi(opts);
   g.table.gameId = 'omaha-hilo';
@@ -295,5 +311,65 @@ export function pairTripsGame(opts: { sb?: number; bb?: number; stack?: number }
       ],
     },
   };
+  return g;
+}
+
+// Fixed-limit 7-card Stud Hi: ante + bring-in (lowest upcard), small bet on
+// third/fourth, big bet from fifth street onward, raise cap per street.
+export function fixedLimitStud(
+  opts: {
+    ante?: number;
+    bringIn?: number;
+    smallBet?: number;
+    bigBet?: number;
+    maxRaises?: number;
+    stack?: number;
+  } = {},
+): GamePreset {
+  const ante = opts.ante ?? 1;
+  const bringIn = opts.bringIn ?? 1;
+  const smallBet = opts.smallBet ?? 2;
+  const bigBet = opts.bigBet ?? 4;
+  const stack = opts.stack ?? 200;
+  const g = studBringIn({ ante, bringIn, stack });
+  g.table.gameId = 'seven-card-stud-fl';
+  const fl = (): BettingConfig => ({
+    type: 'fixed-limit',
+    smallBet,
+    bigBet,
+    bigBetFromStreet: 2, // big bets from fifth street (standard 7-stud)
+    ...(opts.maxRaises !== undefined ? { maxRaisesPerStreet: opts.maxRaises } : {}),
+  });
+  g.hand.streets = g.hand.streets.map((s) => ({ ...s, betting: fl() }));
+  return g;
+}
+
+// Fixed-limit Razz: 7-card stud, A-5 lowball (lowest hand wins, ace low), ante
+// + bring-in (lowest upcard, ace low), small/big bet structure, raise cap.
+export function fixedLimitRazz(
+  opts: {
+    ante?: number;
+    bringIn?: number;
+    smallBet?: number;
+    bigBet?: number;
+    maxRaises?: number;
+    stack?: number;
+  } = {},
+): GamePreset {
+  const ante = opts.ante ?? 1;
+  const bringIn = opts.bringIn ?? 1;
+  const smallBet = opts.smallBet ?? 2;
+  const bigBet = opts.bigBet ?? 4;
+  const stack = opts.stack ?? 200;
+  const g = razz({ ante, bringIn, stack });
+  g.table.gameId = 'razz-fl';
+  const fl = (): BettingConfig => ({
+    type: 'fixed-limit',
+    smallBet,
+    bigBet,
+    bigBetFromStreet: 2,
+    ...(opts.maxRaises !== undefined ? { maxRaisesPerStreet: opts.maxRaises } : {}),
+  });
+  g.hand.streets = g.hand.streets.map((s) => ({ ...s, betting: fl() }));
   return g;
 }
