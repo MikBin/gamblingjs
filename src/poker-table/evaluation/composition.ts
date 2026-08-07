@@ -9,7 +9,7 @@ export interface ResolvedPools {
 function rankCounts(cards: number[]): Map<number, number> {
   const counts = new Map<number, number>();
   for (const c of cards) {
-    const r = c >> 2;
+    const r = c % 13;
     counts.set(r, (counts.get(r) ?? 0) + 1);
   }
   return counts;
@@ -17,7 +17,7 @@ function rankCounts(cards: number[]): Map<number, number> {
 
 function isStraight(cards: number[]): boolean {
   if (cards.length !== 5) return false;
-  const ranks = Array.from(new Set(cards.map((c) => c >> 2))).sort((a, b) => a - b);
+  const ranks = Array.from(new Set(cards.map((c) => c % 13))).sort((a, b) => a - b);
   if (ranks.length !== 5) return false;
   let consecutive = true;
   for (let i = 1; i < 5; i++) {
@@ -44,7 +44,7 @@ export function patternOk(cards: number[], pattern: HandPattern): boolean {
       for (const v of rankCounts(cards).values()) if (v >= 3) return true;
       return false;
     case 'flush':
-      return cards.every((c) => (c & 3) === (cards[0]! & 3));
+      return cards.every((c) => Math.floor(c / 13) === Math.floor(cards[0]! / 13));
     case 'straight':
       return isStraight(cards);
     default:

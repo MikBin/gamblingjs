@@ -84,7 +84,7 @@ function normalize(rank: number, better: Better): number {
 export function lowRankA5(combo: number[], qualifier: 8 | 9): number {
   const vals: number[] = [];
   for (const c of combo) {
-    const r = c >> 2; // 0='2' ... 12='A'
+    const r = c % 13; // 0='2' ... 12='A'
     vals.push(r === 12 ? 1 : r + 2);
   }
   if (new Set(vals).size !== combo.length) return -1;
@@ -161,6 +161,8 @@ export interface HiLoSplit {
   lowWinners: number[]; // empty when no qualifier exists
   hasLow: boolean;
   awards: Map<number, number>; // seat -> total chips won from this split
+  highAwards: Map<number, number>; // seat -> chips won from the high half only
+  lowAwards: Map<number, number>; // seat -> chips won from the low half only
 }
 
 /**
@@ -174,17 +176,18 @@ export function splitHiLo(
 ): HiLoSplit {
   const highHalf = Math.ceil(amount / 2);
   const lowHalf = amount - highHalf;
-  const awards = new Map<number, number>();
-  const award = (seats: number[], amt: number) => {
+  const highAwards = new Map<number, number>();
+  const lowAwards = new Map<number, number>();
+  const awardTo = (map: Map<number, number>, seats: number[], amt: number) => {
     const share = Math.floor(amt / seats.length);
     const rem = amt - share * seats.length;
-    seats.forEach((si, i) => awards.set(si, (awards.get(si) ?? 0) + share + (i === 0 ? rem : 0)));
+    seats.forEach((si, i) => map.set(si, (map.get(si) ?? 0) + share + (i === 0 ? rem : 0)));
   };
 
   let bestHi = -Infinity;
   for (const si of elig) bestHi = Math.max(bestHi, evals.get(si)!.high);
   const highWinners = elig.filter((si) => evals.get(si)!.high === bestHi).sort((a, b) => a - b);
-  award(highWinners, highHalf);
+  awardTo(highAwards, highWinners, highHalf);
 
   const quals = elig.filter((si) => evals.get(si)!.low !== -1);
   let lowWinners: number[] = [];
@@ -192,9 +195,15 @@ export function splitHiLo(
     let bestLo = Infinity;
     for (const si of quals) bestLo = Math.min(bestLo, evals.get(si)!.low);
     lowWinners = quals.filter((si) => evals.get(si)!.low === bestLo).sort((a, b) => a - b);
-    award(lowWinners, lowHalf);
+    awardTo(lowAwards, lowWinners, lowHalf);
   } else {
-    award(highWinners, lowHalf); // no low: high scoops
+    awardTo(highAwards, highWinners, lowHalf); // no low: high scoops
   }
-  return { highWinners, lowWinners, hasLow: quals.length > 0, awards };
+
+  const awards = new Map<number, number>();
+  const merge = (src: Map<number, number>) =>
+    src.forEach((a, seat) => awards.set(seat, (awards.get(seat) ?? 0) + a));
+  merge(highAwards);
+  merge(lowAwards);
+  return { highWinners, lowWinners, hasLow: quals.length > 0, awards, highAwards, lowAwards };
 }

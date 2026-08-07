@@ -72,10 +72,10 @@ function nextActive(state: GameState, from: number): number {
   return -1;
 }
 
-// cards are encoded as rank*4+suit (rank = c>>2, 0='2' ... 12='A'); the index
-// itself is therefore rank-primary / suit-secondary, so lower index == lower card.
+// canonical encoding: rank = c % 13 (0='2' ... 12='A'), suit = floor(c/13).
+// lower key == lower card (rank-primary, then suit) — for bring-in ordering.
 function cardKey(c: number): number {
-  return c;
+  return (c % 13) * 4 + Math.floor(c / 13);
 }
 
 function qualifyingSeat(state: GameState, lowest: boolean): number {
@@ -549,6 +549,22 @@ export function settle(state: GameState): GameState {
   const winners: PotWinner[] = [];
   const pots: PotTier[] = [];
 
+  // Uncontested: everyone folded to a single survivor — no showdown, no split.
+  // Correct for every game type (incl. hi-lo): the whole pot goes to the survivor.
+  if (alive.length === 1) {
+    const survivor = alive[0]!;
+    let total = 0;
+    for (const tier of tiers) total += tier.amount;
+    survivor.stack += total;
+    winners.push({ seat: survivor.index, amount: total, rank: -1, potIndex: 0 });
+    pots.push({ amount: total, eligible: [survivor.index], winners: [survivor.index] });
+    s.winners = winners;
+    s.pots = pots;
+    s.phase = 'terminal';
+    s.isTerminal = true;
+    return s;
+  }
+
   tiers.forEach((tier, idx) => {
     const resolved = tier.eligible; // buildPots guarantees a non-empty eligible set
 
@@ -573,14 +589,18 @@ export function settle(state: GameState): GameState {
     }
 
     // hi-lo: split the tier into high and low halves
-    const { highWinners, lowWinners, hasLow, awards } = splitHiLo(resolved, hiloOf, tier.amount);
+    const { highWinners, lowWinners, hasLow, awards, highAwards, lowAwards } = splitHiLo(
+      resolved,
+      hiloOf,
+      tier.amount,
+    );
     awards.forEach((amount, seat) => {
       s.seats[seat]!.stack += amount;
     });
     highWinners.forEach((si) =>
       winners.push({
         seat: si,
-        amount: awards.get(si) ?? 0,
+        amount: highAwards.get(si) ?? 0,
         rank: hiloOf.get(si)!.high,
         potIndex: idx,
         half: 'high',
@@ -589,7 +609,7 @@ export function settle(state: GameState): GameState {
     lowWinners.forEach((si) =>
       winners.push({
         seat: si,
-        amount: awards.get(si) ?? 0,
+        amount: lowAwards.get(si) ?? 0,
         rank: hiloOf.get(si)!.low,
         potIndex: idx,
         half: 'low',

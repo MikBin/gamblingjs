@@ -21,8 +21,9 @@ export default defineConfig({
       '@utils': resolve(__dirname, 'src/utils'),
       '@views': resolve(__dirname, 'src/views'),
       '@assets': resolve(__dirname, 'src/assets'),
-      // Link to main library
-      '@gamblingjs': resolve(__dirname, '../src/index.ts'),
+      // Link to main library (shim avoids the stale root barrel)
+      '@gamblingjs': resolve(__dirname, 'src/lib/gamblingjs-shim.ts'),
+      '@pokertable': resolve(__dirname, '../src/poker-table/index.ts'),
       'kombinatoricsjs': resolve(__dirname, '../src/lib/kombinatoricsjs/src/kombinatoricsjs.ts')
     },
     extensions: ['.ts', '.js', '.vue', '.json']

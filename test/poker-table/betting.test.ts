@@ -20,8 +20,8 @@ beforeAll(() => {
   fastHashesCreators.high();
 });
 
-// cards are encoded rank*4+suit (rank=c>>2, 0='2' ... 12='A'); lower index == lower card
-const cardKey = (c: number): number => c;
+// canonical encoding: rank = c % 13 (0='2' … 12='A'), suit = floor(c/13); lower key == lower card
+const cardKey = (c: number): number => (c % 13) * 4 + Math.floor(c / 13);
 const zeroSum = (final: number[]): number => final.reduce((a, b) => a + b, 0);
 
 describe('antes (forced bets)', () => {

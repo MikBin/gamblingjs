@@ -15,8 +15,8 @@ beforeAll(() => {
   fastHashesCreators.high();
 });
 
-// card = rank*4 + suit (rank = c>>2: 0='2' ... 12='A'; suit = c&3)
-const C = (rank: number, suit = 0) => rank * 4 + suit;
+// card = suit*13 + rank (encoding B: rank = c%13, 0='2' … 12='A'; suit = floor(c/13))
+const C = (rank: number, suit = 0) => suit * 13 + rank;
 const ACE = 12;
 const KING = 11;
 const pair = (r: number): [number, number] => [C(r, 0), C(r, 1)];
@@ -49,7 +49,7 @@ describe('patternOk (named patterns)', () => {
 });
 
 describe('patternOk (custom predicate)', () => {
-  const isPair: HandPattern = (cards) => cards.length === 2 && cards[0]! >> 2 === cards[1]! >> 2;
+  const isPair: HandPattern = (cards) => cards.length === 2 && cards[0]! % 13 === cards[1]! % 13;
 
   it('is honored identically to a named pattern', () => {
     expect(patternOk(pair(ACE), isPair)).toBe(true);
@@ -75,8 +75,8 @@ describe('enumerateCompositions (pattern filtering)', () => {
     const combos = enumerateCompositions(sel, pools);
     expect(combos).toHaveLength(1); // AA from hole + KKK from community
     const combo = combos[0]!;
-    expect(combo.filter((c) => c >> 2 === ACE)).toHaveLength(2);
-    expect(combo.filter((c) => c >> 2 === KING)).toHaveLength(3);
+    expect(combo.filter((c) => c % 13 === ACE)).toHaveLength(2);
+    expect(combo.filter((c) => c % 13 === KING)).toHaveLength(3);
   });
 
   it('yields nothing when no per-pool subset satisfies the pattern', () => {
@@ -128,7 +128,7 @@ describe('resolveHand with per-pool patterns (invented game)', () => {
         {
           pool: 'hole',
           exactly: 2,
-          pattern: (cards) => cards.length === 2 && cards[0]! >> 2 === cards[1]! >> 2,
+          pattern: (cards) => cards.length === 2 && cards[0]! % 13 === cards[1]! % 13,
         },
         { pool: 'community', exactly: 3, pattern: 'trips' },
       ],

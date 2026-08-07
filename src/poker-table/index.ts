@@ -85,7 +85,15 @@ export {
 export type { ResolvedPools } from './evaluation/composition';
 
 export type { PlayerAgent } from './agents/types';
-export { alwaysCallAgent, alwaysFoldAgent } from './agents/stub';
+export {
+  alwaysCallAgent,
+  alwaysFoldAgent,
+  createAggressiveAgent,
+  createCallingStationAgent,
+  createManiacAgent,
+  createRandomAgent,
+  createTightAgent,
+} from './agents/stub';
 
 export { playHand, replayHand, Table, toReplayAgent } from './table';
 export {

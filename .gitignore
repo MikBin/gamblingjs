@@ -19,3 +19,4 @@ webapp/src/**/*.js
 webapp/src/**/*.d.ts
 # Vendor build outputs inside vendored libs
 src/lib/kombinatoricsjs/dist
+.playwright-mcp

@@ -113,6 +113,26 @@ describe('config validation', () => {
 });
 
 describe('showdown cross-checks across variants', () => {
+  it('known hand: a straight outranks a pair under the canonical card encoding', () => {
+    // encoding B: card = suit*13 + rank (rank = c%13, 0='2' … 12='A')
+    const C = (r: number, s = 0) => s * 13 + r;
+    const board = [C(6), C(7), C(8), C(9), C(2)]; // 8 9 T J 4
+    const sel = standardHoldem().hand.evaluation.composition;
+    const straight = resolveHand(
+      { hole: [C(10), C(11)], door: [], community: board },
+      sel,
+      'high',
+      'high-wins',
+    );
+    const pair = resolveHand(
+      { hole: [C(7, 1), C(0)], door: [], community: board },
+      sel,
+      'high',
+      'high-wins',
+    );
+    expect(straight.rank).toBeGreaterThan(pair.rank);
+  });
+
   it('holdem winner == HighEvaluator best-5-of-7', () => {
     const res = playHand(
       standardHoldem().table,

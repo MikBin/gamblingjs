@@ -1,6 +1,13 @@
 import type { HandConfig, TableConfig } from './config/types';
 import { createRng } from './engine/rng';
-import type { Action, GameEvent, GameState, HandResult, Observation } from './engine/state';
+import type {
+  Action,
+  GameEvent,
+  GameState,
+  HandResult,
+  Observation,
+  PotWinner,
+} from './engine/state';
 import {
   advanceToNextDecision,
   applyAction,
@@ -99,6 +106,14 @@ export class Table {
 
   get done(): boolean {
     return this.state.isTerminal;
+  }
+
+  get winners(): PotWinner[] {
+    return this.state.winners;
+  }
+
+  get pots() {
+    return this.state.pots;
   }
 
   observe(seat: number): Observation {

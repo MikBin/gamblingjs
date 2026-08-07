@@ -11,12 +11,14 @@ const _evaluator = new PokerEvaluator(true);
 import HomeView from './views/HomeView.vue'
 import EvaluatorView from './views/EvaluatorView.vue'
 import DocumentationView from './views/DocumentationView.vue'
+import TableView from './views/TableView.vue'
 
 const router = createRouter({
   history: createWebHistory(),
   routes: [
     { path: '/', component: HomeView },
     { path: '/evaluator', component: EvaluatorView },
+    { path: '/table', component: TableView },
     { path: '/docs', component: DocumentationView }
   ]
 })

@@ -26,7 +26,8 @@
     "baseUrl": ".",
     "paths": {
       "@/*": ["src/*"],
-      "@gamblingjs": ["../src/index.ts"],
+      "@gamblingjs": ["src/lib/gamblingjs-shim.ts"],
+      "@pokertable": ["../src/poker-table/index.ts"],
       "kombinatoricsjs": ["../src/lib/kombinatoricsjs/src/kombinatoricsjs.ts"]
     }
   },
