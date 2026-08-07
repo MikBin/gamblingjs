@@ -2,7 +2,7 @@
   <div class="space-y-4">
     <!-- Config bar -->
     <div class="card bg-base-200 shadow">
-      <div class="card-body grid gap-3 md:grid-cols-6">
+      <div class="card-body grid gap-3 md:grid-cols-7">
         <label class="form-control">
           <span class="label-text text-xs">Game</span>
           <select v-model="presetName" class="select select-bordered select-sm" :disabled="!done && obs !== null">
@@ -23,12 +23,16 @@
           </div>
         </label>
         <label class="form-control">
-          <span class="label-text text-xs">Stack (or stacks e.g. 200,60,30)</span>
+          <span class="label-text text-xs">Stack (e.g. 200,60,30)</span>
           <input v-model="stacksText" class="input input-bordered input-sm" placeholder="200" />
         </label>
         <label class="form-control">
           <span class="label-text text-xs">Seed</span>
           <input v-model.number="seed" type="number" class="input input-bordered input-sm" />
+        </label>
+        <label class="form-control">
+          <span class="label-text text-xs">Bot delay (ms)</span>
+          <input v-model.number="speed" type="range" min="150" max="2500" step="50" class="range range-xs mt-2" />
         </label>
         <div class="flex items-end gap-2">
           <button class="btn btn-primary btn-sm flex-1" @click="onDeal">Deal hand</button>
@@ -36,56 +40,78 @@
       </div>
     </div>
 
-    <!-- Table felt -->
-    <div class="card bg-green-900 text-green-50 shadow-lg">
-      <div class="card-body">
-        <!-- Community + pot -->
-        <div class="flex items-center justify-between">
-          <div class="flex gap-1 items-center min-h-[3rem]">
-            <span class="text-xs uppercase opacity-70 mr-2">Board</span>
-            <template v-if="obs">
-              <span v-for="c in obs.community" :key="c" class="card-chip" :class="cardColor(c)">{{ cardText(c) }}</span>
-              <span v-if="obs.community.length === 0" class="opacity-40">—</span>
-            </template>
-          </div>
-          <div class="text-right">
-            <div class="text-xs uppercase opacity-70">Pot</div>
-            <div class="text-xl font-bold">{{ obs?.pot ?? 0 }}</div>
-          </div>
-        </div>
+    <!-- Circular table felt -->
+    <div class="table-wrap">
+      <div class="felt"></div>
 
-        <!-- Seats -->
-        <div class="grid gap-2 mt-2" :style="`grid-template-columns: repeat(${seatCount}, minmax(0,1fr))`">
-          <div
-            v-for="seat in seatsList"
-            :key="seat"
-            class="rounded-lg p-2 border"
-            :class="seatClasses(seat)"
-          >
-            <div class="flex justify-between text-xs">
-              <span class="font-semibold">{{ seat === 0 ? 'You' : `Bot ${seat}` }}</span>
-              <span class="opacity-80">{{ statusOf(seat) }}</span>
-            </div>
-            <div class="text-sm font-mono">stack {{ stackOf(seat) }} · bet {{ betOf(seat) }}</div>
-            <div class="flex gap-1 mt-1 min-h-[2rem]">
-              <span v-for="c in doorsOf(seat)" :key="'u' + c" class="card-chip card-chip-door" :class="cardColor(c)">{{ cardText(c) }}</span>
-            </div>
-            <div class="flex gap-1 mt-1 min-h-[2rem]">
-              <template v-if="holeOf(seat).length">
-                <span v-for="c in holeOf(seat)" :key="'h' + c" class="card-chip" :class="cardColor(c)">{{ cardText(c) }}</span>
-              </template>
-              <span v-else-if="seat !== 0 && !done" class="card-chip card-chip-back">🂠</span>
-            </div>
-          </div>
+      <!-- Center: community cards + pot + turn -->
+      <div class="center">
+        <div class="flex gap-1 items-center min-h-[2.4rem]">
+          <template v-if="obs">
+            <span
+              v-for="(c, i) in revealedCommunity"
+              :key="c"
+              class="card-chip"
+              :class="cardColor(c)"
+              :style="{ animationDelay: i * 0.06 + 's' }"
+            >{{ cardText(c) }}</span>
+            <span v-if="revealedCommunity.length === 0" class="opacity-40 text-sm">board</span>
+          </template>
         </div>
-
-        <!-- Street / turn indicator -->
-        <div class="text-center text-xs uppercase tracking-wide opacity-80 mt-1">
-          {{ obs?.streetName ?? '—' }} ·
-          <template v-if="done">hand over</template>
-          <template v-else-if="humanTurn">your action</template>
+        <div class="pot">
+          <span class="opacity-70 text-[10px] uppercase tracking-wide mr-1">Pot</span>
+          {{ obs?.pot ?? 0 }}
+        </div>
+        <div class="turn-text">
+          <span class="opacity-70">{{ obs?.streetName ?? '—' }}</span>
+          ·
+          <template v-if="showdown">hand over</template>
+          <template v-else-if="done">…</template>
+          <template v-else-if="humanTurn"><span class="text-yellow-300 font-semibold">your action</span></template>
           <template v-else>seat {{ obs?.actingSeat }} to act</template>
         </div>
+      </div>
+
+      <!-- Pot sliding to the winner(s) at showdown -->
+      <div
+        v-for="(chip, i) in potChips"
+        :key="'fly' + i"
+        class="fly-chip"
+        :style="{ left: '50%', top: '50%', '--tx': chip.tx, '--ty': chip.ty, animationDelay: i * 0.12 + 's' }"
+      >+{{ chip.amount }}<span v-if="chip.half" class="opacity-70"> {{ chip.half }}</span></div>
+
+      <!-- Bet chips (in front of each seat, toward the center) -->
+      <template v-if="showBets">
+        <div
+          v-for="b in betViews"
+          :key="'bet' + b.seat"
+          class="bet-chip"
+          :style="b.betPos"
+        >{{ b.bet }}</div>
+      </template>
+
+      <!-- Seats around the rail -->
+      <div
+        v-for="s in seatViews"
+        :key="s.seat"
+        class="seat"
+        :class="seatClass(s)"
+        :style="s.pos"
+      >
+        <span v-if="s.isButton" class="dealer" title="dealer button">D</span>
+        <div class="seat-name">
+          {{ s.isYou ? 'You' : `Bot ${s.seat}` }}
+          <span v-if="s.status === 'allin'" class="ai-badge">AI</span>
+          <span v-else-if="s.status === 'folded'" class="fold-badge">FOLD</span>
+        </div>
+        <div class="cards">
+          <span v-for="c in s.doors" :key="'u' + c" class="mini-card mini-door" :class="cardColor(c)">{{ cardText(c) }}</span>
+          <template v-if="s.hole.length">
+            <span v-for="c in s.hole" :key="'h' + c" class="mini-card" :class="cardColor(c)">{{ cardText(c) }}</span>
+          </template>
+          <span v-else-if="s.seat !== 0 && !done" class="mini-card mini-back">🂠</span>
+        </div>
+        <div class="seat-stack">{{ s.stack }}</div>
       </div>
     </div>
 
@@ -107,7 +133,7 @@
     </div>
 
     <!-- Showdown summary -->
-    <div v-if="done" class="card bg-base-200 shadow">
+    <div v-if="showdown" class="card bg-base-200 shadow">
       <div class="card-body">
         <h3 class="font-bold">Result</h3>
         <div class="flex flex-wrap gap-4 text-sm">
@@ -152,12 +178,12 @@ const RANKS = ['2', '3', '4', '5', '6', '7', '8', '9', 'T', 'J', 'Q', 'K', 'A'];
 const SUITS = ['♠', '♦', '♥', '♣']; // encoding B: suit = floor(c/13), 0=spades…3=clubs
 
 const presetName = ref(PRESETS[0]!.name);
-const seats = ref(2);
+const seats = ref(6);
 const stacksText = ref('200');
 const seed = ref(42);
 const betAmt = ref(0);
 
-const { obs, log, winners, pots, finalStacks, done, humanTurn, humanActions, lineup, deal, humanAct } =
+const { obs, log, winners, pots, finalStacks, done, humanTurn, humanActions, lineup, speed, revealedCommunity, showdown, deal, humanAct } =
   usePokerTable();
 
 const seatCount = computed(() => obs.value?.players.length ?? seats.value);
@@ -167,6 +193,87 @@ const rangeLabel = computed(() => {
   const a = find('bet') ?? find('raise');
   if (!a) return '';
   return `[${a.min}–${a.max}]`;
+});
+
+interface SeatView {
+  seat: number;
+  isYou: boolean;
+  stack: number;
+  bet: number;
+  status: string;
+  doors: number[];
+  hole: number[];
+  isActor: boolean;
+  isButton: boolean;
+  folded: boolean;
+  pos: { left: string; top: string };
+  betPos: { left: string; top: string };
+}
+
+// Place seats evenly around an ellipse; seat 0 (the human) sits at the bottom.
+function geometry(seat: number, n: number): { left: string; top: string }[] {
+  const rx = 42;
+  const ry = 39;
+  const ang = ((90 + (seat * 360) / n) * Math.PI) / 180;
+  const cx = (r: number) => 50 + r * Math.cos(ang);
+  const cy = (r: number) => 50 + r * Math.sin(ang);
+  return [
+    { left: `${cx(rx)}%`, top: `${cy(ry)}%` },
+    { left: `${cx(rx * 0.5)}%`, top: `${cy(ry * 0.5)}%` },
+  ];
+}
+
+const seatViews = computed<SeatView[]>(() => {
+  const n = seatCount.value;
+  return seatsList.value.map((seat) => {
+    const [pos, betPos] = geometry(seat, n);
+    const player = playerOf(seat);
+    const status = player?.status ?? '';
+    return {
+      seat,
+      isYou: seat === 0,
+      stack: player?.stack ?? 0,
+      bet: player?.bet ?? 0,
+      status,
+      doors: doorsOf(seat),
+      hole: holeOf(seat),
+      isActor: obs.value?.actingSeat === seat && !done.value,
+      isButton: obs.value?.buttonSeat === seat,
+      folded: status === 'folded',
+      pos,
+      betPos,
+    };
+  });
+});
+
+const betViews = computed(() => seatViews.value.filter((s) => s.bet > 0));
+const showBets = computed(() => !showdown.value);
+
+// Pot -> winner animation: when the finale plays, spawn one flying chip per
+// winner that slides from the center to the winner's seat.
+interface FlyChip {
+  seat: number;
+  amount: number;
+  tx: string;
+  ty: string;
+  half?: string;
+}
+const potChips = ref<FlyChip[]>([]);
+let potChipTimer: ReturnType<typeof setTimeout> | null = null;
+watch(showdown, (on) => {
+  if (potChipTimer) clearTimeout(potChipTimer);
+  if (!on) {
+    potChips.value = [];
+    return;
+  }
+  const n = seatCount.value;
+  potChips.value = winners.value.map((w) => {
+    const [pos] = geometry(w.seat, n);
+    return { seat: w.seat, amount: w.amount, tx: pos.left, ty: pos.top, half: w.half };
+  });
+  potChipTimer = setTimeout(() => {
+    potChips.value = [];
+  }, 1700);
 });
 
 watch(humanActions, (acts) => {
@@ -185,27 +292,20 @@ function cardColor(c: number): string {
 function playerOf(seat: number) {
   return obs.value?.players.find((p) => p.seat === seat);
 }
-function stackOf(seat: number): number {
-  return playerOf(seat)?.stack ?? 0;
-}
-function betOf(seat: number): number {
-  return playerOf(seat)?.bet ?? 0;
-}
-function statusOf(seat: number): string {
-  return playerOf(seat)?.status ?? '';
-}
 function doorsOf(seat: number): number[] {
   return obs.value?.up.find((u) => u.seat === seat)?.cards ?? [];
 }
 function holeOf(seat: number): number[] {
   if (seat === 0) return obs.value?.myHole ?? [];
-  if (done.value) return obs.value?.revealedHole?.find((u) => u.seat === seat)?.cards ?? [];
+  if (showdown.value) return obs.value?.revealedHole?.find((u) => u.seat === seat)?.cards ?? [];
   return [];
 }
-function seatClasses(seat: number): string {
-  const isActor = obs.value?.actingSeat === seat && !done.value;
-  const base = seat === 0 ? 'bg-green-800/60 border-green-300' : 'bg-green-950/50 border-green-700';
-  return isActor ? `${base} ring-2 ring-yellow-300` : base;
+function seatClass(s: SeatView): Record<string, boolean> {
+  return {
+    'is-actor': s.isActor,
+    'is-you': s.isYou,
+    'is-folded': s.folded,
+  };
 }
 
 function has(type: Action['type']): boolean {
@@ -243,15 +343,234 @@ function onDeal(): void {
 </script>
 
 <style scoped>
+/* ---- Table geometry ---- */
+.table-wrap {
+  position: relative;
+  width: 100%;
+  aspect-ratio: 16 / 10;
+  max-width: 1080px;
+  margin-inline: auto;
+}
+.felt {
+  position: absolute;
+  inset: 9% 8%;
+  border-radius: 50%;
+  background: radial-gradient(ellipse at center, #1a7a43 0%, #166534 55%, #11452b 100%);
+  border: 12px solid #3b2517;
+  box-shadow: inset 0 0 70px rgba(0, 0, 0, 0.5), 0 12px 30px rgba(0, 0, 0, 0.45);
+}
+
+/* ---- Center pot + board ---- */
+.center {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  text-align: center;
+}
+.pot {
+  background: rgba(0, 0, 0, 0.3);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  color: #ecfccb;
+  padding: 2px 14px;
+  border-radius: 9999px;
+  font-weight: 800;
+  font-size: 15px;
+}
+.turn-text {
+  color: #d1fae5;
+  font-size: 11px;
+  opacity: 0.85;
+}
+
+/* ---- Seats ---- */
+.seat {
+  position: absolute;
+  transform: translate(-50%, -50%);
+  min-width: 74px;
+  padding: 4px 6px 3px;
+  border-radius: 10px;
+  background: rgba(6, 46, 23, 0.92);
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  color: #dcfce7;
+  text-align: center;
+  font-size: 11px;
+  line-height: 1.1;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.4);
+  transition: box-shadow 0.2s ease, transform 0.2s ease, opacity 0.2s ease;
+  z-index: 2;
+}
+.seat-name {
+  font-weight: 700;
+  white-space: nowrap;
+}
+.seat-stack {
+  font-family: ui-monospace, monospace;
+  font-size: 10px;
+  opacity: 0.8;
+}
+.seat.is-you {
+  border-color: rgba(253, 224, 71, 0.55);
+}
+.seat.is-folded {
+  opacity: 0.38;
+  filter: grayscale(0.6);
+}
+.seat.is-actor {
+  border-color: #fde047;
+  transform: translate(-50%, -50%) scale(1.08);
+  animation: actor-pulse 1s ease-in-out infinite;
+  z-index: 3;
+}
+@keyframes actor-pulse {
+  0%,
+  100% {
+    box-shadow: 0 0 0 2px #fde047, 0 0 14px 3px rgba(253, 224, 71, 0.55);
+  }
+  50% {
+    box-shadow: 0 0 0 2px #fde047, 0 0 26px 9px rgba(253, 224, 71, 0.9);
+  }
+}
+
+.dealer {
+  position: absolute;
+  top: -9px;
+  right: -9px;
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  background: #fff;
+  color: #000;
+  font-weight: 800;
+  font-size: 11px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid #000;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.55);
+}
+.ai-badge,
+.fold-badge {
+  font-size: 8px;
+  font-weight: 800;
+  padding: 1px 3px;
+  border-radius: 4px;
+  margin-left: 2px;
+  vertical-align: middle;
+}
+.ai-badge {
+  background: #fca5a5;
+  color: #7f1d1d;
+}
+.fold-badge {
+  background: #6b7280;
+  color: #f9fafb;
+}
+
+/* ---- Cards ---- */
+.cards {
+  display: flex;
+  gap: 2px;
+  justify-content: center;
+  margin: 2px 0;
+  min-height: 18px;
+}
+.mini-card {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: #fff;
+  border-radius: 3px;
+  padding: 0 2px;
+  min-width: 14px;
+  font-size: 11px;
+  font-weight: 700;
+  font-family: ui-monospace, monospace;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.35);
+  animation: card-in 0.3s ease-out both;
+}
+.mini-door {
+  background: #fef3c7;
+}
+.mini-back {
+  background: #1e3a8a;
+  color: #bfdbfe;
+}
+
+/* ---- Bet chips ---- */
+.bet-chip {
+  position: absolute;
+  transform: translate(-50%, -50%);
+  padding: 2px 8px;
+  border-radius: 9999px;
+  background: linear-gradient(#fde68a, #f59e0b);
+  color: #78350f;
+  border: 1px solid #b45309;
+  font-weight: 800;
+  font-size: 11px;
+  font-family: ui-monospace, monospace;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.45);
+  white-space: nowrap;
+  z-index: 1;
+}
+
+/* ---- Board community cards ---- */
 .card-chip {
   @apply inline-flex items-center justify-center bg-white rounded px-1.5 py-0.5 text-sm font-bold shadow;
   min-width: 1.6rem;
   font-family: ui-monospace, monospace;
+  animation: card-in 0.25s ease-out both;
 }
-.card-chip-door {
-  @apply bg-amber-100;
+@keyframes card-in {
+  from {
+    opacity: 0;
+    transform: translateY(-7px) rotate(-10deg) scale(0.7);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
 }
-.card-chip-back {
-  @apply bg-base-300 text-base-content;
+
+/* ---- Pot -> winner slide ---- */
+.fly-chip {
+  position: absolute;
+  z-index: 6;
+  padding: 3px 11px;
+  border-radius: 9999px;
+  background: linear-gradient(#fde68a, #f59e0b);
+  color: #78350f;
+  border: 1px solid #b45309;
+  font-weight: 800;
+  font-size: 13px;
+  font-family: ui-monospace, monospace;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.5);
+  white-space: nowrap;
+  opacity: 0;
+  pointer-events: none;
+  transform: translate(-50%, -50%);
+  animation: fly-pot 0.95s cubic-bezier(0.22, 0.61, 0.36, 1) forwards;
+}
+@keyframes fly-pot {
+  0% {
+    left: 50%;
+    top: 50%;
+    opacity: 0;
+    transform: translate(-50%, -50%) scale(0.5);
+  }
+  18% {
+    opacity: 1;
+    transform: translate(-50%, -50%) scale(1.08);
+  }
+  100% {
+    left: var(--tx);
+    top: var(--ty);
+    opacity: 1;
+    transform: translate(-50%, -50%) scale(1);
+  }
 }
 </style>

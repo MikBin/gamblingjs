@@ -132,22 +132,62 @@ export function usePokerTable() {
   const winners = ref<PotWinner[]>([]);
   const pots = ref<{ amount: number; eligible: number[]; winners: number[] }[]>([]);
   const finalStacks = ref<number[]>([]);
-  const speed = ref(450);
+  const speed = ref(850);
   const lineup = ref(LINEUPS[0]!.name);
-  let timer: ReturnType<typeof setTimeout> | null = null;
+  // Animation/pacing state
+  const revealedCount = ref(Infinity); // how many community cards are visible
+  const showdown = ref(false); // true once the finale (board complete + reveal) plays
+
   let instance: Table | null = null;
   const bots = new Map<number, PlayerAgent>();
+  // Per-street community-card counts, captured at deal() to reconstruct run-outs.
+  let handStreets: { deal?: { community?: number } }[] = [];
+  // Synchronous events captured during a single Table.step() call.
+  let stepEvents: GameEvent[] = [];
+
+  // ---- Cancellable timing (aborted on every new deal) ----
+  let gen = 0;
+  const timers = new Set<ReturnType<typeof setTimeout>>();
+  const sleepers = new Set<() => void>();
+
+  function sleep(ms: number, token: number): Promise<void> {
+    return new Promise((resolve) => {
+      if (token !== gen) return resolve();
+      const id = setTimeout(() => {
+        timers.delete(id);
+        sleepers.delete(resolve);
+        resolve();
+      }, ms);
+      timers.add(id);
+      sleepers.add(resolve);
+    });
+  }
+
+  function cancelAll(): void {
+    gen++;
+    for (const id of timers) clearTimeout(id);
+    timers.clear();
+    for (const wake of sleepers) wake();
+    sleepers.clear();
+  }
 
   const done = computed(() => !!obs.value?.isTerminal);
   const humanTurn = computed(() => !!obs.value && obs.value.actingSeat === 0 && !done.value);
   const humanActions = computed(() => (humanTurn.value ? obs.value?.legalActions ?? [] : []));
+
+  const revealedCommunity = computed(() => {
+    const c = obs.value?.community ?? [];
+    const n = revealedCount.value;
+    return n >= c.length ? c : c.slice(0, n);
+  });
 
   function push(line: string): void {
     log.value.push(line);
   }
 
   function onEvent(e: GameEvent): void {
-    if (e.type === 'dealt') push(`➤ deal street ${e.streetIndex !== undefined ? e.streetIndex + 1 : ''}`);
+    stepEvents.push(e);
+    if (e.type === 'dealt') push(`➤ deal street ${(e.streetIndex ?? 0) + 1}`);
     else if (e.type === 'betting-complete') push('➤ betting complete');
     else if (e.type === 'showdown') push('➤ showdown');
     else if (e.type === 'hand-ended') push('➤ hand complete');
@@ -182,29 +222,72 @@ export function usePokerTable() {
     }
   }
 
-  function tickBots(): void {
-    if (!instance) return;
-    if (instance.done || instance.currentSeat === 0) {
-      refresh();
-      return;
-    }
-    const seat = instance.currentSeat;
-    const bot = bots.get(seat) ?? alwaysCallAgent;
-    const action = bot.decide(instance.observe(seat));
+  // Apply one action, then (if a new street was dealt inside that step) reveal
+  // the board street-by-street so the human can see cards coming — including an
+  // all-in run-out, where the engine deals several streets in a single step().
+  function doStep(action: Action): { pre: number; dealtStreets: number[] } {
+    if (!instance) return { pre: 0, dealtStreets: [] };
+    const pre = obs.value?.community.length ?? 0;
+    stepEvents = [];
     instance.step(action);
     push(describe(action));
     refresh();
-    if (!instance.done && instance.currentSeat !== 0) {
-      timer = setTimeout(tickBots, speed.value);
+    const dealtStreets = stepEvents
+      .filter((e) => e.type === 'dealt')
+      .map((e) => e.streetIndex ?? 0);
+    return { pre, dealtStreets };
+  }
+
+  async function paceReveal(d: { pre: number; dealtStreets: number[] }, token: number): Promise<void> {
+    if (!d.dealtStreets.length) return;
+    revealedCount.value = d.pre; // hide cards about to be revealed
+    let idx = d.pre;
+    for (const si of d.dealtStreets) {
+      await sleep(speed.value, token);
+      if (token !== gen) return;
+      idx += handStreets[si]?.deal?.community ?? 0;
+      revealedCount.value = idx;
     }
   }
 
+  // Showdown / fold-out finale: pause on the final board, then flip the flag the
+  // view uses to reveal hole cards and animate the pot sliding to the winner(s).
+  async function finale(token: number): Promise<void> {
+    await sleep(speed.value, token);
+    if (token !== gen) return;
+    showdown.value = true;
+  }
+
+  async function applyActionPaced(action: Action, token: number): Promise<void> {
+    const d = doStep(action);
+    await paceReveal(d, token);
+    if (token !== gen) return;
+    if (instance?.done) await finale(token);
+  }
+
+  async function runBots(): Promise<void> {
+    const token = gen;
+    while (instance && !instance.done && instance.currentSeat !== 0) {
+      await sleep(speed.value, token);
+      if (token !== gen) return;
+      if (!instance || instance.done || instance.currentSeat === 0) break;
+      const seat = instance.currentSeat;
+      const bot = bots.get(seat) ?? alwaysCallAgent;
+      const action = bot.decide(instance.observe(seat));
+      await applyActionPaced(action, token);
+      if (token !== gen) return;
+    }
+    refresh();
+  }
+
   function deal(preset: GamePreset, seed: number, stacks?: number[]): void {
-    if (timer) clearTimeout(timer);
+    cancelAll();
     log.value = [];
     winners.value = [];
     pots.value = [];
     finalStacks.value = [];
+    showdown.value = false;
+    handStreets = preset.hand.streets ?? [];
     instance = new Table(preset.table, preset.hand, seed, onEvent, stacks);
     table.value = instance;
     // build the bot roster for seats 1..n (seat 0 is the human)
@@ -216,19 +299,22 @@ export function usePokerTable() {
     }
     push(`new hand · ${preset.table.gameId} · seed ${seed} · ${n} seats · ${lineupOpt.name}`);
     refresh();
-    tickBots();
+    revealedCount.value = obs.value?.community.length ?? 0;
+    void runBots();
   }
 
   function humanAct(action: Action): void {
     if (!instance || instance.done) return;
-    instance.step(action);
-    push(`seat 0 (you): ${describe(action).replace(/^seat 0 /, '')}`);
-    refresh();
-    tickBots();
+    const token = gen;
+    void (async () => {
+      await applyActionPaced(action, token);
+      if (token !== gen) return;
+      if (!instance?.done && instance.currentSeat !== 0) void runBots();
+    })();
   }
 
   function stop(): void {
-    if (timer) clearTimeout(timer);
+    cancelAll();
   }
 
   return {
@@ -242,6 +328,8 @@ export function usePokerTable() {
     humanActions,
     speed,
     lineup,
+    revealedCommunity,
+    showdown,
     deal,
     humanAct,
     stop,
