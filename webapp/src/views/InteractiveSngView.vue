@@ -40,6 +40,26 @@
           <span class="label-text text-xs">Bot response time: {{ speed }}ms</span>
           <input v-model.number="speed" type="range" min="150" max="2500" step="50" class="range range-xs" />
         </label>
+        <template v-if="lineup === 'Smart bots' || lineup === 'Smart + classic mix'">
+          <div class="grid grid-cols-2 gap-3 mt-1">
+            <label class="form-control">
+              <span class="label-text text-xs">Smart aggression: {{ smartCfg.aggression }}</span>
+              <input v-model.number="smartCfg.aggression" type="range" min="0" max="1" step="0.05" class="range range-xs" />
+            </label>
+            <label class="form-control">
+              <span class="label-text text-xs">Smart tightness: {{ smartCfg.tightness }}</span>
+              <input v-model.number="smartCfg.tightness" type="range" min="0" max="1" step="0.05" class="range range-xs" />
+            </label>
+            <label class="form-control">
+              <span class="label-text text-xs">Bluffiness: {{ smartCfg.bluffiness }}</span>
+              <input v-model.number="smartCfg.bluffiness" type="range" min="0" max="0.5" step="0.02" class="range range-xs" />
+            </label>
+            <label class="form-control">
+              <span class="label-text text-xs">Bet sizing (× pot): {{ smartCfg.sizing }}</span>
+              <input v-model.number="smartCfg.sizing" type="range" min="0.2" max="1.5" step="0.05" class="range range-xs" />
+            </label>
+          </div>
+        </template>
         <div class="card-actions justify-end mt-2">
           <button class="btn btn-primary" @click="start">▶ Start tournament</button>
         </div>
@@ -186,7 +206,7 @@ import type { Action } from '@pokertable';
 const s = useInteractiveSitAndGo();
 const {
   phase, players, level, game, levelIndex, handNumber, handsToNextLevel,
-  lineup, speed, handsPerLevel, startingStack, seed, rotationCadence, lineups,
+  lineup, speed, smartCfg, handsPerLevel, startingStack, seed, rotationCadence, lineups,
   seatOrder, humanSeat, humanAlive, humanTurn, humanActions,
   obs, log, revealedCommunity, finished, winner,
   start, reset, dealNextHand, humanAct,

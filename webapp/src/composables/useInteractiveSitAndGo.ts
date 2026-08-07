@@ -6,6 +6,7 @@ import {
   createCallingStationAgent,
   createManiacAgent,
   createRandomAgent,
+  createSmartBot,
   createTightAgent,
   eightGameRotation,
   ensureHighHashes,
@@ -15,8 +16,9 @@ import {
   type Observation,
   type PlayerAgent,
   type SitAndGoLevel,
+  type SmartBotParams,
 } from '@pokertable';
-import { LINEUPS, type BotProfile } from './usePokerTable';
+import { LINEUPS, SMART_DEFAULT, type BotProfile } from './usePokerTable';
 
 export type Phase = 'config' | 'playing' | 'between' | 'finished';
 
@@ -32,7 +34,7 @@ export interface Player {
 
 const AVATARS = ['🧑', '🦊', '🐻', '🐺', '🦅', '🐱', '🐼', '🦁'];
 
-function buildBot(profile: BotProfile, seed: number): PlayerAgent {
+function buildBot(profile: BotProfile, seed: number, smart: Omit<SmartBotParams, 'seed'>): PlayerAgent {
   switch (profile) {
     case 'random':
       return createRandomAgent(seed);
@@ -46,6 +48,8 @@ function buildBot(profile: BotProfile, seed: number): PlayerAgent {
       return createTightAgent(seed);
     case 'call':
       return alwaysCallAgent;
+    case 'smart':
+      return createSmartBot({ seed, ...smart });
   }
 }
 
@@ -60,6 +64,7 @@ export function useInteractiveSitAndGo() {
   // ---- Config (editable until start) ----
   const lineup = ref(LINEUPS[0]!.name);
   const speed = ref(750);
+  const smartCfg = ref<Omit<SmartBotParams, 'seed'>>({ ...SMART_DEFAULT });
   const handsPerLevel = ref(6);
   const startingStack = ref(2000);
   const seed = ref(2024);
@@ -416,7 +421,8 @@ export function useInteractiveSitAndGo() {
     // Seed bots once (deterministic per seed).
     bots.clear();
     for (const p of players.value) {
-      if (p.profile !== 'human') bots.set(p.id, buildBot(p.profile as BotProfile, seed.value + p.id * 17));
+      if (p.profile !== 'human')
+        bots.set(p.id, buildBot(p.profile as BotProfile, seed.value + p.id * 17, smartCfg.value));
     }
     buttonId.value = 0;
     levelIndex.value = 0;
@@ -445,6 +451,7 @@ export function useInteractiveSitAndGo() {
     // config
     lineup,
     speed,
+    smartCfg,
     handsPerLevel,
     startingStack,
     seed,
