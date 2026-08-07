@@ -113,6 +113,9 @@ export interface PublicObservation {
   players: PlayerPublicView[];
   actionLog: ActionRecord[];
   pot: number;
+  /** The hand configuration (streets, composition, betting, action order) so
+   *  agents can be game-type aware. Always set by the engine. */
+  handCfg?: HandConfig;
 }
 
 export interface Observation extends PublicObservation {

@@ -95,6 +95,15 @@ export {
   createTightAgent,
 } from './agents/stub';
 export { chooseDiscard, discardAction } from './agents/discard';
+export {
+  analyzeObservation,
+  chenStrength,
+  createSmartBot,
+  drawBonus,
+  madeStrength,
+  requiredStrength,
+} from './agents/smart';
+export type { BotContext, GameType, SmartBotParams } from './agents/smart';
 
 export { playHand, replayHand, replayHandSteps, Table, toReplayAgent } from './table';
 export type { HandReplayStep } from './table';

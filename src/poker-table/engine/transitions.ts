@@ -418,6 +418,7 @@ export function observePublic(state: GameState): PublicObservation {
     players,
     actionLog,
     pot,
+    handCfg: state.handCfg,
   };
 }
 
