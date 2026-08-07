@@ -71,10 +71,12 @@ export function computeLegalActions(state: GameState, handCfg: HandConfig): Acti
     if (seat.stack > 0) {
       let minBet = minBetFloor;
       let maxBet = seat.stack;
+      let flUnit = 0;
       if (type === 'fixed-limit') {
         const unit = flBetUnit(betting!, si, handCfg.streets.length, bb);
+        flUnit = unit;
         minBet = Math.min(unit, seat.stack);
-        maxBet = unit;
+        maxBet = Math.min(unit, seat.stack);
       } else if (type === 'pot-limit') {
         maxBet = Math.min(seat.stack, potTotal(state));
       }
@@ -89,7 +91,11 @@ export function computeLegalActions(state: GameState, handCfg: HandConfig): Acti
           max: maxBet,
         });
       }
-      acts.push({ type: 'allin', seat: seat.index, streetIndex: si, amount: seat.stack });
+      // Fixed-limit: all-in is only legal when the stack cannot complete the
+      // fixed bet unit (short stack). Full stacks shove in no-limit/pot-limit.
+      if (type !== 'fixed-limit' || seat.stack < flUnit) {
+        acts.push({ type: 'allin', seat: seat.index, streetIndex: si, amount: seat.stack });
+      }
     }
     return acts;
   }
@@ -141,7 +147,14 @@ export function computeLegalActions(state: GameState, handCfg: HandConfig): Acti
     }
   }
 
-  if (seat.stack > tc) {
+  if (type === 'fixed-limit') {
+    // Fixed-limit: all-in only when the stack cannot complete the call.
+    // A stack that can call must call/raise/fold in fixed units — no shove.
+    if (seat.stack < tc) {
+      acts.push({ type: 'allin', seat: seat.index, streetIndex: si, amount: seat.stack });
+    }
+  } else if (seat.stack > tc) {
+    // No-limit / pot-limit: an open shove over the top is legal.
     acts.push({ type: 'allin', seat: seat.index, streetIndex: si, amount: seat.stack });
   }
   return acts;

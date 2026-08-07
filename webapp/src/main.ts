@@ -12,6 +12,7 @@ import HomeView from './views/HomeView.vue'
 import EvaluatorView from './views/EvaluatorView.vue'
 import DocumentationView from './views/DocumentationView.vue'
 import TableView from './views/TableView.vue'
+import SitAndGoView from './views/SitAndGoView.vue'
 
 const router = createRouter({
   history: createWebHistory(),
@@ -19,6 +20,7 @@ const router = createRouter({
     { path: '/', component: HomeView },
     { path: '/evaluator', component: EvaluatorView },
     { path: '/table', component: TableView },
+    { path: '/sng', component: SitAndGoView },
     { path: '/docs', component: DocumentationView }
   ]
 })

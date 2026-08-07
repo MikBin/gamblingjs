@@ -140,17 +140,19 @@ describe('NL Stud Hi/Lo — determinism & deck edge', () => {
     expect(replayed.winners).toEqual(orig.winners);
   });
 
-  it('8-handed throws deck-exhausted; 7-handed completes zero-sum', () => {
+  it('8-handed completes via the common-card rule; 7-handed completes zero-sum', () => {
     const g8 = studHiLo({ ante: 1, bringIn: 1, stack: 200 });
     g8.table.seats = { min: 8, max: 8 };
-    expect(() =>
-      playHand(
-        g8.table,
-        g8.hand,
-        Array.from({ length: 8 }, () => alwaysCallAgent),
-        1,
-      ),
-    ).toThrow('deck exhausted');
+    const r8 = playHand(
+      g8.table,
+      g8.hand,
+      Array.from({ length: 8 }, () => alwaysCallAgent),
+      1,
+    );
+    expect(r8.isTerminal).toBe(true);
+    expect(zeroSum(r8.finalStacks)).toBe(8 * 200);
+    for (const hole of r8.dealt.hole) expect(hole.length).toBe(3);
+    for (const up of r8.dealt.up) expect(up.length).toBe(4);
     const g7 = studHiLo({ ante: 1, bringIn: 1, stack: 200 });
     g7.table.seats = { min: 7, max: 7 };
     const res = playHand(

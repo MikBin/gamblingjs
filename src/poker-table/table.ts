@@ -10,10 +10,16 @@ import type {
 } from './engine/state';
 import {
   advanceToNextDecision,
+  anyActive,
   applyAction,
+  countNonFolded,
+  dealStreet,
   initHand,
+  needsAction,
   observe,
+  refundUncalled,
   resumeHand,
+  settle,
 } from './engine/transitions';
 import { computeLegalActions } from './engine/actions';
 import type { PlayerAgent } from './agents/types';
@@ -82,6 +88,105 @@ export function replayHand(
   const replay = toReplayAgent(actions);
   const agents: PlayerAgent[] = Array.from({ length: tableCfg.seats.min }, () => replay);
   return playHand(tableCfg, handCfg, agents, seed, seatStacks);
+}
+
+/** One animation frame: the events that fired plus the public state after them. */
+export interface HandReplayStep {
+  events: GameEvent[];
+  obs: Observation;
+}
+
+/**
+ * Re-run a recorded hand through the exact engine state machine used by
+ * `playHand` (runBettingRound semantics), capturing a public observation after
+ * every event. Unlike driving `Table.step` (which uses advanceToNextDecision),
+ * this can never diverge from the recorded action order, so it is safe to feed
+ * any `HandResult.actions` log. Deterministic: same inputs, same steps.
+ */
+export function replayHandSteps(
+  tableCfg: TableConfig,
+  handCfg: HandConfig,
+  seed: number,
+  actions: Action[],
+  seatStacks?: number[],
+): HandReplayStep[] {
+  const rng = createRng(seed);
+  const agent = toReplayAgent(actions);
+  const agents: PlayerAgent[] = Array.from({ length: tableCfg.seats.min }, () => agent);
+  const steps: HandReplayStep[] = [];
+  let pending: GameEvent[] = [];
+  const emit = (e: GameEvent): void => {
+    pending.push(e);
+  };
+  const capture = (state: GameState): void => {
+    steps.push({ events: [...pending], obs: observe(state, 0) });
+    pending = [];
+  };
+
+  const settleAndEmit = (state: GameState): GameState => {
+    const alive = countNonFolded(state);
+    const settled = settle(state);
+    if (alive > 1) emit({ type: 'showdown', winners: settled.winners });
+    emit({ type: 'hand-ended', winners: settled.winners });
+    capture(settled);
+    return settled;
+  };
+
+  // Betting round with per-action capture (mirrors runBettingRound).
+  const runBettingRound = (state: GameState): GameState => {
+    let cur = state;
+    let cursor = cur.actingSeat;
+    let guard = 0;
+    while (countNonFolded(cur) > 1) {
+      let seatIdx = -1;
+      const n = cur.seats.length;
+      for (let k = 0; k < n; k++) {
+        const idx = (cursor + k) % n;
+        if (needsAction(cur, idx)) {
+          seatIdx = idx;
+          break;
+        }
+      }
+      if (seatIdx === -1) break;
+      cur.actingSeat = seatIdx;
+      const obs = observe(cur, seatIdx);
+      const action = agents[seatIdx]!.decide(obs);
+      cur = applyAction(cur, action, handCfg);
+      emit({ type: 'action', streetIndex: cur.streetIndex, action });
+      capture(cur);
+      cursor = (seatIdx + 1) % n;
+      if (++guard > 100000) throw new Error('betting round did not converge');
+    }
+    emit({ type: 'betting-complete', streetIndex: cur.streetIndex });
+    capture(cur);
+    return refundUncalled(cur);
+  };
+
+  let s = initHand(tableCfg, handCfg, rng, seatStacks);
+  capture(s); // street 0 already dealt
+
+  const runCurrentStreet = (): boolean => {
+    if (countNonFolded(s) <= 1) return false;
+    if (anyActive(s)) {
+      s = runBettingRound(s);
+      if (countNonFolded(s) <= 1) return false;
+    }
+    return true;
+  };
+
+  if (!runCurrentStreet()) {
+    settleAndEmit(s);
+    return steps;
+  }
+  for (let si = s.streetIndex + 1; si < handCfg.streets.length; si++) {
+    if (countNonFolded(s) <= 1) break;
+    s = dealStreet(s, si);
+    emit({ type: 'dealt', streetIndex: si });
+    capture(s);
+    if (!runCurrentStreet()) break;
+  }
+  settleAndEmit(s);
+  return steps;
 }
 
 export class Table {

@@ -156,17 +156,19 @@ describe('FL Stud Hi — determinism', () => {
 });
 
 describe('FL Stud Hi — deck-exhaustion edge', () => {
-  it('8-handed stud (56 cards > 52) fails cleanly', () => {
+  it('8-handed stud (56 cards > 52) completes via the common-card rule', () => {
     const g = fixedLimitStud({ ante: 1, bringIn: 1, smallBet: 2, bigBet: 4, stack: 200 });
     g.table.seats = { min: 8, max: 8 };
-    expect(() =>
-      playHand(
-        g.table,
-        g.hand,
-        Array.from({ length: 8 }, () => alwaysCallAgent),
-        1,
-      ),
-    ).toThrow('deck exhausted');
+    const res = playHand(
+      g.table,
+      g.hand,
+      Array.from({ length: 8 }, () => alwaysCallAgent),
+      1,
+    );
+    expect(res.isTerminal).toBe(true);
+    expect(zeroSum(res.finalStacks)).toBe(8 * 200);
+    for (const hole of res.dealt.hole) expect(hole.length).toBe(3);
+    for (const up of res.dealt.up) expect(up.length).toBe(4);
   });
 
   it('7-handed stud (49 cards) completes fine', () => {

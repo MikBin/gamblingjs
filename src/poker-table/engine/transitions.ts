@@ -59,7 +59,7 @@ export function countNonFolded(state: GameState): number {
   return n;
 }
 
-function anyActive(state: GameState): boolean {
+export function anyActive(state: GameState): boolean {
   return state.seats.some((s) => s.status === 'active');
 }
 
@@ -221,10 +221,22 @@ export function dealStreet(state: GameState, streetIndex: number): GameState {
   const s = cloneState(state);
   const deal = s.handCfg.streets[streetIndex]?.deal;
   if (deal) {
-    for (const seat of s.seats) {
-      if (seat.status === 'out') continue;
-      for (let k = 0; k < deal.holeDown; k++) seat.hole.push(draw(s));
-      for (let k = 0; k < deal.playerUp; k++) seat.up.push(draw(s));
+    const recipients = s.seats.filter((seat) => seat.status !== 'out');
+    const perSeat = (deal.holeDown ?? 0) + (deal.playerUp ?? 0);
+    if (recipients.length * perSeat > s.deck.length && recipients.length > 0) {
+      // Standard stud rule for a short deck: when the deck cannot give every
+      // remaining player a card on this street (e.g. 8-handed 7th street), one
+      // common card is dealt and shared by all remaining players.
+      const common = draw(s);
+      for (const seat of recipients) {
+        for (let k = 0; k < deal.holeDown; k++) seat.hole.push(common);
+        for (let k = 0; k < deal.playerUp; k++) seat.up.push(common);
+      }
+    } else {
+      for (const seat of recipients) {
+        for (let k = 0; k < deal.holeDown; k++) seat.hole.push(draw(s));
+        for (let k = 0; k < deal.playerUp; k++) seat.up.push(draw(s));
+      }
     }
     for (let k = 0; k < deal.community; k++) s.community.push(draw(s));
   }
@@ -330,7 +342,7 @@ export function applyAction(state: GameState, action: Action, handCfg: HandConfi
   return s;
 }
 
-function needsAction(state: GameState, idx: number): boolean {
+export function needsAction(state: GameState, idx: number): boolean {
   const seat = state.seats[idx];
   if (!seat || seat.status !== 'active') return false;
   if (!seat.hasActedThisStreet) return true;

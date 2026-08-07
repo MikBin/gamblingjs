@@ -95,7 +95,8 @@ export {
   createTightAgent,
 } from './agents/stub';
 
-export { playHand, replayHand, Table, toReplayAgent } from './table';
+export { playHand, replayHand, replayHandSteps, Table, toReplayAgent } from './table';
+export type { HandReplayStep } from './table';
 export {
   deuceSeven,
   fixedLimitHoldem,
@@ -113,3 +114,20 @@ export {
 } from './config/presets';
 export type { GamePreset } from './config/presets';
 export { dealtCounts, validateHandConfig } from './config/validate';
+
+export type {
+  GameBuilder,
+  HandSummary,
+  HandWinnerSummary,
+  PayoutResult,
+  RotationCadence,
+  RotationGame,
+  SitAndGoConfig,
+  SitAndGoLevel,
+  SitAndGoResult,
+  SngPlayerInput,
+  StandingsRow,
+} from './session/types';
+export { fastHorseLevels, horseGame, horseRotation } from './session/horse';
+export type { HorseLetter } from './session/horse';
+export { runSitAndGo } from './session/sng';
