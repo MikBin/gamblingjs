@@ -6,6 +6,7 @@ import {
   createCallingStationAgent,
   createManiacAgent,
   createRandomAgent,
+  createSmartBot,
   createTightAgent,
   ensureHighHashes,
   standardHoldem,
@@ -26,6 +27,7 @@ import {
   type Observation,
   type PlayerAgent,
   type PotWinner,
+  type SmartBotParams,
 } from '@pokertable';
 
 export interface PresetOption {
@@ -83,7 +85,14 @@ export const PRESETS: PresetOption[] = [
 
 let warmed = false;
 
-export type BotProfile = 'random' | 'aggressive' | 'maniac' | 'station' | 'tight' | 'call';
+export type BotProfile =
+  | 'random'
+  | 'aggressive'
+  | 'maniac'
+  | 'station'
+  | 'tight'
+  | 'call'
+  | 'smart';
 
 export interface LineupOption {
   name: string;
@@ -93,6 +102,14 @@ export interface LineupOption {
 // "Random mix" cycles archetypes so a table sees folds, raises, all-ins, etc.
 const MIX_CYCLE: BotProfile[] = ['random', 'aggressive', 'maniac', 'station', 'tight'];
 
+/** Default smart-bot personality; tuned live via the table's difficulty sliders. */
+export const SMART_DEFAULT: Omit<SmartBotParams, 'seed'> = {
+  aggression: 0.6,
+  tightness: 0.4,
+  bluffiness: 0.08,
+  sizing: 0.7,
+};
+
 export const LINEUPS: LineupOption[] = [
   { name: 'Random mix', seats: (i) => MIX_CYCLE[i % MIX_CYCLE.length]! },
   { name: 'All random', seats: () => 'random' },
@@ -101,9 +118,11 @@ export const LINEUPS: LineupOption[] = [
   { name: 'Aggressive (LAG)', seats: () => 'aggressive' },
   { name: 'Tight / nits', seats: () => 'tight' },
   { name: 'Always-call', seats: () => 'call' },
+  { name: 'Smart bots', seats: () => 'smart' },
+  { name: 'Smart + classic mix', seats: (i) => (i % 2 === 0 ? 'smart' : MIX_CYCLE[i % MIX_CYCLE.length]!) },
 ];
 
-function buildBot(profile: BotProfile, seed: number): PlayerAgent {
+function buildBot(profile: BotProfile, seed: number, smart: Omit<SmartBotParams, 'seed'>): PlayerAgent {
   switch (profile) {
     case 'random':
       return createRandomAgent(seed);
@@ -117,6 +136,8 @@ function buildBot(profile: BotProfile, seed: number): PlayerAgent {
       return createTightAgent(seed);
     case 'call':
       return alwaysCallAgent;
+    case 'smart':
+      return createSmartBot({ seed, ...smart });
   }
 }
 
@@ -134,6 +155,8 @@ export function usePokerTable() {
   const finalStacks = ref<number[]>([]);
   const speed = ref(850);
   const lineup = ref(LINEUPS[0]!.name);
+  // Smart-bot personality, tunable live (sliders in the table view).
+  const smartCfg = ref<Omit<SmartBotParams, 'seed'>>({ ...SMART_DEFAULT });
   // Animation/pacing state
   const revealedCount = ref(Infinity); // how many community cards are visible
   const showdown = ref(false); // true once the finale (board complete + reveal) plays
@@ -295,7 +318,7 @@ export function usePokerTable() {
     const lineupOpt = LINEUPS.find((l) => l.name === lineup.value) ?? LINEUPS[0]!;
     const n = preset.table.seats.min;
     for (let seat = 1; seat < n; seat++) {
-      bots.set(seat, buildBot(lineupOpt.seats(seat - 1), seed * 131 + seat));
+      bots.set(seat, buildBot(lineupOpt.seats(seat - 1), seed * 131 + seat, smartCfg.value));
     }
     push(`new hand · ${preset.table.gameId} · seed ${seed} · ${n} seats · ${lineupOpt.name}`);
     refresh();
@@ -328,6 +351,7 @@ export function usePokerTable() {
     humanActions,
     speed,
     lineup,
+    smartCfg,
     revealedCommunity,
     showdown,
     deal,

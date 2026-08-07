@@ -34,6 +34,24 @@
           <span class="label-text text-xs">Bot delay (ms)</span>
           <input v-model.number="speed" type="range" min="150" max="2500" step="50" class="range range-xs mt-2" />
         </label>
+        <template v-if="lineup === 'Smart bots' || lineup === 'Smart + classic mix'">
+          <label class="form-control">
+            <span class="label-text text-xs">Smart aggression: {{ smartCfg.aggression }}</span>
+            <input v-model.number="smartCfg.aggression" type="range" min="0" max="1" step="0.05" class="range range-xs mt-2" />
+          </label>
+          <label class="form-control">
+            <span class="label-text text-xs">Smart tightness: {{ smartCfg.tightness }}</span>
+            <input v-model.number="smartCfg.tightness" type="range" min="0" max="1" step="0.05" class="range range-xs mt-2" />
+          </label>
+          <label class="form-control">
+            <span class="label-text text-xs">Bluffiness: {{ smartCfg.bluffiness }}</span>
+            <input v-model.number="smartCfg.bluffiness" type="range" min="0" max="0.5" step="0.02" class="range range-xs mt-2" />
+          </label>
+          <label class="form-control">
+            <span class="label-text text-xs">Bet sizing (× pot): {{ smartCfg.sizing }}</span>
+            <input v-model.number="smartCfg.sizing" type="range" min="0.2" max="1.5" step="0.05" class="range range-xs mt-2" />
+          </label>
+        </template>
         <div class="flex items-end gap-2">
           <button class="btn btn-primary btn-sm flex-1" @click="onDeal">Deal hand</button>
         </div>
@@ -183,7 +201,7 @@ const stacksText = ref('200');
 const seed = ref(42);
 const betAmt = ref(0);
 
-const { obs, log, winners, pots, finalStacks, done, humanTurn, humanActions, lineup, speed, revealedCommunity, showdown, deal, humanAct } =
+const { obs, log, winners, pots, finalStacks, done, humanTurn, humanActions, lineup, smartCfg, speed, revealedCommunity, showdown, deal, humanAct } =
   usePokerTable();
 
 const seatCount = computed(() => obs.value?.players.length ?? seats.value);
