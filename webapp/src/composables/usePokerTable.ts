@@ -6,6 +6,7 @@ import {
   createCallingStationAgent,
   createManiacAgent,
   createRandomAgent,
+  createSearchAgent,
   createSmartBot,
   createTightAgent,
   ensureHighHashes,
@@ -27,6 +28,7 @@ import {
   type Observation,
   type PlayerAgent,
   type PotWinner,
+  type SearchBotConfig,
   type SmartBotParams,
 } from '@pokertable';
 
@@ -92,15 +94,17 @@ export type BotProfile =
   | 'station'
   | 'tight'
   | 'call'
-  | 'smart';
+  | 'smart'
+  | 'search';
 
 export interface LineupOption {
   name: string;
   seats: (botIndex: number) => BotProfile;
 }
 
-// "Random mix" cycles archetypes so a table sees folds, raises, all-ins, etc.
-const MIX_CYCLE: BotProfile[] = ['random', 'aggressive', 'maniac', 'station', 'tight'];
+// "Random mix" cycles archetypes (incl. the two skilled bots) so a table sees
+// folds, raises, all-ins, and genuinely strong play.
+const MIX_CYCLE: BotProfile[] = ['random', 'aggressive', 'maniac', 'station', 'tight', 'smart', 'search'];
 
 /** Default smart-bot personality; tuned live via the table's difficulty sliders. */
 export const SMART_DEFAULT: Omit<SmartBotParams, 'seed'> = {
@@ -108,6 +112,16 @@ export const SMART_DEFAULT: Omit<SmartBotParams, 'seed'> = {
   tightness: 0.4,
   bluffiness: 0.08,
   sizing: 0.7,
+};
+
+/** Default Monte-Carlo search-bot config; tuned live via the table's sliders.
+ *  equitySamples stays modest so in-browser decisions stay responsive. */
+export const SEARCH_DEFAULT: Omit<SearchBotConfig, 'seed'> = {
+  temperature: 0.15,
+  equitySamples: 200,
+  aggression: 0.5,
+  tightness: 0.4,
+  bluffFrequency: 0.05,
 };
 
 export const LINEUPS: LineupOption[] = [
@@ -119,10 +133,17 @@ export const LINEUPS: LineupOption[] = [
   { name: 'Tight / nits', seats: () => 'tight' },
   { name: 'Always-call', seats: () => 'call' },
   { name: 'Smart bots', seats: () => 'smart' },
+  { name: 'Search bots (MC equity)', seats: () => 'search' },
   { name: 'Smart + classic mix', seats: (i) => (i % 2 === 0 ? 'smart' : MIX_CYCLE[i % MIX_CYCLE.length]!) },
+  { name: 'Search + smart mix', seats: (i) => (i % 2 === 0 ? 'search' : 'smart') },
 ];
 
-function buildBot(profile: BotProfile, seed: number, smart: Omit<SmartBotParams, 'seed'>): PlayerAgent {
+function buildBot(
+  profile: BotProfile,
+  seed: number,
+  smart: Omit<SmartBotParams, 'seed'>,
+  search: Omit<SearchBotConfig, 'seed'>,
+): PlayerAgent {
   switch (profile) {
     case 'random':
       return createRandomAgent(seed);
@@ -138,6 +159,8 @@ function buildBot(profile: BotProfile, seed: number, smart: Omit<SmartBotParams,
       return alwaysCallAgent;
     case 'smart':
       return createSmartBot({ seed, ...smart });
+    case 'search':
+      return createSearchAgent({ seed, ...search });
   }
 }
 
@@ -157,6 +180,8 @@ export function usePokerTable() {
   const lineup = ref(LINEUPS[0]!.name);
   // Smart-bot personality, tunable live (sliders in the table view).
   const smartCfg = ref<Omit<SmartBotParams, 'seed'>>({ ...SMART_DEFAULT });
+  // Search-bot config, tunable live (sliders in the table view).
+  const searchCfg = ref<Omit<SearchBotConfig, 'seed'>>({ ...SEARCH_DEFAULT });
   // Animation/pacing state
   const revealedCount = ref(Infinity); // how many community cards are visible
   const showdown = ref(false); // true once the finale (board complete + reveal) plays
@@ -318,7 +343,7 @@ export function usePokerTable() {
     const lineupOpt = LINEUPS.find((l) => l.name === lineup.value) ?? LINEUPS[0]!;
     const n = preset.table.seats.min;
     for (let seat = 1; seat < n; seat++) {
-      bots.set(seat, buildBot(lineupOpt.seats(seat - 1), seed * 131 + seat, smartCfg.value));
+      bots.set(seat, buildBot(lineupOpt.seats(seat - 1), seed * 131 + seat, smartCfg.value, searchCfg.value));
     }
     push(`new hand · ${preset.table.gameId} · seed ${seed} · ${n} seats · ${lineupOpt.name}`);
     refresh();
@@ -352,6 +377,7 @@ export function usePokerTable() {
     speed,
     lineup,
     smartCfg,
+    searchCfg,
     revealedCommunity,
     showdown,
     deal,

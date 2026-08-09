@@ -52,6 +52,34 @@
             <input v-model.number="smartCfg.sizing" type="range" min="0.2" max="1.5" step="0.05" class="range range-xs mt-2" />
           </label>
         </template>
+        <template
+          v-if="
+            lineup === 'Search bots (MC equity)' ||
+            lineup === 'Search + smart mix' ||
+            lineup === 'Random mix'
+          "
+        >
+          <label class="form-control">
+            <span class="label-text text-xs">Search temperature: {{ searchCfg.temperature }} (0 = greedy/strong)</span>
+            <input v-model.number="searchCfg.temperature" type="range" min="0" max="2" step="0.05" class="range range-xs mt-2" />
+          </label>
+          <label class="form-control">
+            <span class="label-text text-xs">Equity samples: {{ searchCfg.equitySamples }} (higher = sharper/slower)</span>
+            <input v-model.number="searchCfg.equitySamples" type="range" min="50" max="1000" step="50" class="range range-xs mt-2" />
+          </label>
+          <label class="form-control">
+            <span class="label-text text-xs">Aggression: {{ searchCfg.aggression }}</span>
+            <input v-model.number="searchCfg.aggression" type="range" min="0" max="1" step="0.05" class="range range-xs mt-2" />
+          </label>
+          <label class="form-control">
+            <span class="label-text text-xs">Tightness: {{ searchCfg.tightness }}</span>
+            <input v-model.number="searchCfg.tightness" type="range" min="0" max="1" step="0.05" class="range range-xs mt-2" />
+          </label>
+          <label class="form-control">
+            <span class="label-text text-xs">Bluff frequency: {{ searchCfg.bluffFrequency }}</span>
+            <input v-model.number="searchCfg.bluffFrequency" type="range" min="0" max="0.5" step="0.02" class="range range-xs mt-2" />
+          </label>
+        </template>
         <div class="flex items-end gap-2">
           <button class="btn btn-primary btn-sm flex-1" @click="onDeal">Deal hand</button>
         </div>
@@ -201,7 +229,7 @@ const stacksText = ref('200');
 const seed = ref(42);
 const betAmt = ref(0);
 
-const { obs, log, winners, pots, finalStacks, done, humanTurn, humanActions, lineup, smartCfg, speed, revealedCommunity, showdown, deal, humanAct } =
+const { obs, log, winners, pots, finalStacks, done, humanTurn, humanActions, lineup, smartCfg, searchCfg, speed, revealedCommunity, showdown, deal, humanAct } =
   usePokerTable();
 
 const seatCount = computed(() => obs.value?.players.length ?? seats.value);
