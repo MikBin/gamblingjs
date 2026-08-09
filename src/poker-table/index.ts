@@ -104,7 +104,13 @@ export {
   requiredStrength,
 } from './agents/smart';
 export type { BotContext, GameType, SmartBotParams } from './agents/smart';
-export { createSearchAgent, monteCarloEquity, resolveSearchBotConfig } from './agents/search';
+export {
+  createSearchAgent,
+  ismctsDecide,
+  monteCarloEquity,
+  reconstructState,
+  resolveSearchBotConfig,
+} from './agents/search';
 export type {
   EquityArgs,
   EquityResult,

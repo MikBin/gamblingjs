@@ -28,12 +28,16 @@ export interface SearchBotConfig {
   sizing?: { mean: number; sigma: number };
   /** Phase 1 supports 'uniform' only; 'bayesian' is reserved for Phase 2. */
   opponentModel?: 'uniform';
-  // --- reserved (Phase 2/3): validated, not consumed by the rollout ---
-  /** UCB1 exploration constant for IS-MCTS (Phase 3). */
+  /** Decision core: 'pimc' (1-ply Monte-Carlo equity, default) or 'ismcts' (tree search with UCB1). */
+  core?: 'pimc' | 'ismcts';
+  /** Number of determinizations sampled per IS-MCTS decision (hidden-info resamples). */
+  determinizations?: number;
+  // --- reserved (Phase 3): validated, consumed only when core === 'ismcts' ---
+  /** UCB1 exploration constant for IS-MCTS. */
   explorationC?: number;
-  /** IS-MCTS iterations per decision (Phase 3). */
+  /** IS-MCTS iterations per decision. */
   treeIterations?: number;
-  /** IS-MCTS lookahead cap in streets (Phase 3). */
+  /** IS-MCTS lookahead cap in streets. */
   maxDepthStreets?: number;
 }
 
@@ -47,6 +51,8 @@ export interface ResolvedSearchBotConfig {
   potOddsTolerance: number;
   sizing: { mean: number; sigma: number };
   opponentModel: 'uniform';
+  core: 'pimc' | 'ismcts';
+  determinizations: number;
   explorationC: number;
   treeIterations: number;
   maxDepthStreets: number;
@@ -75,8 +81,10 @@ export function resolveSearchBotConfig(c: SearchBotConfig): ResolvedSearchBotCon
     potOddsTolerance: clamp01(c.potOddsTolerance ?? 0.05),
     sizing: c.sizing ?? { mean: 0.6, sigma: 0.2 },
     opponentModel: 'uniform',
+    core: c.core === 'ismcts' ? 'ismcts' : 'pimc',
+    determinizations: Math.max(1, Math.floor(c.determinizations ?? 6)),
     explorationC: c.explorationC ?? 0.7,
-    treeIterations: c.treeIterations ?? 10000,
+    treeIterations: Math.max(1, Math.floor(c.treeIterations ?? 400)),
     maxDepthStreets: c.maxDepthStreets ?? 1,
   };
 }

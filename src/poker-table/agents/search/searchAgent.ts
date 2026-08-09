@@ -6,6 +6,7 @@ import type { PlayerAgent } from '../types';
 import { analyzeObservation } from '../smart';
 import { discardAction } from '../discard';
 import { monteCarloEquity } from './equity';
+import { ismctsDecide } from './tree';
 import { resolveSearchBotConfig } from './config';
 import type { ResolvedSearchBotConfig, SearchBotConfig } from './config';
 
@@ -155,47 +156,58 @@ function sized(a: Action, p: ResolvedSearchBotConfig, rng: RngSource): Action {
 export function createSearchAgent(config: SearchBotConfig): PlayerAgent {
   const p = resolveSearchBotConfig(config);
   const rng = createRng(p.seed);
-  const unit = (): number => rng.nextInt(1000) / 1000;
   return {
     decide(obs: Observation): Action {
-      const disc = discardAction(obs);
-      if (disc) return disc;
-      const legal = obs.legalActions;
-      if (legal.length === 0) {
-        return { type: 'fold', seat: obs.seat, streetIndex: obs.streetIndex };
-      }
-
-      const ctx = analyzeObservation(obs);
-      const potOdds = ctx.potOdds;
-      const eq = equityOf(obs, p, rng);
-
-      // Rare, high-leverage all-ins (mirrors the smart-bot guardrails).
-      const allin = findType(legal, 'allin');
-      if (allin) {
-        const desperate = ctx.myStack <= ctx.pot * 0.25 && eq >= 0.25;
-        const committed = ctx.facingBet && ctx.toCall >= 0.6 * ctx.myStack && eq >= potOdds * 1.2;
-        const nuts = ctx.streetIndex > 0 && eq >= 0.95;
-        if (desperate || committed || nuts) return allin;
-      }
-
-      const scored: Scored[] = legal
-        .filter((a) => a.type !== 'allin')
-        .map((a) => ({ a, u: utility(a, eq, potOdds, p) }));
-      const pool = scored.length > 0 ? scored : legal.map((a) => ({ a, u: 0 }));
-      let chosen = softmaxPick(pool, p.temperature, rng);
-
-      // Bluff injection: occasionally bet/raise a weak hand when free or priced out.
-      if (
-        (chosen.type === 'fold' || chosen.type === 'check') &&
-        eq < 0.34 &&
-        unit() < p.bluffFrequency
-      ) {
-        const aggro = findType(legal, 'bet') ?? findType(legal, 'raise');
-        if (aggro) chosen = aggro;
-      }
-
-      if (chosen.type === 'bet' || chosen.type === 'raise') return sized(chosen, p, rng);
-      return chosen;
+      if (p.core === 'ismcts') return ismctsDecide(obs, p, rng, pimcDecide, sizeAction);
+      return pimcDecide(obs, p, rng);
     },
   };
+}
+
+/** Gaussian-sized bet/raise within the action's legal [min, max] range. */
+export function sizeAction(a: Action, p: ResolvedSearchBotConfig, rng: RngSource): Action {
+  return sized(a, p, rng);
+}
+
+/** The 1-ply Monte-Carlo equity decision (the PIMC core; also the IS-MCTS fallback). */
+export function pimcDecide(obs: Observation, p: ResolvedSearchBotConfig, rng: RngSource): Action {
+  const unit = (): number => rng.nextInt(1000) / 1000;
+  const disc = discardAction(obs);
+  if (disc) return disc;
+  const legal = obs.legalActions;
+  if (legal.length === 0) {
+    return { type: 'fold', seat: obs.seat, streetIndex: obs.streetIndex };
+  }
+
+  const ctx = analyzeObservation(obs);
+  const potOdds = ctx.potOdds;
+  const eq = equityOf(obs, p, rng);
+
+  // Rare, high-leverage all-ins (mirrors the smart-bot guardrails).
+  const allin = findType(legal, 'allin');
+  if (allin) {
+    const desperate = ctx.myStack <= ctx.pot * 0.25 && eq >= 0.25;
+    const committed = ctx.facingBet && ctx.toCall >= 0.6 * ctx.myStack && eq >= potOdds * 1.2;
+    const nuts = ctx.streetIndex > 0 && eq >= 0.95;
+    if (desperate || committed || nuts) return allin;
+  }
+
+  const scored: Scored[] = legal
+    .filter((a) => a.type !== 'allin')
+    .map((a) => ({ a, u: utility(a, eq, potOdds, p) }));
+  const pool = scored.length > 0 ? scored : legal.map((a) => ({ a, u: 0 }));
+  let chosen = softmaxPick(pool, p.temperature, rng);
+
+  // Bluff injection: occasionally bet/raise a weak hand when free or priced out.
+  if (
+    (chosen.type === 'fold' || chosen.type === 'check') &&
+    eq < 0.34 &&
+    unit() < p.bluffFrequency
+  ) {
+    const aggro = findType(legal, 'bet') ?? findType(legal, 'raise');
+    if (aggro) chosen = aggro;
+  }
+
+  if (chosen.type === 'bet' || chosen.type === 'raise') return sized(chosen, p, rng);
+  return chosen;
 }
