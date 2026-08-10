@@ -6,6 +6,7 @@ import type { PlayerAgent } from '../types';
 import { analyzeObservation } from '../smart';
 import { discardAction } from '../discard';
 import { monteCarloEquity } from './equity';
+import { makeOpponentModel, uniformModel } from './model';
 import { ismctsDecide } from './tree';
 import { resolveSearchBotConfig } from './config';
 import type { ResolvedSearchBotConfig, SearchBotConfig } from './config';
@@ -59,10 +60,15 @@ function equityOf(obs: Observation, p: ResolvedSearchBotConfig, rng: RngSource):
   if (opponentUp.length === 0) return 1;
   const geo = geometryOf(obs.handCfg, myPrivate, obs.community);
   const selector = obs.handCfg?.evaluation.composition ?? fallbackSelector(obs);
+  const opponentModels =
+    p.opponentModel === 'bayesian'
+      ? oppSeats.map((seat) => makeOpponentModel(obs, seat, obs.evaluator))
+      : oppSeats.map(() => uniformModel);
   return monteCarloEquity({
     myPrivate,
     community: obs.community,
     opponentUp,
+    opponentModels,
     selector,
     kind: obs.evaluator,
     lowQualify: obs.handCfg?.evaluation.lowQualify,

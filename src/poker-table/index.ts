@@ -106,14 +106,20 @@ export {
 export type { BotContext, GameType, SmartBotParams } from './agents/smart';
 export {
   createSearchAgent,
+  inferProfile,
   ismctsDecide,
+  makeOpponentModel,
   monteCarloEquity,
+  rangeWeight,
   reconstructState,
   resolveSearchBotConfig,
+  uniformModel,
 } from './agents/search';
 export type {
   EquityArgs,
   EquityResult,
+  OpponentModel,
+  OpponentProfile,
   ResolvedSearchBotConfig,
   SearchBotConfig,
 } from './agents/search';

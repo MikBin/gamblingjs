@@ -18,6 +18,8 @@ import { applyAction, advanceToNextDecision, cloneState, observe } from '../../e
 import { computeLegalActions, bigBlindOf } from '../../engine/actions';
 import type { RngSource } from '../../engine/rng';
 import { discardAction } from '../discard';
+import type { OpponentModel } from './model';
+import { uniformModel, makeOpponentModel } from './model';
 import type { ResolvedSearchBotConfig } from './config';
 
 const FULL_DECK: number[] = Array.from({ length: 52 }, (_, i) => i);
@@ -111,24 +113,27 @@ function legalActionsMatch(a: Action[], b: Action[]): boolean {
  * observation. Returns null when the rebuilt state's legal actions do not match
  * the observation (reconstruction unreliable for this spot).
  */
-export function reconstructState(obs: Observation, rng: RngSource): GameState | null {
+export function reconstructState(
+  obs: Observation,
+  rng: RngSource,
+  opponentModels?: Map<number, OpponentModel>,
+): GameState | null {
   const handCfg = obs.handCfg;
   if (!handCfg) return null;
   const mySeat = obs.seat;
 
-  // Sample each opponent's hidden down cards from the unseen pool.
+  // Sample each opponent's hidden down cards from the unseen pool, optionally
+  // biased by an inferred range (Bayesian). Models splice out of the pool.
   const pool = unseenOf(obs);
   rng.shuffleInPlace(pool);
   const downCount = downDealtSoFar(handCfg, obs.streetIndex);
-  let cursor = 0;
   const oppHole = new Map<number, number[]>();
   for (const pl of obs.players) {
     if (pl.seat === mySeat || pl.status === 'out') continue;
-    const hole = pool.slice(cursor, cursor + downCount);
-    cursor += downCount;
-    oppHole.set(pl.seat, hole);
+    const model = opponentModels?.get(pl.seat) ?? uniformModel;
+    oppHole.set(pl.seat, model.samplePrivate(pool, downCount, rng));
   }
-  const deck = pool.slice(cursor); // remaining unseen → future streets
+  const deck = pool; // remaining unseen → future streets
   rng.shuffleInPlace(deck);
 
   const seats: SeatState[] = obs.players.map((pl) => ({
@@ -281,12 +286,22 @@ export function ismctsDecide(
   if (!handCfg) return fallback(obs, p, rng);
   const mySeat = obs.seat;
 
+  // Optional Bayesian range models for the determinization sampling.
+  const opponentModels: Map<number, OpponentModel> | undefined =
+    p.opponentModel === 'bayesian'
+      ? new Map(
+          obs.players
+            .filter((pl) => pl.seat !== mySeat && pl.status !== 'out')
+            .map((pl) => [pl.seat, makeOpponentModel(obs, pl.seat, obs.evaluator)] as const),
+        )
+      : undefined;
+
   // Precompute validated determinized root states.
   const roots: GameState[] = [];
   let attempts = 0;
   while (roots.length < p.determinizations && attempts < p.determinizations * 3) {
     attempts++;
-    const st = reconstructState(obs, rng);
+    const st = reconstructState(obs, rng, opponentModels);
     if (st) roots.push(st);
   }
   if (roots.length === 0) return fallback(obs, p, rng);

@@ -283,7 +283,10 @@ describe('resolveSearchBotConfig — validation', () => {
   });
 
   it('rejects unimplemented opponent models', () => {
-    expect(() => resolveSearchBotConfig({ seed: 1, opponentModel: 'bayesian' })).toThrow();
+    expect(() => resolveSearchBotConfig({ seed: 1, opponentModel: 'bayesian' })).not.toThrow();
+    expect(() =>
+      resolveSearchBotConfig({ seed: 1, opponentModel: 'telepathy' as never }),
+    ).toThrow();
   });
 
   it('rejects out-of-range knobs', () => {

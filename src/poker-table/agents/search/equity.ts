@@ -2,6 +2,8 @@ import type { CompositionSelector, EvaluatorKind } from '../../config/types';
 import type { ResolvedPools } from '../../evaluation/composition';
 import { resolveHand, resolveHiLo } from '../../evaluation/resolver';
 import type { RngSource } from '../../engine/rng';
+import type { OpponentModel } from './model';
+import { uniformModel } from './model';
 
 /**
  * Expected pot share for the acting player in [0, 1] (1 = certain win, 0.5 =
@@ -22,6 +24,8 @@ export interface EquityArgs {
   community: number[];
   /** One entry per live opponent: that opponent's visible up cards (stud). */
   opponentUp: number[][];
+  /** Optional per-opponent range model (Bayesian narrowing). Defaults to uniform. */
+  opponentModels?: OpponentModel[];
   /** Best-hand composition rule for the game (from the hand config). */
   selector: CompositionSelector;
   kind: EvaluatorKind;
@@ -53,6 +57,7 @@ export function monteCarloEquity(a: EquityArgs): EquityResult {
     myPrivate,
     community,
     opponentUp,
+    opponentModels,
     selector,
     kind,
     lowQualify,
@@ -70,7 +75,7 @@ export function monteCarloEquity(a: EquityArgs): EquityResult {
 
   const known = new Set<number>([...myPrivate, ...community]);
   for (const up of opponentUp) for (const c of up) known.add(c);
-  const pool = FULL_DECK.filter((c) => !known.has(c));
+  const unseen = FULL_DECK.filter((c) => !known.has(c));
 
   const myHidden = Math.max(0, privateTotal - myPrivate.length);
   const oppHidden = opponentUp.map((up) => Math.max(0, privateTotal - up.length));
@@ -79,19 +84,44 @@ export function monteCarloEquity(a: EquityArgs): EquityResult {
   let shareSum = 0;
   let lowWinSum = 0;
 
-  for (let s = 0; s < nSamples; s++) {
-    rng.shuffleInPlace(pool);
-    let cursor = 0;
-    const draw = (n: number): number[] => {
-      if (n <= 0) return [];
-      const out = pool.slice(cursor, cursor + n);
-      cursor += n;
-      return out;
-    };
+  // Fast path: when no range narrowing is requested, sample every hand with the
+  // original sequential draw (byte-identical to the pre-Phase-2 behaviour).
+  const allUniform = !opponentModels || opponentModels.every((m) => m === uniformModel);
 
-    const meFull = myPrivate.concat(draw(myHidden));
-    const oppFull = opponentUp.map((up, i) => up.concat(draw(oppHidden[i]!)));
-    const boardFull = community.concat(draw(boardHidden));
+  for (let s = 0; s < nSamples; s++) {
+    const pool = unseen.slice();
+    rng.shuffleInPlace(pool);
+
+    let meFull: number[];
+    let oppFull: number[][];
+    let boardFull: number[];
+
+    if (allUniform) {
+      let cursor = 0;
+      const draw = (n: number): number[] => {
+        if (n <= 0) return [];
+        const out = pool.slice(cursor, cursor + n);
+        cursor += n;
+        return out;
+      };
+      meFull = myPrivate.concat(draw(myHidden));
+      oppFull = opponentUp.map((up, i) => up.concat(draw(oppHidden[i]!)));
+      boardFull = community.concat(draw(boardHidden));
+    } else {
+      // Opponents drawn first via their range models (splice out of the pool);
+      // the player's own hole and the board are then drawn uniformly from the
+      // remainder.
+      const pop = (n: number): number[] => {
+        if (n <= 0) return [];
+        return pool.splice(Math.max(0, pool.length - n), n);
+      };
+      const modelFor = (i: number): OpponentModel => opponentModels![i] ?? uniformModel;
+      oppFull = opponentUp.map((up, i) =>
+        up.concat(modelFor(i).samplePrivate(pool, oppHidden[i]!, rng)),
+      );
+      meFull = myPrivate.concat(pop(myHidden));
+      boardFull = community.concat(pop(boardHidden));
+    }
 
     const toPools = (priv: number[]): ResolvedPools => ({
       hole: priv,

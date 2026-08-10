@@ -26,8 +26,9 @@ export interface SearchBotConfig {
   potOddsTolerance?: number;
   /** Gaussian bet sizing as a fraction of [min, max] (mean in 0..1, sigma spread). */
   sizing?: { mean: number; sigma: number };
-  /** Phase 1 supports 'uniform' only; 'bayesian' is reserved for Phase 2. */
-  opponentModel?: 'uniform';
+  /** Opponent range model: 'uniform' (any unseen card equally likely) or
+   *  'bayesian' (narrow the sampled range from the opponent's actions). */
+  opponentModel?: 'uniform' | 'bayesian';
   /** Decision core: 'pimc' (1-ply Monte-Carlo equity, default) or 'ismcts' (tree search with UCB1). */
   core?: 'pimc' | 'ismcts';
   /** Number of determinizations sampled per IS-MCTS decision (hidden-info resamples). */
@@ -50,7 +51,7 @@ export interface ResolvedSearchBotConfig {
   bluffFrequency: number;
   potOddsTolerance: number;
   sizing: { mean: number; sigma: number };
-  opponentModel: 'uniform';
+  opponentModel: 'uniform' | 'bayesian';
   core: 'pimc' | 'ismcts';
   determinizations: number;
   explorationC: number;
@@ -61,10 +62,9 @@ export interface ResolvedSearchBotConfig {
 const clamp01 = (v: number): number => Math.max(0, Math.min(1, v));
 
 export function resolveSearchBotConfig(c: SearchBotConfig): ResolvedSearchBotConfig {
-  if (c.opponentModel !== undefined && c.opponentModel !== 'uniform') {
-    throw new Error(
-      `opponentModel "${c.opponentModel}" is not implemented (Phase 1: 'uniform' only)`,
-    );
+  const om = c.opponentModel ?? 'uniform';
+  if (om !== 'uniform' && om !== 'bayesian') {
+    throw new Error(`opponentModel "${om}" is not supported (use 'uniform' or 'bayesian')`);
   }
   const es = c.equitySamples ?? 600;
   if (!Number.isFinite(es) || es < 0) throw new Error('equitySamples must be >= 0');
@@ -80,7 +80,7 @@ export function resolveSearchBotConfig(c: SearchBotConfig): ResolvedSearchBotCon
     bluffFrequency: clamp01(c.bluffFrequency ?? 0.05),
     potOddsTolerance: clamp01(c.potOddsTolerance ?? 0.05),
     sizing: c.sizing ?? { mean: 0.6, sigma: 0.2 },
-    opponentModel: 'uniform',
+    opponentModel: om,
     core: c.core === 'ismcts' ? 'ismcts' : 'pimc',
     determinizations: Math.max(1, Math.floor(c.determinizations ?? 6)),
     explorationC: c.explorationC ?? 0.7,

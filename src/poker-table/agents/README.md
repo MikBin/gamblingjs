@@ -51,7 +51,7 @@ it controls **how strong / how correct for the game format** the bot is.
 |---|---|---|---|---|---|---|
 | 0 | **ICM awareness (tournament value)** | Decisions weighted by payout structure, not raw chips | Bot plays chip-EV — **too aggressive on SNG bubbles / final tables / pay jumps** | **Any SNG/tournament training** (cash is unaffected — chip-EV is correct there) | Medium | Not started |
 | 1 | **Multi-way calibration (N>2)** | Tune raise/bet/bluff thresholds for 6-max / 9-max | Equity already handles N opponents; the *policy* is heads-up-tuned, so it may play slightly too loose full-ring | Full-ring cash or SNG | Small (data-driven threshold tuning + tests) | Not started |
-| 2 | **Opponent modelling (Phase 2)** | Put the opponent on a range from their `actionLog`; narrow it over the hand | Bot assumes opponent cards are uniform-random — it plays its own cards, not yours. Exploitable by an adaptive human | When you want a *tough, adaptive* opponent rather than a fixed practice one | Medium (`OpponentModel` seam already exists in the design) | Designed, not built |
+| 2 | **Opponent modelling (Phase 2)** | Put the opponent on a range from their `actionLog`; narrow it over the hand | Default `opponentModel: 'uniform'` assumes opponent cards are uniform-random. `'bayesian'` narrows the sampled range but with a fixed tight-opponent prior | When you want the bot to *read* opponents rather than play its own cards | Medium | **Implemented (`'bayesian'`, experimental)** — see below |
 | 3 | **IS-MCTS / UCT lookahead (Phase 3)** | Multi-street search: plan "call now to bluff the river", value of future fold equity | 1-ply equity + pot odds only. Correct for ~90% of decisions; misses deep-SPR planning | Deep-stacked cash, or pushing toward near-optimal strength | Large (tree search; `monteCarloEquity` is already the leaf) | **Implemented (experimental)** — see below |
 
 ### Guidance by game format
@@ -89,14 +89,24 @@ shrinks, so the continue/raise bars should rise with `opponents`. A data-driven
 pass (run the bot vs. the existing bots across N=2..9, fit thresholds to a target
 win rate) closes this without architectural change.
 
-### #2 — Opponent modelling (Phase 2)
-Today every opponent's hidden cards are sampled uniformly from the unseen deck
-(the `OpponentModel` / `uniformModel` abstraction in the design). Bayesian range
-narrowing — tighten the sampled range from the opponent's `actionLog` (bet/raise
-= stronger range; call = capped; fold = dead) and their visible upcards in Stud —
-makes the bot exploit *weak* opponents and respect *strong* ones. It is a pure
-swap of the model passed into `monteCarloEquity`; the rest of the bot is
-unchanged. This is what makes the bot "adapt to the game".
+### #2 — Opponent modelling (Phase 2) — implemented (`'bayesian'`, experimental)
+`createSearchAgent({ opponentModel: 'bayesian' })` puts each opponent on a range
+inferred from their public `actionLog`: a preflop **raise** biases the sampled
+hole cards toward a strong range; a **limp/call** toward a weak/capped one; no
+read → uniform. The bias is a soft (floored) likelihood over Chen starting-strength
+(`search/model.ts`), fed into `monteCarloEquity` *and* the IS-MCTS determinization
+— the rest of the bot is unchanged.
+
+**Status — correct, style-naive.** Verified by directional tests: vs a raised
+(strong) range a mediocre hand's equity drops, vs a limped (weak) range a premium's
+equity rises — exactly as a range read should move it. But the prior is **fixed**
+("raise = premium-heavy, limp = trash"): it helps against tight/passive opponents
+and **over-narrows against loose ones** (a LAG that raises wide gets mis-read as
+premium-only), so vs a balanced opponent like `createSmartBot` it runs ~20 bb/100
+*below* uniform over a low-variance sample. Making it adaptive requires
+**cross-hand VPIP/PFR tracking** (the bot is currently per-hand stateless) so the
+range width scales to each opponent's actual looseness. Scope: 2-hole-card **high**
+games (Hold'em, Stud-high); low / hi-lo / Omaha / draw degrade to uniform.
 
 ### #3 — IS-MCTS / UCT lookahead (implemented, experimental)
 The search core now has a second algorithm: **IS-MCTS** (`search/tree.ts`,
