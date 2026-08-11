@@ -24,8 +24,14 @@ they differ only in the hand-strength signal (heuristic vs. sampled equity).
   `createAggressiveAgent`, `createManiacAgent`, `createCallingStationAgent`,
   `createTightAgent`. Baselines / sparring partners / tests.
 - `smart.ts` — `createSmartBot({ seed, aggression, tightness, bluffiness?, sizing? })`.
-- `search/searchAgent.ts` — `createSearchAgent({ seed, core?, temperature?, aggression?,
-  tightness?, bluffFrequency?, equitySamples?, sizing? })`. `core: 'pimc'` (default, strong) or `'ismcts'` (experimental UCB1 tree search).
+- `search/searchAgent.ts` — `createSearchAgent({ seed, core?, opponentModel?, temperature?,
+  aggression?, tightness?, bluffFrequency?, equitySamples?, sizing? })`. `core: 'pimc'`
+  (default, strong) or `'ismcts'` (experimental UCB1 tree search).
+  - **Continuation tuning (no over-folding):** `tightness` is a *live* dial — lower
+    it to call wider. A draw's implied odds are added to its equity (flush/straight
+    draws aren't folded at raw expressed equity), and the continue-bar is loosened
+    automatically in **fixed-limit** (cheap bets, generous pot odds) so the bot
+    defends wide there. NL/PL stay tight by default.
 - `search/equity.ts` — `monteCarloEquity(...)`: the reusable Monte-Carlo equity
   primitive (the leaf/rollout evaluator used by both cores).
 

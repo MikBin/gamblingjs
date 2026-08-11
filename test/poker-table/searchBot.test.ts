@@ -4,6 +4,7 @@ import {
   alwaysCallAgent,
   createRandomAgent,
   createSearchAgent,
+  fixedLimitHoldem,
   monteCarloEquity,
   omahaHi,
   playHand,
@@ -439,5 +440,98 @@ describe('createSearchAgent — policy branches', () => {
   it('folds on an empty legal-action list', () => {
     const bot = createSearchAgent({ seed: 4, temperature: 0, equitySamples: 100 });
     expect(bot.decide(buildObs({ legal: [] })).type).toBe('fold');
+  });
+});
+
+describe('createSearchAgent — continuation tuning (does not over-fold)', () => {
+  // 24 hands spanning trash → premium. At a pot-sized bet (pot-odds 0.5) the
+  // weak/marginal ones land on the continuation dial's swing band.
+  const hands: number[][] = [
+    [12, 25],
+    [12, 11],
+    [11, 24],
+    [12, 10],
+    [11, 9],
+    [10, 23],
+    [9, 22],
+    [8, 21],
+    [7, 20],
+    [6, 19],
+    [5, 18],
+    [4, 17],
+    [3, 16],
+    [2, 15],
+    [1, 14],
+    [0, 13],
+    [10, 9],
+    [8, 7],
+    [6, 5],
+    [4, 3],
+    [12, 0],
+    [11, 2],
+    [9, 4],
+    [7, 1],
+  ];
+  const facing = (toCall: number): Action[] => [
+    { type: 'fold', seat: 0, streetIndex: 0 },
+    { type: 'call', seat: 0, streetIndex: 0, amount: toCall },
+    { type: 'raise', seat: 0, streetIndex: 0, to: toCall * 3, min: toCall * 3, max: 400 },
+  ];
+
+  function foldRate(
+    make: () => PlayerAgent,
+    handCfg: HandConfig | undefined,
+    toCall = 30,
+    pot = 30,
+  ): number {
+    let folds = 0;
+    const bot = make();
+    for (const hole of hands) {
+      const obs = buildObs({ hole, handCfg, toCall, pot, legal: facing(toCall) });
+      if (bot.decide(obs).type === 'fold') folds++;
+    }
+    return folds / hands.length;
+  }
+
+  it('lower tightness folds less — the tightness dial is now live', () => {
+    const loose = foldRate(
+      () => createSearchAgent({ seed: 1, tightness: 0.1, temperature: 0, equitySamples: 200 }),
+      HOLDEM_HAND,
+    );
+    const tight = foldRate(
+      () => createSearchAgent({ seed: 1, tightness: 0.9, temperature: 0, equitySamples: 200 }),
+      HOLDEM_HAND,
+    );
+    expect(loose).toBeLessThan(tight);
+  });
+
+  it('fixed-limit defends wider than no-limit at the same config', () => {
+    const nl = standardHoldem({ seats: 2, sb: 1, bb: 2, stack: 200 }).hand;
+    const fl = fixedLimitHoldem({
+      sb: 1,
+      bb: 2,
+      smallBet: 2,
+      bigBet: 4,
+      maxRaises: 4,
+      stack: 200,
+    }).hand;
+    const mk = () =>
+      createSearchAgent({ seed: 1, tightness: 0.5, temperature: 0, equitySamples: 200 });
+    expect(foldRate(mk, fl)).toBeLessThan(foldRate(mk, nl));
+  });
+
+  it('a flush draw on the flop is continued, not folded', () => {
+    // 2♠7♠ + 9♠K♠2♥ → bare four-flush, no pair/straight. With the implied-odds
+    // draw bonus the bot should call a half-pot bet rather than fold the draw.
+    const bot = createSearchAgent({ seed: 3, tightness: 0.5, temperature: 0, equitySamples: 300 });
+    const obs = buildObs({
+      hole: [0, 5],
+      community: [7, 11, 13],
+      streetIndex: 1,
+      toCall: 10,
+      pot: 30,
+      legal: facing(10),
+    });
+    expect(['call', 'raise']).toContain(bot.decide(obs).type);
   });
 });

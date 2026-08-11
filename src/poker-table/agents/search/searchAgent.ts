@@ -3,7 +3,7 @@ import type { RngSource } from '../../engine/rng';
 import { createRng } from '../../engine/rng';
 import type { CompositionSelector, HandConfig } from '../../config/types';
 import type { PlayerAgent } from '../types';
-import { analyzeObservation } from '../smart';
+import { analyzeObservation, drawBonus } from '../smart';
 import { discardAction } from '../discard';
 import { monteCarloEquity } from './equity';
 import { makeOpponentModel, uniformModel } from './model';
@@ -84,9 +84,17 @@ interface Scored {
   u: number;
 }
 
-function utility(a: Action, eq: number, potOdds: number, p: ResolvedSearchBotConfig): number {
-  // Shared call/raise EV core: positive exactly when calling is +EV vs pot odds.
-  const base = (eq - potOdds) * 2.0;
+function utility(
+  a: Action,
+  eq: number,
+  potOdds: number,
+  contLine: number,
+  p: ResolvedSearchBotConfig,
+): number {
+  // `contLine` is the (loosened) break-even equity to continue — strictly below
+  // potOdds when tightness is low or the bet structure is fixed-limit, so the
+  // bot doesn't over-fold marginal hands and draws (implied-odds / realization).
+  const base = (eq - contLine) * 2.0;
   const investScale = 2.0 + p.aggression * 2.0;
   switch (a.type) {
     case 'fold':
@@ -187,7 +195,17 @@ export function pimcDecide(obs: Observation, p: ResolvedSearchBotConfig, rng: Rn
 
   const ctx = analyzeObservation(obs);
   const potOdds = ctx.potOdds;
-  const eq = equityOf(obs, p, rng);
+  // Equity + implied-odds premium for draws (reuse the smart bot's drawBonus),
+  // so flush/straight draws aren't folded at their raw expressed equity.
+  const eq = clamp01(equityOf(obs, p, rng) + drawBonus(obs));
+
+  // Continuation line: the loosened break-even equity to keep playing. A small
+  // tightness slack (so NL/PL stay tight) PLUS a larger fixed-limit boost (cheap
+  // bets, generous pot odds → defend wider). Stops over-folding without making
+  // big-bet games calling-stations. (Rec.#1 + Rec.#3.)
+  const betType = obs.handCfg?.streets[obs.streetIndex]?.betting.type ?? 'no-limit';
+  const slack = 0.08 * (1 - p.tightness) + (betType === 'fixed-limit' ? 0.14 : 0);
+  const contLine = potOdds * (1 - slack);
 
   // Rare, high-leverage all-ins (mirrors the smart-bot guardrails).
   const allin = findType(legal, 'allin');
@@ -200,7 +218,7 @@ export function pimcDecide(obs: Observation, p: ResolvedSearchBotConfig, rng: Rn
 
   const scored: Scored[] = legal
     .filter((a) => a.type !== 'allin')
-    .map((a) => ({ a, u: utility(a, eq, potOdds, p) }));
+    .map((a) => ({ a, u: utility(a, eq, potOdds, contLine, p) }));
   const pool = scored.length > 0 ? scored : legal.map((a) => ({ a, u: 0 }));
   let chosen = softmaxPick(pool, p.temperature, rng);
 
