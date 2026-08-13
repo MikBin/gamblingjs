@@ -13,27 +13,31 @@ import {
   createSearchAgent,
   createSmartBot,
   createTightAgent,
+  fixedLimitRazz,
+  fixedLimitStud,
   omahaHi,
   omahaHiLo,
   playHand,
   standardHoldem,
+  studHiLo,
 } from '../src/poker-table';
 import type { BettingConfig, GamePreset } from '../src/poker-table';
 import type { PlayerAgent } from '../src/poker-table';
 
 fastHashesCreators.high();
 
-const VARIANT = (process.argv[2] ?? 'plo') as 'nlhe' | 'plo' | 'flomaha' | 'plohl' | 'flohl';
+const VARIANT = (process.argv[2] ?? 'plo') as 'nlhe' | 'plo' | 'flomaha' | 'plohl' | 'flohl' | 'stud' | 'razz' | 'studhilo';
 const FORMAT = process.argv[3] === 'hu' ? 'hu' : '6max';
 const TARGET = (process.argv[4] ?? 'station') as keyof typeof ARCH;
 const SEATS = FORMAT === 'hu' ? 2 : 6;
 const FIELD = SEATS - 1;
-const IS_OMAHA = VARIANT !== 'nlhe';
-const HI_LO = VARIANT === 'plohl' || VARIANT === 'flohl';
+const IS_OMAHA = VARIANT === 'plo' || VARIANT === 'flomaha' || VARIANT === 'plohl' || VARIANT === 'flohl';
+const IS_STUD = VARIANT === 'stud' || VARIANT === 'razz' || VARIANT === 'studhilo';
+const HI_LO = VARIANT === 'plohl' || VARIANT === 'flohl'; // slow Omaha hi-lo → reduced hands
 const EQ = IS_OMAHA ? 200 : 300;
 const SWEEP_H = Number(process.argv[5] ?? (FORMAT === 'hu' ? (HI_LO ? 1500 : 2500) : HI_LO ? 800 : 1500));
 const VAL_H = Number(process.argv[6] ?? (FORMAT === 'hu' ? (HI_LO ? 1500 : 2500) : HI_LO ? 1000 : 1800));
-const STACK = VARIANT === 'flomaha' || VARIANT === 'flohl' ? 200 : 100;
+const STACK = VARIANT === 'flomaha' || VARIANT === 'flohl' || IS_STUD ? 200 : 100;
 
 // --- preset per variant ---
 const potLimit: BettingConfig = { type: 'pot-limit' };
@@ -42,6 +46,24 @@ function fixedLimit(smallBet: number, bigBet: number): BettingConfig {
 }
 function buildPreset(): GamePreset {
   if (VARIANT === 'nlhe') return standardHoldem({ seats: SEATS, sb: 1, bb: 2, stack: STACK });
+  if (VARIANT === 'stud') {
+    const g = fixedLimitStud({ ante: 1, bringIn: 1, smallBet: 2, bigBet: 4, maxRaises: 4, stack: STACK });
+    g.table.seats = { min: SEATS, max: SEATS };
+    return g;
+  }
+  if (VARIANT === 'razz') {
+    const g = fixedLimitRazz({ ante: 1, bringIn: 1, smallBet: 2, bigBet: 4, maxRaises: 4, stack: STACK });
+    g.table.seats = { min: SEATS, max: SEATS };
+    return g;
+  }
+  if (VARIANT === 'studhilo') {
+    const g = studHiLo({ ante: 1, bringIn: 1, stack: STACK });
+    g.table.seats = { min: SEATS, max: SEATS };
+    const fl: BettingConfig = { type: 'fixed-limit', smallBet: 2, bigBet: 4, bigBetFromStreet: 2, maxRaisesPerStreet: 4 };
+    g.hand.streets = g.hand.streets.map((s) => ({ ...s, betting: fl }));
+    g.table.gameId = 'seven-card-stud-hilo-fl';
+    return g;
+  }
   const g = HI_LO ? omahaHiLo({ sb: 1, bb: 2, stack: STACK }) : omahaHi({ sb: 1, bb: 2, stack: STACK });
   g.table.seats = { min: SEATS, max: SEATS };
   const bet = VARIANT === 'plo' || VARIANT === 'plohl' ? potLimit : fixedLimit(2, 4);
@@ -56,7 +78,10 @@ const VARIANT_LABEL =
     : VARIANT === 'flomaha' ? 'Fixed-Limit Omaha Hi'
       : VARIANT === 'plohl' ? 'Pot-Limit Omaha Hi/Lo'
         : VARIANT === 'flohl' ? 'Fixed-Limit Omaha Hi/Lo'
-          : 'No-Limit Hold-em';
+          : VARIANT === 'stud' ? '7-Card Stud (FL)'
+            : VARIANT === 'razz' ? 'Razz (A-5 low, FL)'
+              : VARIANT === 'studhilo' ? '7-Card Stud Hi/Lo (FL)'
+                : 'No-Limit Hold-em';
 
 type Maker = (seed: number) => PlayerAgent;
 const ARCH: Record<string, Maker> = {
